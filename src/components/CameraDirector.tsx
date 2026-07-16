@@ -1,0 +1,153 @@
+import { useEffect, useMemo, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { PerspectiveCamera } from 'three';
+import gsap from 'gsap';
+import { rooms } from '../data/rooms';
+import { useExperienceStore } from '../state/useExperienceStore';
+
+// Keep navigation tied to elapsed time even when a low-power GPU drops frames.
+gsap.ticker.lagSmoothing(0);
+
+type CameraProxy = {
+  x: number;
+  y: number;
+  z: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+  roll: number;
+  fov: number;
+};
+
+export function CameraDirector() {
+  const { camera, pointer } = useThree();
+  const perspectiveCamera = camera as PerspectiveCamera;
+  const activeRoom = useExperienceStore((state) => state.activeRoom);
+  const requestedRoom = useExperienceStore((state) => state.requestedRoom);
+  const isTransitioning = useExperienceStore((state) => state.isTransitioning);
+  const reducedMotion = useExperienceStore((state) => state.reducedMotion);
+  const setTransitionProgress = useExperienceStore((state) => state.setTransitionProgress);
+  const completeTransition = useExperienceStore((state) => state.completeTransition);
+
+  const initial = rooms[0];
+  const proxy = useMemo<CameraProxy>(
+    () => ({
+      x: initial.camera[0],
+      y: initial.camera[1],
+      z: initial.camera[2],
+      targetX: initial.target[0],
+      targetY: initial.target[1],
+      targetZ: initial.target[2],
+      roll: 0,
+      fov: 43,
+    }),
+    [initial],
+  );
+
+  const progressProxy = useRef({ value: 0 });
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const previousFov = useRef(proxy.fov);
+
+  useEffect(() => {
+    const room = rooms[activeRoom];
+    if (isTransitioning) return;
+
+    proxy.x = room.camera[0];
+    proxy.y = room.camera[1];
+    proxy.z = room.camera[2];
+    proxy.targetX = room.target[0];
+    proxy.targetY = room.target[1];
+    proxy.targetZ = room.target[2];
+    proxy.roll = 0;
+    proxy.fov = 43;
+  }, [activeRoom, isTransitioning, proxy]);
+
+  useEffect(() => {
+    if (!isTransitioning) return;
+
+    timelineRef.current?.kill();
+
+    const destination = rooms[requestedRoom];
+    const distance = Math.max(1, Math.abs(requestedRoom - activeRoom));
+    const direction = requestedRoom > activeRoom ? 1 : -1;
+    const duration = reducedMotion ? 0.12 : 1.42 + Math.min(1.05, (distance - 1) * 0.16);
+    const sideExcursion = direction * Math.min(1.7, 0.95 + distance * 0.12);
+    progressProxy.current.value = 0;
+
+    const timeline = gsap.timeline({
+      defaults: { ease: 'power3.inOut' },
+      onUpdate: () => setTransitionProgress(progressProxy.current.value),
+      onComplete: completeTransition,
+    });
+
+    timeline.to(
+      proxy,
+      {
+        y: destination.camera[1],
+        targetY: destination.target[1],
+        targetX: destination.target[0],
+        targetZ: destination.target[2],
+        duration,
+      },
+      0,
+    );
+
+    if (reducedMotion) {
+      timeline.to(
+        proxy,
+        {
+          x: destination.camera[0],
+          z: destination.camera[2],
+          roll: 0,
+          fov: 43,
+          duration,
+        },
+        0,
+      );
+    } else {
+      timeline.to(proxy, { x: sideExcursion, duration: duration * 0.43, ease: 'power2.inOut' }, 0);
+      timeline.to(
+        proxy,
+        { x: destination.camera[0], duration: duration * 0.57, ease: 'power2.out' },
+        duration * 0.43,
+      );
+      timeline.to(proxy, { z: 5.9, fov: 51.5, roll: -direction * 0.038, duration: duration * 0.48, ease: 'power2.in' }, 0);
+      timeline.to(
+        proxy,
+        { z: destination.camera[2], fov: 43, roll: 0, duration: duration * 0.52, ease: 'power2.out' },
+        duration * 0.48,
+      );
+    }
+
+    timeline.to(progressProxy.current, { value: 1, duration, ease: 'none' }, 0);
+    timelineRef.current = timeline;
+
+    return () => {
+      timeline.kill();
+    };
+  }, [activeRoom, completeTransition, isTransitioning, proxy, reducedMotion, requestedRoom, setTransitionProgress]);
+
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+    const ambientScale = isTransitioning || reducedMotion ? 0 : 1;
+    const driftX = (pointer.x * 0.24 + Math.sin(time * 0.42) * 0.055) * ambientScale;
+    const driftY = (pointer.y * 0.13 + Math.cos(time * 0.36) * 0.045) * ambientScale;
+    const driftZ = Math.sin(time * 0.28) * 0.045 * ambientScale;
+
+    perspectiveCamera.position.set(proxy.x + driftX, proxy.y + driftY, proxy.z + driftZ);
+    perspectiveCamera.lookAt(
+      proxy.targetX + driftX * 0.2,
+      proxy.targetY + driftY * 0.16,
+      proxy.targetZ,
+    );
+    perspectiveCamera.rotateZ(proxy.roll);
+
+    if (Math.abs(previousFov.current - proxy.fov) > 0.001) {
+      perspectiveCamera.fov = proxy.fov;
+      perspectiveCamera.updateProjectionMatrix();
+      previousFov.current = proxy.fov;
+    }
+  });
+
+  return null;
+}
