@@ -1,0 +1,10 @@
+# Asset pipeline requirements
+huggingface-hub>=1.17.0
+transformers>=4.35.0
+trimesh>=3.18.0
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# Optional: for 3D generation models
+# stable-diffusion-3d
+# replicate
