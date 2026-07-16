@@ -2,12 +2,12 @@
 
 A vertically navigated persistent 3D facility prototype. The building is one continuous WebGL world: swipe, scroll, use the arrow keys, or select a room to move between exact room anchors.
 
-This repository contains the complete source, reference images, technical notes, and screenshots from the running experience. Production output is generated locally with `npm run build` and intentionally excluded from version control.
+This repository contains the runnable application source for Iteration 04. Production output is generated with `npm run build` and intentionally excluded from version control. Large concept boards and verification screenshots remain in the companion project package rather than being duplicated in Git.
 
 ## Current implementation
 
-- 12 data-driven rooms based on the supplied Confluence zone map.
-- Touch, wheel, keyboard, buttons, and direct room selection.
+- 12 data-driven rooms based on the Confluence facility zone map.
+- Touch, wheel, keyboard, button, and direct-room navigation.
 - Furnished procedural room systems for Rooms 01–05:
   - conference and experience gallery;
   - workforce academy;
@@ -15,12 +15,12 @@ This repository contains the complete source, reference images, technical notes,
   - living-building command lab;
   - smart-neighborhood planning studio.
 - One-draw-call shader particle field with authored room volumes.
-- Quantized `Uint16` particle targets reconstructed in the vertex shader, cutting active target attribute bandwidth by roughly 50% relative to `Float32` positions.
+- Quantized `Uint16` particle targets reconstructed in the vertex shader, reducing active target-attribute bandwidth by roughly 50% relative to `Float32` positions.
 - Coherent instability, rare breakaway points, velocity-derived glow, target morphing, and streamed travel behavior.
 - Rectilinear inter-room conduit with service decks, braces, rails, wire enclosure, and energy rings.
 - Arrival choreography that settles each destination room after navigation.
-- Adaptive runtime quality tiers plus adaptive device-pixel ratio.
-- Low-cost procedural grounding/contact-shadow textures instead of expensive real-time shadow maps.
+- Adaptive runtime quality tiers and adaptive device-pixel ratio.
+- Procedural grounding textures instead of expensive real-time shadow maps.
 - Procedural Web Audio ambience, travel sweep, arrival tone, and mute control.
 - GLB preloading, centering, normalization, first-animation playback, and procedural fallback.
 - Only the current room, destination, and adjacent rooms remain mounted.
@@ -80,18 +80,6 @@ Place an optimized `.glb` in `public/assets`, then add its path to the matching 
 ```
 
 The loader preloads adjacent assets, clones the scene, calculates its bounds, centers it, normalizes its size, plays its first animation when available, and retains the procedural fallback if loading fails.
-
-See `ASSET_WORKFLOW.md` and `docs/ROOM_ASSET_MANIFEST.md` for the generation path.
-
-## Particle targets from generated meshes
-
-The runtime particle system is already structured for a generated-mesh sampling stage. See `docs/PARTICLE_TARGET_PIPELINE.md` for the quantized format and the proposed GLB-to-particle workflow.
-
-## Running screenshots
-
-- `docs/screenshots/room-01-v4.png`
-- `docs/screenshots/room-05-v4.png`
-- `docs/screenshots/transition-04-to-05-v4.png`
 
 ## Main files
 
