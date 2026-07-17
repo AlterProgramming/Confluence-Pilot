@@ -19,13 +19,47 @@ type CameraProxy = {
   fov: number;
 };
 
+type CaptureOffset = {
+  x: number;
+  y: number;
+  z: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+};
+
 const captureParams = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search);
 const captureMode = captureParams?.get('capture') === '1';
 const captureView = captureMode ? captureParams?.get('view') : null;
-const captureOffset =
-  captureView === 'secondary'
-    ? { x: 2.35, y: 0.2, z: 0.55, targetX: 0.45, targetY: 0.08 }
-    : { x: 0, y: 0, z: 0, targetX: 0, targetY: 0 };
+const NO_CAPTURE_OFFSET: CaptureOffset = { x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 };
+const DEFAULT_SECONDARY_OFFSET: CaptureOffset = {
+  x: 2.35,
+  y: 0.2,
+  z: 0.55,
+  targetX: 0.45,
+  targetY: 0.08,
+  targetZ: 0,
+};
+
+function getCaptureOffset(roomId: string): CaptureOffset {
+  if (captureView !== 'secondary') return NO_CAPTURE_OFFSET;
+  if (roomId === '01') {
+    // Deliberately reveal the right-hand public demo zone and the center aisle;
+    // this should provide materially different composition evidence from the
+    // canonical centered view rather than a small lateral variation.
+    // Re-aimed to the exhibit cluster's relocated centroid (~x=3.0, ~z=-1.85)
+    // after moving the exhibits closer to the canonical view axis for legibility.
+    return {
+      x: 1.5,
+      y: -0.2,
+      z: -1.6,
+      targetX: 3.0,
+      targetY: -0.18,
+      targetZ: -0.25,
+    };
+  }
+  return DEFAULT_SECONDARY_OFFSET;
+}
 
 export function CameraDirector() {
   const { camera, pointer } = useThree();
@@ -36,6 +70,7 @@ export function CameraDirector() {
   const reducedMotion = useExperienceStore((state) => state.reducedMotion);
   const setTransitionProgress = useExperienceStore((state) => state.setTransitionProgress);
   const completeTransition = useExperienceStore((state) => state.completeTransition);
+  const captureOffset = getCaptureOffset(rooms[activeRoom]?.id ?? '');
 
   const initial = rooms[0];
   const proxy = useMemo<CameraProxy>(
@@ -150,7 +185,7 @@ export function CameraDirector() {
     perspectiveCamera.lookAt(
       proxy.targetX + captureOffset.targetX + driftX * 0.2,
       proxy.targetY + captureOffset.targetY + driftY * 0.16,
-      proxy.targetZ,
+      proxy.targetZ + captureOffset.targetZ,
     );
     perspectiveCamera.rotateZ(proxy.roll);
 

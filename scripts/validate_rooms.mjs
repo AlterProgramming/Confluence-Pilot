@@ -55,6 +55,15 @@ function nonEmptyArray(value, minimum = 1) {
   return Array.isArray(value) && value.filter(Boolean).length >= minimum;
 }
 
+function reviewDocsForRoom(id) {
+  const reviewsDir = path.join(root, 'validation/reviews');
+  if (!fs.existsSync(reviewsDir)) return [];
+  return fs
+    .readdirSync(reviewsDir)
+    .filter((name) => name.startsWith(`room-${id}-`) && name.endsWith('.md'))
+    .map((name) => `validation/reviews/${name}`);
+}
+
 function manualPass(check) {
   return Boolean(check?.passed === true && nonEmptyString(check?.notes));
 }
@@ -213,7 +222,9 @@ for (const id of ids) {
 if (new Set(ids).size !== ids.length) errors.push('Room validation ids must be unique.');
 
 const results = rooms.map(evaluateRoom);
-for (const result of results) {
+for (let index = 0; index < results.length; index += 1) {
+  const result = results[index];
+  const room = rooms[index];
   if (!allowedStatuses.has(result.status)) {
     errors.push(`Room ${result.id}: invalid status "${result.status}".`);
   }
@@ -227,6 +238,27 @@ for (const result of results) {
   }
   if (result.status === 'phase-1' && result.candidateReady) {
     warnings.push(`Room ${result.id}: all gates pass; promote it to candidate for review.`);
+  }
+
+  const reviewDocs = reviewDocsForRoom(result.id);
+  if (reviewDocs.length > 0) {
+    const latestReviewDoc = room?.latestReviewDoc;
+    if (!nonEmptyString(latestReviewDoc)) {
+      warnings.push(
+        `Room ${result.id}: review docs exist (${reviewDocs.join(', ')}) but "latestReviewDoc" is not set in validation/rooms.json.`,
+      );
+    } else if (!existingFile(latestReviewDoc)) {
+      warnings.push(`Room ${result.id}: "latestReviewDoc" (${latestReviewDoc}) does not exist.`);
+    }
+  }
+
+  if (reviewDocs.length > 0 && room?.manualChecks?.performance?.passed === false) {
+    const nextStep = room?.manualChecks?.performance?.followUp?.nextStep;
+    if (!nonEmptyString(nextStep)) {
+      warnings.push(
+        `Room ${result.id}: performance gate is failing but manualChecks.performance.followUp.nextStep is empty.`,
+      );
+    }
   }
 }
 

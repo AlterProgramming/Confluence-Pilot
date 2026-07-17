@@ -12,20 +12,25 @@
       "registryKey": "01",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
+      "latestReviewDoc": "validation/reviews/room-01-composition-gate.md",
       "signatureAssets": ["/assets/room-01-kiosk.glb"],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "Evidence shows an overexposed kiosk, block-like seating, repeated display treatment, and an unclear secondary program zone." },
-        "materialsLighting": { "passed": false, "notes": "Kiosk whites clip, seating loses detail, and LED intensity overwhelms the architectural material palette." },
+        "composition": { "passed": false, "notes": "Seating now has separate cushion, back, back-shell, armrest, pedestal, and base parts (no longer block-like); the generic exhibit pods were replaced with purpose-built vision and language demonstrations repositioned near the view axis for legibility. Canonical-camera legibility of the two exhibits and clearance from the Dais/kiosk have not yet been confirmed against regenerated evidence; narrow-viewport legibility is unverified." },
+        "materialsLighting": { "passed": false, "notes": "Kiosk no longer clips to featureless white but sits near the upper exposure limit; seat materials now vary by part (upholstery/back-shell/armrest/pedestal) but are unreviewed on target display hardware; exhibit emissive accents still read brighter than their subordinate role warrants." },
         "navigation": { "passed": false, "notes": "Automated boundary traversal evidence is used for this gate." },
-        "performance": { "passed": false, "notes": "CI software WebGL measured about 5.7 seconds; target lab hardware and warm room-to-room timing remain unmeasured." },
+        "performance": {
+          "passed": false,
+          "notes": "CI software WebGL measured about 5.7-9.9 seconds against a 2-second target across multiple corrective passes; target lab hardware and warm room-to-room timing remain unmeasured.",
+          "followUp": { "owner": "", "nextStep": "Measure cold load and warm Room 02 -> Room 01 traversal timing on the actual target lab desktop/connection; record the result here." }
+        },
         "contentSafety": { "passed": false, "notes": "Decorative wall imagery and the kiosk pseudo-interface still require content review." }
       },
       "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
       "knownLimitations": [
-        "Phase 1 reconstruction; composition and lighting corrections are required.",
-        "Target-machine performance has not been measured.",
-        "Content correctness review remains open."
+        "Composition: seating and exhibit geometry have been reworked across several corrective passes; canonical-camera legibility of the relocated exhibits still needs evidence confirmation, and target-display materials/lighting review remains open.",
+        "Target-machine performance has not been measured (CI software-render ready time has run 5.7-9.9s against a 2s target across multiple passes); no owner or date is assigned yet - see manualChecks.performance.followUp.",
+        "Content correctness review of the kiosk pseudo-interface and wall-art imagery remains open."
       ],
       "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
     },
