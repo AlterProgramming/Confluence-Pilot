@@ -60,3 +60,13 @@ Automation does not decide whether the room is visually successful. Before Room 
 - Any measured performance exception is acceptable on the actual target lab machine.
 
 Only after those notes are recorded in `validation/rooms.json` may the room be promoted from `phase-1` to `candidate`. Human approval is still required for `validated`.
+
+Recording those notes is a manual step, and it was skipped for three corrective passes in a row
+before anyone noticed `validation/rooms.json` still described the room's very first evidence pass.
+Each room entry now has a `latestReviewDoc` field naming the review doc that reflects its current
+state; `scripts/validate_rooms.mjs` emits a (non-blocking) warning if review docs exist under
+`validation/reviews/` for a room but its `latestReviewDoc` is missing or points at a file that
+doesn't exist. The same script also warns if a room's performance gate is failing while
+`manualChecks.performance.followUp.nextStep` is empty, so a target-hardware measurement doesn't
+silently drop off the next review pass. Treat either warning as a signal that `rooms.json` needs
+to be updated alongside the review doc, not just after it.

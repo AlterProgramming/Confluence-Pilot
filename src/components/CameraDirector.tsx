@@ -47,13 +47,15 @@ function getCaptureOffset(roomId: string): CaptureOffset {
     // Deliberately reveal the right-hand public demo zone and the center aisle;
     // this should provide materially different composition evidence from the
     // canonical centered view rather than a small lateral variation.
+    // Re-aimed to the exhibit cluster's relocated centroid (~x=3.0, ~z=-1.85)
+    // after moving the exhibits closer to the canonical view axis for legibility.
     return {
-      x: 2.2,
+      x: 1.5,
       y: -0.2,
-      z: -2.15,
-      targetX: 4.25,
+      z: -1.6,
+      targetX: 3.0,
       targetY: -0.18,
-      targetZ: 0.72,
+      targetZ: -0.25,
     };
   }
   return DEFAULT_SECONDARY_OFFSET;

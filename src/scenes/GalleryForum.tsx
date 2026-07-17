@@ -164,7 +164,7 @@ function ExhibitPedestal({ accent }: { accent: string }) {
  * abstract framed object, communicating sensing without a fabricated dashboard. */
 function VisionExhibit({ accent }: { accent: string }) {
   return (
-    <group position={[5.75, -0.98, -2.65]} rotation={[0, -0.28, 0]}>
+    <group position={[2.8, -0.98, -3.05]} rotation={[0, -0.12, 0]} scale={1.3}>
       <ExhibitPedestal accent={accent} />
       <group position={[0, 0.92, 0]}>
         <mesh castShadow>
@@ -207,7 +207,7 @@ function VisionExhibit({ accent }: { accent: string }) {
 function LanguageExhibit({ accent }: { accent: string }) {
   const waveform = [0.28, 0.52, 0.88, 0.58, 1.0, 0.64, 0.38];
   return (
-    <group position={[5.9, -0.98, -0.4]} rotation={[0, -0.36, 0]}>
+    <group position={[3.15, -0.98, -0.65]} rotation={[0, -0.16, 0]} scale={1.3}>
       <ExhibitPedestal accent={accent} />
       <group position={[0, 0.92, 0]}>
         {waveform.map((height, index) => (
