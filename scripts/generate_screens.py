@@ -26,6 +26,12 @@ SCREENS = {
     "05": "a geospatial smart-neighborhood planning dashboard, green tones, city map with analytics overlays and district data",
     "07": "a secure AI governance dashboard, deep indigo, network security graphs and shield motifs",
     "08": "an autonomous mobility operations map, sky blue, drone flight paths and logistics routes over terrain",
+    "02": "a workforce academy skills dashboard, warm orange, certification badges, learning pathways and progress rings",
+    "06": "a construction and infrastructure operations dashboard, amber, site plans, equipment telemetry and engineering schematics",
+    "09": "a resilient communications network map, violet, satellite links and rural connectivity coverage",
+    "10": "a food and cold-chain logistics dashboard, lime green, temperature monitoring and supply-route tracking",
+    "11": "a governable fintech risk dashboard, magenta, fairness metrics and transparent financial graphs",
+    "12": "a small-business AI dashboard, coral, storefront analytics and community marketplace tiles",
 }
 
 
