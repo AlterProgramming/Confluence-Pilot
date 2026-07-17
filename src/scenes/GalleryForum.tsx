@@ -15,7 +15,7 @@ function Dais({ accent }: { accent: string }) {
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.018, 0]}>
         <ringGeometry args={[1.98, 2.08, 64]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.22} roughness={0.5} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.16} roughness={0.5} />
       </mesh>
     </group>
   );
@@ -34,13 +34,13 @@ function ExhibitPod({
     <group position={position}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[1.05, tall ? 1.5 : 1.15, 1.05]} />
-        <meshStandardMaterial color="#d9d2c7" roughness={0.68} metalness={0.05} />
+        <meshStandardMaterial color="#afa69b" roughness={0.72} metalness={0.04} />
       </mesh>
       <mesh position={[0, tall ? 0.9 : 0.72, 0]} castShadow>
         <icosahedronGeometry args={[0.32, 1]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.28} roughness={0.38} metalness={0.3} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.14} roughness={0.42} metalness={0.24} />
       </mesh>
-      <pointLight color={accent} intensity={0.48} distance={3.2} decay={2} position={[0, tall ? 1.0 : 0.82, 0.5]} />
+      <pointLight color={accent} intensity={0.16} distance={2.6} decay={2} position={[0, tall ? 1.0 : 0.82, 0.5]} />
     </group>
   );
 }
@@ -70,7 +70,7 @@ export function GalleryForum({ room }: { room: RoomDefinition; active: boolean }
         floorRepeat={[5, 5]}
         floorRoughness={0.7}
       />
-      <LedWall url="/assets/screens/room-01-wall-art.svg" radius={8.25} arc={1.78} height={3.55} y={1.45} />
+      <LedWall url="/assets/screens/room-01-wall-art.svg" radius={7.55} arc={1.78} height={3.55} y={1.45} />
       <Seating
         baseRadius={4.45}
         rows={3}
