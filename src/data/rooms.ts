@@ -161,12 +161,32 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
   },
 ];
 
+// Per-room camera framing to flatter each layout. Values are relative — the
+// y component is added to the room's own y. Falls back to the default framing.
+type View = { camera: [number, number, number]; target: [number, number, number] };
+const DEFAULT_VIEW: View = { camera: [0, 1.8, 12.4], target: [0, 1.25, 0] };
+const views: Record<string, View> = {
+  '01': { camera: [0, 2.6, 13.8], target: [0, 1.5, -1.6] }, // auditorium: pull back to show curved wall + seating
+  '02': { camera: [0, 2.3, 12.9], target: [0, 1.2, -0.6] }, // workbenches
+  '03': { camera: [0, 2.2, 12.7], target: [0, 1.2, -0.5] },
+  '04': { camera: [0, 2.3, 12.9], target: [0, 1.2, -0.8] }, // control room
+  '05': { camera: [0, 2.0, 11.7], target: [0, 1.0, -0.2] }, // studio: move in on the scale model
+  '06': { camera: [0, 2.0, 11.9], target: [0, 1.05, 0] }, // platform
+  '07': { camera: [0, 2.0, 11.9], target: [0, 1.05, 0] },
+  '08': { camera: [0.4, 2.1, 11.9], target: [0, 1.1, 0] }, // hangar
+  '09': { camera: [0, 2.0, 11.9], target: [0, 1.05, 0] },
+  '10': { camera: [0, 2.2, 12.7], target: [0, 1.2, -0.5] },
+  '11': { camera: [0, 2.2, 12.7], target: [0, 1.2, -0.5] },
+  '12': DEFAULT_VIEW,
+};
+
 export const rooms: RoomDefinition[] = roomSeed.map((room, index) => {
   const y = index * ROOM_SPACING;
+  const v = views[room.id] ?? DEFAULT_VIEW;
   return {
     ...room,
     y,
-    camera: [0, y + 1.8, 12.4],
-    target: [0, y + 1.25, 0],
+    camera: [v.camera[0], y + v.camera[1], v.camera[2]],
+    target: [v.target[0], y + v.target[1], v.target[2]],
   };
 });
