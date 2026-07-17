@@ -1,0 +1,37 @@
+{
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x000046A3) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "errors": [],
+  "idle": {
+    "frames": 162,
+    "avgFps": 53.2,
+    "minFps": 28.9,
+    "p50ms": 20.7,
+    "p95ms": 21,
+    "p99ms": 27.7,
+    "worstMs": 34.6,
+    "below60": 113,
+    "below30": 1
+  },
+  "sequentialNav": {
+    "frames": 565,
+    "avgFps": 35.1,
+    "minFps": 0.8,
+    "p50ms": 20.6,
+    "p95ms": 41.5,
+    "p99ms": 423,
+    "worstMs": 1214,
+    "below60": 310,
+    "below30": 45
+  },
+  "violentSwipe": {
+    "frames": 310,
+    "avgFps": 39,
+    "minFps": 0.9,
+    "p50ms": 14.1,
+    "p95ms": 34.8,
+    "p99ms": 430.1,
+    "worstMs": 1151.4,
+    "below60": 130,
+    "below30": 19
+  }
+}
