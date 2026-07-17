@@ -23,3 +23,7 @@ public/viewer.html
 scripts/queue/
 
 scripts/_models/
+
+# Generated evidence / renders (large)
+validation/render/
+validation/evidence/
