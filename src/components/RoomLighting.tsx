@@ -12,14 +12,18 @@ export function RoomLighting({ room, active }: { room: RoomDefinition; active: b
   const keyX = Math.cos(angle) * 5.6;
   const keyZ = 5.4 + Math.sin(angle) * 2.2;
   const isGalleryCalibration = room.id === '01';
+  const isDarkHangar = room.id === '08';
+  const isReflectiveFintech = room.id === '11';
 
-  const activeAmbient = isGalleryCalibration ? 1.12 : 1.25;
-  const activeHemisphere = isGalleryCalibration ? 0.92 : 1.0;
-  const activeKey = isGalleryCalibration ? 2.15 : 3.1;
-  const activeFill = isGalleryCalibration ? 1.65 : 3.4;
-  const activeRim = isGalleryCalibration ? 2.1 : 3.8;
-  const activeWhiteSpot = isGalleryCalibration ? 3.25 : 6.6;
-  const activeAccentSpot = isGalleryCalibration ? 2.7 : 6;
+  const baseScale = isDarkHangar ? 1.1 : isReflectiveFintech ? 0.7 : 1;
+  const spotScale = isDarkHangar ? 1.28 : isReflectiveFintech ? 0.84 : 1;
+  const activeAmbient = (isGalleryCalibration ? 1.12 : 1.25) * baseScale;
+  const activeHemisphere = (isGalleryCalibration ? 0.92 : 1.0) * baseScale;
+  const activeKey = (isGalleryCalibration ? 2.15 : 3.1) * baseScale;
+  const activeFill = (isGalleryCalibration ? 1.65 : 3.4) * baseScale;
+  const activeRim = (isGalleryCalibration ? 2.1 : 3.8) * (isDarkHangar ? 1.22 : isReflectiveFintech ? 0.78 : 1);
+  const activeWhiteSpot = (isGalleryCalibration ? 3.25 : 6.6) * spotScale;
+  const activeAccentSpot = (isGalleryCalibration ? 2.7 : 6) * (isReflectiveFintech ? 0.72 : spotScale);
 
   return (
     <>
