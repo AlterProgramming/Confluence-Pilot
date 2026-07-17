@@ -20,6 +20,13 @@ export type RoomArchitecture =
   | 'fintech'
   | 'main-street';
 
+export type AssetMaterialTuning = {
+  envMapIntensity?: number;
+  emissiveIntensity?: number;
+  colorMultiplier?: number;
+  roughnessFloor?: number;
+};
+
 export type RoomDefinition = {
   id: string;
   shortTitle: string;
@@ -38,4 +45,5 @@ export type RoomDefinition = {
   assetPosition?: [number, number, number];
   assetRotation?: [number, number, number];
   assetTargetSize?: number;
+  assetMaterialTuning?: AssetMaterialTuning;
 };
