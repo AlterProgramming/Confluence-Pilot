@@ -48,12 +48,12 @@ function getCaptureOffset(roomId: string): CaptureOffset {
     // this should provide materially different composition evidence from the
     // canonical centered view rather than a small lateral variation.
     return {
-      x: 4.65,
-      y: -0.12,
-      z: -1.35,
-      targetX: 3.85,
+      x: 2.2,
+      y: -0.2,
+      z: -2.15,
+      targetX: 4.25,
       targetY: -0.18,
-      targetZ: 0.45,
+      targetZ: 0.72,
     };
   }
   return DEFAULT_SECONDARY_OFFSET;
