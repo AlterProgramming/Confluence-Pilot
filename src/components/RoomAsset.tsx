@@ -1,5 +1,6 @@
 import { Component, Suspense, useEffect, useMemo, useRef, type ErrorInfo, type ReactNode } from 'react';
 import { useAnimations, useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import { Box3, Mesh, MeshStandardMaterial, Vector3, type Group, type Material } from 'three';
 import type { AssetMaterialTuning, RoomDefinition } from '../types/room';
 
@@ -97,6 +98,16 @@ function LoadedRoomAsset({
       firstAction?.fadeOut(0.15);
     };
   }, [actions, names]);
+
+  // Gentle idle motion (slow turn + hover) so the centrepiece feels alive.
+  // Skipped when the GLB ships its own animation.
+  useFrame(({ clock }) => {
+    if (names.length > 0) return;
+    const t = clock.getElapsedTime();
+    const inst = normalized.instance;
+    inst.rotation.y = t * 0.16;
+    inst.position.y = normalized.center[1] + Math.sin(t * 0.85) * 0.05;
+  });
 
   return (
     <group
