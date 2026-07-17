@@ -13,7 +13,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -49,8 +49,11 @@ jobs:
           cat /tmp/confluence-preview.log
           exit 1
 
-      - name: Capture Room 01 validation evidence
+      - name: Capture Room 01 regression evidence
         run: npm run evidence:room01
+
+      - name: Capture Rooms 02 through 12 validation evidence
+        run: npm run evidence:rooms02-12
 
       - name: Upload Room 01 evidence
         if: always()
@@ -58,5 +61,25 @@ jobs:
         with:
           name: room-01-validation-evidence
           path: validation/evidence/room-01
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Rooms 02 through 12 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rooms-02-12-validation-evidence
+          path: |
+            validation/evidence/room-02
+            validation/evidence/room-03
+            validation/evidence/room-04
+            validation/evidence/room-05
+            validation/evidence/room-06
+            validation/evidence/room-07
+            validation/evidence/room-08
+            validation/evidence/room-09
+            validation/evidence/room-10
+            validation/evidence/room-11
+            validation/evidence/room-12
           if-no-files-found: error
           retention-days: 14
