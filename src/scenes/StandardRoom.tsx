@@ -4,6 +4,7 @@ import { RoomShell } from './kit/RoomShell';
 import { LedWall } from './kit/LedWall';
 import { CeilingRig } from './kit/CeilingRig';
 import { Glazing } from './kit/Glazing';
+import { Platform, Workbenches } from './kit/Furnishings';
 import { defaultConfig, sceneConfigs } from './sceneConfigs';
 
 /** Low presentation dais ring under the centrepiece. */
@@ -29,6 +30,7 @@ function Dais({ accent }: { accent: string }) {
  */
 export function StandardRoom({ room, active }: { room: RoomDefinition; active: boolean }) {
   const cfg = sceneConfigs[room.id] ?? defaultConfig;
+  const layout = cfg.layout ?? 'default';
   return (
     <group>
       <RoomShell
@@ -44,10 +46,15 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
       {cfg.ledWall && <LedWall url={cfg.ledWall} radius={8.2} arc={2.2} height={4.2} y={1.5} />}
       {cfg.glazing && <Glazing side={cfg.glazing} x={7.6} width={11} />}
       <CeilingRig y={4.5} accent={room.color} />
-      <Dais accent={room.color} />
-      {/* Furniture (GLB props) is the heaviest layer — only mount it for the
-          active/destination room to keep draw calls + texture bandwidth bounded. */}
-      {active && <SceneProps room={room} active={active} />}
+
+      {/* Layout-specific furnishing (distinct per room type). The heavier layers
+          only mount for the active/destination room. */}
+      {layout === 'platform' && <Platform accent={room.color} />}
+      {layout !== 'platform' && <Dais accent={room.color} />}
+      {active && layout === 'workbenches' && (
+        <Workbenches accent={room.color} secondary={room.secondaryColor} rows={2} perRow={3} />
+      )}
+      {active && layout === 'default' && <SceneProps room={room} active={active} />}
     </group>
   );
 }
