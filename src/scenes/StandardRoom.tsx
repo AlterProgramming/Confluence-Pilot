@@ -6,7 +6,7 @@ import { LedWall } from './kit/LedWall';
 import { CeilingRig } from './kit/CeilingRig';
 import { Glazing } from './kit/Glazing';
 import { Platform } from './kit/Furnishings';
-import { Lounge, ReceptionZone, Workstations } from './kit/Furniture';
+import { CeilingPendants, Lounge, ReceptionZone, Workstations } from './kit/Furniture';
 import { defaultConfig, sceneConfigs } from './sceneConfigs';
 
 /** Low presentation dais ring under the centrepiece. */
@@ -49,6 +49,14 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
       {cfg.ledWall && <LedWall url={cfg.ledWall} radius={8.2} arc={2.2} height={4.2} y={1.5} />}
       {cfg.glazing && !low && <Glazing side={cfg.glazing} x={7.6} width={11} />}
       <CeilingRig y={4.5} accent={room.color} />
+      {/* Real overhead pendant fixtures so the ceiling reads inhabited (a repeated
+          complaint that rooms 2-12 "gruesomely lack" ceilings). Cheap Clones,
+          dropped on the low tier. */}
+      {!low && (
+        <Suspense fallback={null}>
+          <CeilingPendants />
+        </Suspense>
+      )}
 
       {/* Layout-specific furnishing with real CC0 furniture. Heavy layers mount
           only for the active/destination room and thin out on the low tier. */}

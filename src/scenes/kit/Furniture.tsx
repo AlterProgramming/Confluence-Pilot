@@ -72,13 +72,53 @@ export function Workstations({ accent, secondary, rows = 2, perRow = 3 }: { acce
   );
 }
 
-/** A lounge seating group: sofa + armchairs around a coffee table. */
+/** Pendant lamps hanging from the ceiling — real overhead fixtures so the
+ *  ceiling plane reads inhabited instead of bare. Each pendant hangs by its
+ *  own mount (model's top sits at the ceiling). drei <Clone> shares geometry,
+ *  and IBL lights them, so this adds overhead detail at ~zero per-frame cost. */
+export function CeilingPendants({
+  asset = 'modern_ceiling_lamp_01',
+  ceilingY = 4.66,
+  spots = [
+    [-3.6, -2.2],
+    [3.6, -2.2],
+    [0, 2.4],
+  ],
+  scale = 1,
+}: {
+  asset?: string;
+  ceilingY?: number;
+  spots?: [number, number][];
+  scale?: number;
+}) {
+  const { scene } = useGLTF(`${FURN}/${asset}.glb`, false, true);
+  const offset = useMemo(() => {
+    const box = new Box3().setFromObject(scene);
+    const center = box.getCenter(new Vector3());
+    // Hang from the top: the model's highest point (the ceiling mount) is pinned
+    // to the ceiling plane, so the globe drops down into the room below.
+    return [-center.x * scale, -box.max.y * scale, -center.z * scale] as [number, number, number];
+  }, [scene, scale]);
+  return (
+    <group>
+      {spots.map(([x, z], i) => (
+        <group key={i} position={[x, ceilingY, z]}>
+          <Clone object={scene} scale={scale} position={offset} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** A lounge seating group: sofa + mixed seating around a coffee table. Mixes a
+ *  generic armchair with a premium mid-century lounge chair so the group reads
+ *  curated, not stamped from one asset. */
 export function Lounge() {
   return (
     <group>
       <FurnitureItem asset="sofa" position={[0, FLOOR, 2.9]} rotationY={Math.PI} scale={1.05} />
       <FurnitureItem asset="armchair" position={[-2.3, FLOOR, 1.4]} rotationY={0.9} />
-      <FurnitureItem asset="armchair" position={[2.3, FLOOR, 1.4]} rotationY={-0.9} />
+      <FurnitureItem asset="mid_century_lounge_chair" position={[2.3, FLOOR, 1.4]} rotationY={-0.9} />
       <FurnitureItem asset="coffee-table" position={[0, FLOOR, 1.5]} scale={0.95} />
     </group>
   );
