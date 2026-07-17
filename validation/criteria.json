@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "candidateRequires": [
+    "reference",
+    "bespokeScene",
+    "composition",
+    "materialsLighting",
+    "assetIntegrity",
+    "navigation",
+    "performance",
+    "contentSafety",
+    "evidence"
+  ],
+  "humanApprovalRequired": true,
+  "budgets": {
+    "maxSingleAssetBytes": 2097152,
+    "maxRoomAssetBytes": 4194304,
+    "targetReadyMilliseconds": 2000
+  },
+  "criteria": {
+    "reference": {
+      "label": "Reference fidelity",
+      "automated": true,
+      "requiredFields": ["referenceBoard", "canonicalScreenshot", "identityCues"]
+    },
+    "bespokeScene": {
+      "label": "Bespoke scene registered",
+      "automated": true,
+      "requiredFields": ["sceneComponent", "registryKey"]
+    },
+    "composition": {
+      "label": "Spatial composition",
+      "automated": false,
+      "requiredFields": ["wideScreenshot", "secondaryScreenshot", "compositionNotes"]
+    },
+    "materialsLighting": {
+      "label": "Materials, lighting, and grounding",
+      "automated": false,
+      "requiredFields": ["lightingNotes", "materialNotes"]
+    },
+    "assetIntegrity": {
+      "label": "Asset integrity",
+      "automated": true,
+      "requiredFields": ["signatureAssets", "assetInspectionScreenshots"]
+    },
+    "navigation": {
+      "label": "Navigation and interaction",
+      "automated": true,
+      "requiredFields": ["transitionTest"]
+    },
+    "performance": {
+      "label": "Performance and stability",
+      "automated": false,
+      "requiredFields": ["buildEvidence", "runtimeEvidence", "targetMachineReview"]
+    },
+    "contentSafety": {
+      "label": "Content correctness and safety",
+      "automated": false,
+      "requiredFields": ["contentReview"]
+    },
+    "evidence": {
+      "label": "Evidence completeness",
+      "automated": true,
+      "requiredFields": ["knownLimitations", "evidenceManifest"]
+    }
+  }
+}

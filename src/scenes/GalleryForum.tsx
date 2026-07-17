@@ -10,11 +10,11 @@ function Dais({ accent }: { accent: string }) {
   return (
     <group position={[0, -1.44, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.7, 2.4, 64]} />
-        <meshStandardMaterial color="#231810" metalness={0.35} roughness={0.35} />
+        <ringGeometry args={[1.45, 2.05, 64]} />
+        <meshStandardMaterial color="#5b4637" metalness={0.08} roughness={0.72} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <ringGeometry args={[2.32, 2.42, 64]} />
+        <ringGeometry args={[1.98, 2.08, 64]} />
         <meshBasicMaterial color={accent} toneMapped={false} />
       </mesh>
     </group>
@@ -37,8 +37,17 @@ export function GalleryForum({ room }: { room: RoomDefinition; active: boolean }
         floorRepeat={[5, 5]}
         floorRoughness={0.7}
       />
-      <LedWall url="/assets/screens/room-01-wall.webp" radius={8.4} arc={2.3} height={4.4} y={1.55} />
-      <Seating baseRadius={3.9} rows={3} />
+      <LedWall url="/assets/screens/room-01-wall.webp" radius={8.25} arc={1.78} height={3.55} y={1.45} />
+      <Seating
+        baseRadius={4.45}
+        rows={3}
+        rowGap={1.18}
+        riseGap={0.32}
+        span={1.82}
+        perRow={7}
+        perRowGrowth={2}
+        centerAisle={0.11}
+      />
       <Glazing side="left" x={8.0} width={12} />
       <CeilingRig y={4.7} accent={room.color} />
       <Dais accent={room.color} />

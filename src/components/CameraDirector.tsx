@@ -19,6 +19,14 @@ type CameraProxy = {
   fov: number;
 };
 
+const captureParams = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search);
+const captureMode = captureParams?.get('capture') === '1';
+const captureView = captureMode ? captureParams?.get('view') : null;
+const captureOffset =
+  captureView === 'secondary'
+    ? { x: 2.35, y: 0.2, z: 0.55, targetX: 0.45, targetY: 0.08 }
+    : { x: 0, y: 0, z: 0, targetX: 0, targetY: 0 };
+
 export function CameraDirector() {
   const { camera, pointer } = useThree();
   const perspectiveCamera = camera as PerspectiveCamera;
@@ -134,10 +142,14 @@ export function CameraDirector() {
     const driftY = (pointer.y * 0.13 + Math.cos(time * 0.36) * 0.045) * ambientScale;
     const driftZ = Math.sin(time * 0.28) * 0.045 * ambientScale;
 
-    perspectiveCamera.position.set(proxy.x + driftX, proxy.y + driftY, proxy.z + driftZ);
+    perspectiveCamera.position.set(
+      proxy.x + captureOffset.x + driftX,
+      proxy.y + captureOffset.y + driftY,
+      proxy.z + captureOffset.z + driftZ,
+    );
     perspectiveCamera.lookAt(
-      proxy.targetX + driftX * 0.2,
-      proxy.targetY + driftY * 0.16,
+      proxy.targetX + captureOffset.targetX + driftX * 0.2,
+      proxy.targetY + captureOffset.targetY + driftY * 0.16,
       proxy.targetZ,
     );
     perspectiveCamera.rotateZ(proxy.roll);

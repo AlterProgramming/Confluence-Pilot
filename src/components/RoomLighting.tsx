@@ -11,33 +11,46 @@ export function RoomLighting({ room, active }: { room: RoomDefinition; active: b
   const angle = (seed / 12) * Math.PI * 2;
   const keyX = Math.cos(angle) * 5.6;
   const keyZ = 5.4 + Math.sin(angle) * 2.2;
+  const isGalleryCalibration = room.id === '01';
+
+  const activeAmbient = isGalleryCalibration ? 1.12 : 1.25;
+  const activeHemisphere = isGalleryCalibration ? 0.92 : 1.0;
+  const activeKey = isGalleryCalibration ? 2.15 : 3.1;
+  const activeFill = isGalleryCalibration ? 1.65 : 3.4;
+  const activeRim = isGalleryCalibration ? 2.1 : 3.8;
+  const activeWhiteSpot = isGalleryCalibration ? 3.25 : 6.6;
+  const activeAccentSpot = isGalleryCalibration ? 2.7 : 6;
 
   return (
     <>
       {/* Bright base fill so every space reads as lit and inviting, never a void. */}
-      <ambientLight intensity={active ? 1.25 : 0.5} />
-      <hemisphereLight color={room.secondaryColor} groundColor="#2a2f3a" intensity={active ? 1.0 : 0.42} />
+      <ambientLight intensity={active ? activeAmbient : 0.5} />
+      <hemisphereLight
+        color={room.secondaryColor}
+        groundColor="#2a2f3a"
+        intensity={active ? activeHemisphere : 0.42}
+      />
 
       {/* Warm key light — unique angle per room. */}
       <directionalLight
         castShadow={false}
         color="#fff3e2"
-        intensity={active ? 3.1 : 0.85}
+        intensity={active ? activeKey : 0.85}
         position={[keyX, 7.4, keyZ]}
       />
 
       {active && (
         <>
           {/* Warm fill from the opposite side, tinted by the room's primary color. */}
-          <pointLight color={room.color} intensity={3.4} distance={24} decay={2} position={[-keyX * 0.85, 3.4, 6.2]} />
+          <pointLight color={room.color} intensity={activeFill} distance={24} decay={2} position={[-keyX * 0.85, 3.4, 6.2]} />
 
           {/* Rim / back light to separate the centerpiece from the dark background. */}
-          <pointLight color={room.secondaryColor} intensity={3.8} distance={18} decay={2} position={[keyX * 0.4, 3.9, -4.2]} />
+          <pointLight color={room.secondaryColor} intensity={activeRim} distance={18} decay={2} position={[keyX * 0.4, 3.9, -4.2]} />
 
           {/* Soft white key spot straight onto the centerpiece. */}
           <spotLight
             color="#ffffff"
-            intensity={6.6}
+            intensity={activeWhiteSpot}
             distance={17}
             angle={0.6}
             penumbra={0.82}
@@ -49,7 +62,7 @@ export function RoomLighting({ room, active }: { room: RoomDefinition; active: b
           {/* Accent spot in the room's secondary color for character. */}
           <spotLight
             color={room.secondaryColor}
-            intensity={6}
+            intensity={activeAccentSpot}
             distance={15}
             angle={0.5}
             penumbra={0.75}
