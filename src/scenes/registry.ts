@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import type { RoomDefinition } from '../types/room';
 import { GalleryForum } from './GalleryForum';
+import { ControlRoom } from './ControlRoom';
 import { StandardRoom } from './StandardRoom';
 
 export type RoomSceneProps = { room: RoomDefinition; active: boolean };
@@ -14,7 +15,7 @@ export const roomScenes: Record<string, ComponentType<RoomSceneProps>> = {
   '01': GalleryForum,
   '02': StandardRoom,
   '03': StandardRoom,
-  '04': StandardRoom,
+  '04': ControlRoom,
   '05': StandardRoom,
   '06': StandardRoom,
   '07': StandardRoom,
