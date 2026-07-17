@@ -32,8 +32,12 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffd29e',
     shape: 'torus',
     architecture: 'academy',
-    assetUrl: '/assets/room-02-credential-stack.glb',
-    assetTargetSize: 3.0,
+    assetUrl: '/assets/room-02-hero.glb',
+    assetTargetSize: 3.2,
+    assetMaterialTuning: {
+      envMapIntensity: 0.9,
+      roughnessFloor: 0.4,
+    },
   },
   {
     id: '03',
@@ -45,8 +49,12 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ff97bd',
     shape: 'octahedron',
     architecture: 'studio',
-    assetUrl: '/assets/room-03-fabricator.glb',
+    assetUrl: '/assets/room-03-hero.glb',
     assetTargetSize: 3.0,
+    assetMaterialTuning: {
+      envMapIntensity: 0.7,
+      roughnessFloor: 0.5,
+    },
   },
   {
     id: '04',
