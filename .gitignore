@@ -9,5 +9,6 @@ dist
 # Asset pipeline intermediates (concept images, scratch, secrets)
 scripts/_concepts/
 scripts/_opt/
+scripts/_shots/
 scripts/__pycache__/
 .env

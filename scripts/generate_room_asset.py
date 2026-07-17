@@ -68,10 +68,12 @@ def get_token():
 def build_prompt(room_id: str) -> str:
     _slug, concept = ROOM_CONCEPTS[room_id]
     color = ROOM_COLORS.get(room_id, "cyan")
+    # Bright, evenly-lit, light materials so TripoSR does not bake a dark mesh.
     return (
-        f"{concept}, centered product shot, single object isolated on a plain white "
-        f"background, {color} accent glow, sleek matte industrial design, soft studio "
-        f"lighting, high detail, physically based render, no text, no people"
+        f"{concept}, single centered object, isolated on pure white studio background, "
+        f"brightly and evenly lit, soft neutral studio lighting, light matte materials "
+        f"with a subtle {color} accent, high detail product render, no harsh shadows, "
+        f"no dark areas, no text, no people"
     )
 
 

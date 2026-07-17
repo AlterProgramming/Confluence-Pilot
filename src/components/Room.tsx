@@ -5,8 +5,11 @@ import type { RoomDefinition } from '../types/room';
 import { RoomArchitecture } from './RoomArchitecture';
 import { RoomAsset } from './RoomAsset';
 import { RoomCore } from './RoomCore';
+import { RoomDisplays } from './RoomDisplays';
 import { RoomFixtures } from './RoomFixtures';
 import { RoomGrounding } from './RoomGrounding';
+import { RoomLighting } from './RoomLighting';
+import { SceneProps } from './SceneProps';
 
 function revealOffset(room: RoomDefinition): [number, number, number] {
   if (room.architecture === 'academy') return [0, -0.24, 0.16];
@@ -46,7 +49,9 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
       <RoomGrounding room={room} active={active} />
       <group ref={contentRef}>
         <RoomArchitecture room={room} active={active} />
+        <RoomDisplays room={room} active={active} />
         <RoomFixtures room={room} active={active} />
+        <SceneProps room={room} active={active} />
         <RoomAsset
           assetUrl={room.assetUrl}
           assetScale={room.assetScale}
@@ -56,30 +61,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
           fallback={fallback}
         />
       </group>
-      <ambientLight intensity={active ? 0.66 : 0.18} />
-      <directionalLight
-        castShadow={false}
-        color="#f6f8ff"
-        intensity={active ? 2.05 : 0.46}
-        position={[4.5, 7.2, 7.5]}
-      />
-      <pointLight
-        color="#dbe8ff"
-        intensity={active ? 2.65 : 0.4}
-        distance={18}
-        decay={2}
-        position={[0, 4.2, 6.5]}
-      />
-      <spotLight
-        color={room.secondaryColor}
-        intensity={active ? 7.1 : 1.3}
-        distance={15}
-        angle={0.48}
-        penumbra={0.72}
-        decay={2}
-        position={[-4.5, 5.2, 5.8]}
-        target-position={[0, 0.5, 0]}
-      />
+      <RoomLighting room={room} active={active} />
     </group>
   );
 }

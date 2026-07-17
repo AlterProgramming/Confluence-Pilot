@@ -1,0 +1,30 @@
+{
+  "_comment": "Asset generation list for scene composition. 'shared' = neutral furniture/props reusable across rooms; 'rooms' = per-room signature props. Prompts are tuned for single-object TripoSR reconstruction: centered, white background, BRIGHT and EVENLY lit (no dark bakes), light matte materials.",
+  "style_suffix": "single centered object, isolated on pure white studio background, brightly and evenly lit, soft neutral studio lighting, light matte materials, high detail product render, no harsh shadows, no dark areas, no text, no people",
+  "shared": [
+    { "id": "office-chair",        "size": 1.05, "prompt": "a modern ergonomic mesh office chair, light gray" },
+    { "id": "lounge-armchair",     "size": 1.05, "prompt": "a modern minimalist lounge armchair, light fabric upholstery" },
+    { "id": "workstation-desk",    "size": 1.7,  "prompt": "a modern office desk with a thin top and slim metal legs, light wood and white" },
+    { "id": "round-meeting-table", "size": 1.8,  "prompt": "a round modern meeting table, white top with light wooden legs" },
+    { "id": "bar-stool",           "size": 0.9,  "prompt": "a modern minimalist bar stool, light wood seat and metal frame" },
+    { "id": "two-seat-sofa",       "size": 2.0,  "prompt": "a modern two-seat sofa, light gray upholstery" },
+    { "id": "shelving-unit",       "size": 2.0,  "prompt": "a modern open shelving unit, light wood and white" },
+    { "id": "potted-plant",        "size": 1.6,  "prompt": "a tall leafy potted indoor plant in a white ceramic planter" },
+    { "id": "floor-lamp",          "size": 1.8,  "prompt": "a modern minimalist floor lamp with a glowing warm illuminated shade" },
+    { "id": "pendant-light",       "size": 0.8,  "prompt": "a modern pendant ceiling light fixture with a glowing warm bulb" },
+    { "id": "display-kiosk",       "size": 1.6,  "prompt": "a freestanding interactive touchscreen information kiosk, white and glass, glowing screen" },
+    { "id": "presentation-podium", "size": 1.2,  "prompt": "a modern presentation podium lectern, white with a light panel" }
+  ],
+  "rooms": {
+    "01": [
+      { "id": "demo-table",  "size": 1.6, "prompt": "a modern interactive demonstration table with a glowing top surface, white" },
+      { "id": "exhibit-stand","size": 1.9, "prompt": "a modern museum exhibit pedestal stand with a small glowing display, white" }
+    ],
+    "02": [
+      { "id": "credential-totem", "size": 2.0, "prompt": "a tall modern digital signage totem showing glowing certificate badges, white" }
+    ],
+    "03": [
+      { "id": "maker-workbench", "size": 1.8, "prompt": "a modern maker workbench with tools and a small 3d printer, light metal" }
+    ]
+  }
+}

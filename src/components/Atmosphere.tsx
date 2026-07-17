@@ -7,7 +7,7 @@ import { useExperienceStore } from '../state/useExperienceStore';
 export function Atmosphere() {
   const backgroundRef = useRef<Color>(null);
   const fogRef = useRef<Fog>(null);
-  const dark = useMemo(() => new Color('#05070b'), []);
+  const dark = useMemo(() => new Color('#0d121c'), []);
   const mixed = useMemo(() => new Color(), []);
   const colorA = useMemo(() => new Color(), []);
   const colorB = useMemo(() => new Color(), []);
@@ -21,10 +21,10 @@ export function Atmosphere() {
     colorB.set(rooms[state.requestedRoom].color);
     mixed.lerpColors(colorA, colorB, progress);
 
-    backgroundRef.current.copy(dark).lerp(mixed, 0.038 + travel * 0.025);
-    fogRef.current.color.copy(dark).lerp(mixed, 0.065 + travel * 0.055);
-    fogRef.current.near = 14 - travel * 4.5;
-    fogRef.current.far = 43 - travel * 12;
+    backgroundRef.current.copy(dark).lerp(mixed, 0.12 + travel * 0.03);
+    fogRef.current.color.copy(dark).lerp(mixed, 0.2 + travel * 0.06);
+    fogRef.current.near = 17 - travel * 4.5;
+    fogRef.current.far = 54 - travel * 12;
   });
 
   return (
