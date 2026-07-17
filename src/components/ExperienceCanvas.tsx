@@ -9,11 +9,13 @@ import { Atmosphere } from './Atmosphere';
  *  material response). Self-contained — no external HDRI fetch. */
 function StudioEnvironment() {
   return (
-    <Environment resolution={256} frames={1} environmentIntensity={0.55}>
-      <Lightformer form="rect" intensity={3.2} color="#fff2e0" position={[0, 6, -9]} scale={[14, 9, 1]} />
-      <Lightformer form="rect" intensity={1.8} color="#cfe0ff" position={[-8, 4, 3]} rotation={[0, Math.PI / 3, 0]} scale={[8, 8, 1]} />
-      <Lightformer form="rect" intensity={1.8} color="#ffd9c2" position={[8, 4, 3]} rotation={[0, -Math.PI / 3, 0]} scale={[8, 8, 1]} />
-      <Lightformer form="ring" intensity={2.4} color="#ffffff" position={[0, 10, 1]} rotation={[Math.PI / 2, 0, 0]} scale={[10, 10, 1]} />
+    <Environment resolution={256} frames={1} environmentIntensity={0.85}>
+      <Lightformer form="rect" intensity={3.6} color="#fff2e0" position={[0, 6, -9]} scale={[14, 9, 1]} />
+      <Lightformer form="rect" intensity={2.2} color="#cfe0ff" position={[-8, 4, 3]} rotation={[0, Math.PI / 3, 0]} scale={[8, 8, 1]} />
+      <Lightformer form="rect" intensity={2.2} color="#ffd9c2" position={[8, 4, 3]} rotation={[0, -Math.PI / 3, 0]} scale={[8, 8, 1]} />
+      <Lightformer form="ring" intensity={3.0} color="#ffffff" position={[0, 10, 1]} rotation={[Math.PI / 2, 0, 0]} scale={[10, 10, 1]} />
+      {/* soft overhead fill so ceilings/corners don't fall off */}
+      <Lightformer form="rect" intensity={1.3} color="#eef2ff" position={[0, 9, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[16, 12, 1]} />
     </Environment>
   );
 }
@@ -48,7 +50,7 @@ export function ExperienceCanvas() {
       performance={{ min: 0.5, debounce: 220 }}
       onCreated={({ gl }) => {
         gl.toneMapping = ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.15;
+        gl.toneMappingExposure = 1.25;
       }}
     >
       <AdaptiveQuality>
