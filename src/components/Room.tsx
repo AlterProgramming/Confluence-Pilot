@@ -68,6 +68,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
           assetPosition={room.assetPosition}
           assetRotation={room.assetRotation}
           assetTargetSize={room.assetTargetSize}
+          assetMaterialTuning={room.assetMaterialTuning}
           fallback={fallback}
         />
       </group>

@@ -1,11 +1,11 @@
 import { Component, Suspense, useEffect, useMemo, useRef, type ErrorInfo, type ReactNode } from 'react';
 import { useAnimations, useGLTF } from '@react-three/drei';
-import { Box3, Vector3, type Group } from 'three';
-import type { RoomDefinition } from '../types/room';
+import { Box3, Mesh, MeshStandardMaterial, Vector3, type Group, type Material } from 'three';
+import type { AssetMaterialTuning, RoomDefinition } from '../types/room';
 
 type RoomAssetProps = Pick<
   RoomDefinition,
-  'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize'
+  'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize' | 'assetMaterialTuning'
 > & {
   fallback: ReactNode;
 };
@@ -26,18 +26,41 @@ class AssetErrorBoundary extends Component<{ fallback: ReactNode; children: Reac
   }
 }
 
+function tuneMaterial(source: Material, tuning?: AssetMaterialTuning): Material {
+  const material = source.clone();
+  if (!tuning) return material;
+
+  const pbr = material as MeshStandardMaterial;
+  if (typeof pbr.envMapIntensity === 'number' && tuning.envMapIntensity !== undefined) {
+    pbr.envMapIntensity = tuning.envMapIntensity;
+  }
+  if (typeof pbr.emissiveIntensity === 'number' && tuning.emissiveIntensity !== undefined) {
+    pbr.emissiveIntensity = tuning.emissiveIntensity;
+  }
+  if (pbr.color && tuning.colorMultiplier !== undefined) {
+    pbr.color.multiplyScalar(tuning.colorMultiplier);
+  }
+  if (typeof pbr.roughness === 'number' && tuning.roughnessFloor !== undefined) {
+    pbr.roughness = Math.max(pbr.roughness, tuning.roughnessFloor);
+  }
+  pbr.needsUpdate = true;
+  return pbr;
+}
+
 function LoadedRoomAsset({
   url,
   scale,
   position,
   rotation,
   targetSize,
+  materialTuning,
 }: {
   url: string;
   scale: number;
   position: [number, number, number];
   rotation: [number, number, number];
   targetSize: number;
+  materialTuning?: AssetMaterialTuning;
 }) {
   const groupRef = useRef<Group>(null);
   const { scene, animations } = useGLTF(url, false, true);
@@ -46,12 +69,14 @@ function LoadedRoomAsset({
   const normalized = useMemo(() => {
     const instance = scene.clone(true);
     instance.updateMatrixWorld(true);
-    // Let textured (TRELLIS) assets pick up reflections from the Environment IBL.
     instance.traverse((node) => {
-      const mesh = node as unknown as { isMesh?: boolean; material?: { envMapIntensity?: number } | Array<{ envMapIntensity?: number }> };
-      if (mesh.isMesh && mesh.material) {
-        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        for (const m of mats) if (m && typeof m.envMapIntensity === 'number') m.envMapIntensity = 0.9;
+      const mesh = node as Mesh;
+      if (!mesh.isMesh || !mesh.material) return;
+      const original = mesh.material;
+      if (Array.isArray(original)) {
+        mesh.material = original.map((material) => tuneMaterial(material, materialTuning));
+      } else {
+        mesh.material = tuneMaterial(original, materialTuning);
       }
     });
     const bounds = new Box3().setFromObject(instance);
@@ -63,7 +88,7 @@ function LoadedRoomAsset({
       center: [-center.x, -center.y, -center.z] as [number, number, number],
       normalizedScale: (targetSize / largestAxis) * scale,
     };
-  }, [scale, scene, targetSize]);
+  }, [materialTuning, scale, scene, targetSize]);
 
   useEffect(() => {
     const firstAction = names[0] ? actions[names[0]] : undefined;
@@ -95,6 +120,7 @@ export function RoomAsset({
   assetPosition = [0, 0.25, 0],
   assetRotation = [0, 0, 0],
   assetTargetSize = 3.5,
+  assetMaterialTuning,
   fallback,
 }: RoomAssetProps) {
   if (!assetUrl) return fallback;
@@ -108,6 +134,7 @@ export function RoomAsset({
           position={assetPosition}
           rotation={assetRotation}
           targetSize={assetTargetSize}
+          materialTuning={assetMaterialTuning}
         />
       </Suspense>
     </AssetErrorBoundary>
