@@ -1,11 +1,12 @@
+import { Suspense } from 'react';
 import type { RoomDefinition } from '../types/room';
 import { useExperienceStore } from '../state/useExperienceStore';
-import { SceneProps } from '../components/SceneProps';
 import { RoomShell } from './kit/RoomShell';
 import { LedWall } from './kit/LedWall';
 import { CeilingRig } from './kit/CeilingRig';
 import { Glazing } from './kit/Glazing';
-import { Platform, SecondaryZone, Workbenches } from './kit/Furnishings';
+import { Platform } from './kit/Furnishings';
+import { Lounge, ReceptionZone, Workstations } from './kit/Furniture';
 import { defaultConfig, sceneConfigs } from './sceneConfigs';
 
 /** Low presentation dais ring under the centrepiece. */
@@ -49,17 +50,21 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
       {cfg.glazing && !low && <Glazing side={cfg.glazing} x={7.6} width={11} />}
       <CeilingRig y={4.5} accent={room.color} />
 
-      {/* Layout-specific furnishing (distinct per room type). The heavier layers
-          only mount for the active/destination room, and thin out on the low
-          adaptive-quality tier. */}
+      {/* Layout-specific furnishing with real CC0 furniture. Heavy layers mount
+          only for the active/destination room and thin out on the low tier. */}
       {layout === 'platform' && <Platform accent={room.color} />}
       {layout !== 'platform' && <Dais accent={room.color} />}
-      {active && layout === 'workbenches' && (
-        <Workbenches accent={room.color} secondary={room.secondaryColor} rows={low ? 1 : 2} perRow={low ? 2 : 3} />
+      {/* Furniture uses drei <Clone> (shared geometry/materials), so mounting is
+          cheap; gated to the active/destination room to keep idle light. */}
+      {active && (
+        <Suspense fallback={null}>
+          {layout === 'workbenches' && (
+            <Workstations accent={room.color} secondary={room.secondaryColor} rows={low ? 1 : 2} perRow={low ? 2 : 3} />
+          )}
+          {layout === 'default' && <Lounge />}
+          {!low && <ReceptionZone side={cfg.glazing === 'right' ? 'left' : 'right'} />}
+        </Suspense>
       )}
-      {active && !low && layout === 'default' && <SceneProps room={room} active={active} />}
-      {/* Secondary program zone (reception + exhibit pods), opposite the glazing. */}
-      {active && !low && <SecondaryZone accent={room.color} side={cfg.glazing === 'right' ? 'left' : 'right'} />}
     </group>
   );
 }

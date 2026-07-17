@@ -24,7 +24,6 @@ type Profile = {
 const profiles: Record<string, Profile> = {
   '02': { floor: 'wood-floor', wall: 'plaster', wallColor: '#e7dccb', ledWall: '/assets/screens/room-02-wall.webp', glazing: 'left' },
   '03': { floor: 'concrete', wall: 'plaster', wallColor: '#dcdfe4', ledWall: '/assets/screens/room-03-wall.webp', width: 17 },
-  '04': { floor: 'metal-panel', wall: 'concrete', wallColor: '#bcc4cc', ledWall: '/assets/screens/room-04-wall.webp', height: 6.6 },
   '05': { floor: 'concrete', wall: 'concrete', wallColor: '#b2b8c0', ledWall: '/assets/screens/room-05-wall.webp', width: 17, depth: 16 },
   '06': { floor: 'concrete', wall: 'metal-panel', wallColor: '#c8ccd0', ledWall: '/assets/screens/room-06-wall.webp', width: 18 },
   '07': { floor: 'metal-panel', wall: 'concrete', wallColor: '#bac0cc', ledWall: '/assets/screens/room-07-wall.webp' },
@@ -130,37 +129,6 @@ function MakerspaceCue({ room }: { room: RoomDefinition }) {
             <meshStandardMaterial color={index % 2 ? '#9d8f82' : '#6d7681'} roughness={0.72} />
           </mesh>
         ))}
-      </group>
-    </>
-  );
-}
-
-function BuildingCue({ room }: { room: RoomDefinition }) {
-  const blocks = [
-    [-0.8, -0.72, 0, 1.15, 1.7, 1.15],
-    [0.6, -0.42, 0.1, 1.45, 2.3, 1.35],
-    [0.1, 0.82, -0.05, 0.8, 1.1, 0.9],
-  ] as const;
-  return (
-    <>
-      <Platform accent={room.color} radius={3.15} height={0.26} />
-      <group position={[0, -0.9, 0]}>
-        {blocks.map((block, index) => (
-          <mesh key={index} position={[block[0], block[1], block[2]]} castShadow receiveShadow>
-            <boxGeometry args={[block[3], block[4], block[5]]} />
-            <meshStandardMaterial color={index === 1 ? '#56616d' : '#818b94'} metalness={0.28} roughness={0.48} />
-          </mesh>
-        ))}
-        {[[-1.35, 0.1], [1.4, -0.5], [0.9, 1.25]].map(([x, z], index) => (
-          <group key={index} position={[x, 0.5, z]}>
-            <mesh><sphereGeometry args={[0.12, 16, 12]} /><meshStandardMaterial color={room.color} emissive={room.color} emissiveIntensity={0.35} /></mesh>
-            <mesh position={[0, -0.6, 0]}><cylinderGeometry args={[0.035, 0.05, 1.2, 10]} /><meshStandardMaterial color="#30363d" metalness={0.45} /></mesh>
-          </group>
-        ))}
-      </group>
-      <group position={[5.2, -0.55, 1.1]} rotation={[0, -0.35, 0]}>
-        <mesh castShadow receiveShadow><boxGeometry args={[2.7, 1.5, 0.85]} /><meshStandardMaterial color="#2d333b" metalness={0.3} roughness={0.5} /></mesh>
-        <FramedPanel position={[0, 0.3, 0.48]} color={room.secondaryColor} width={2.2} height={0.8} />
       </group>
     </>
   );
@@ -335,10 +303,6 @@ export function WorkforceAcademy({ room, active }: ProgramRoomProps) {
 
 export function StudentMakerspace({ room, active }: ProgramRoomProps) {
   return <ProgramShell room={room} active={active}><MakerspaceCue room={room} /></ProgramShell>;
-}
-
-export function LivingBuildingLab({ room, active }: ProgramRoomProps) {
-  return <ProgramShell room={room} active={active}><BuildingCue room={room} /></ProgramShell>;
 }
 
 export function NeighborhoodStudio({ room, active }: ProgramRoomProps) {

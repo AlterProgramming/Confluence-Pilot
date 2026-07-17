@@ -44,10 +44,10 @@ function AdaptiveQuality({ children }: { children: React.ReactNode }) {
 export function ExperienceCanvas() {
   return (
     <Canvas
-      dpr={[0.85, 1.25]}
+      dpr={[0.55, 1.2]}
       gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
       camera={{ fov: 43, near: 0.1, far: 280, position: [0, 1.8, 12.4] }}
-      performance={{ min: 0.5, debounce: 220 }}
+      performance={{ min: 0.35, debounce: 200 }}
       onCreated={({ gl }) => {
         gl.toneMapping = ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.25;

@@ -34,12 +34,17 @@ const captureView = captureMode ? captureParams?.get('view') : null;
 const NO_CAPTURE_OFFSET: CaptureOffset = { x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 };
 
 /** Secondary evidence views deliberately frame each room's program zone rather
- * than applying the same small lateral nudge to every composition. */
+ * than applying the same small lateral nudge to every composition.
+ * Room 01 is re-aimed to the exhibit cluster's relocated centroid (~x=3.0,
+ * ~z=-1.85) after moving the exhibits closer to the canonical view axis for
+ * legibility. Room 04 is aimed at ControlRoom's side cabinet (~x=6.3, ~z=-1.2)
+ * rather than the generic ProgramRooms building-model panel it was originally
+ * tuned against, since Room 04 keeps its bespoke ControlRoom scene. */
 const secondaryOffsets: Record<string, CaptureOffset> = {
-  '01': { x: 2.35, y: 0.2, z: 0.55, targetX: 0.45, targetY: 0.08, targetZ: 0 },
+  '01': { x: 1.5, y: -0.2, z: -1.6, targetX: 3.0, targetY: -0.18, targetZ: -0.25 },
   '02': { x: -3.4, y: -0.05, z: -1.1, targetX: -3.7, targetY: -0.25, targetZ: 0.8 },
   '03': { x: 3.6, y: -0.12, z: -1.15, targetX: 4.1, targetY: -0.2, targetZ: 0.5 },
-  '04': { x: 3.25, y: -0.1, z: -1.35, targetX: 4.2, targetY: -0.1, targetZ: 0.55 },
+  '04': { x: 3.3, y: -0.2, z: -1.1, targetX: 5.6, targetY: -0.35, targetZ: -0.9 },
   '05': { x: 3.35, y: -0.12, z: -1.2, targetX: 4.45, targetY: -0.18, targetZ: 0.4 },
   '06': { x: -3.45, y: -0.18, z: -1.3, targetX: -4.35, targetY: -0.25, targetZ: 0.55 },
   '07': { x: 3.5, y: -0.15, z: -1.15, targetX: 3.75, targetY: -0.2, targetZ: 0.6 },
