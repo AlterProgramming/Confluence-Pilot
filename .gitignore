@@ -21,3 +21,5 @@ public/viewer.html
 
 # Generation queue runtime state
 scripts/queue/
+
+scripts/_models/
