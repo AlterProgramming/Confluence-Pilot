@@ -18,3 +18,6 @@ public/assets/output.glb
 public/assets/room-01-trellis.glb
 public/assets/einstein-bust.glb
 public/viewer.html
+
+# Generation queue runtime state
+scripts/queue/
