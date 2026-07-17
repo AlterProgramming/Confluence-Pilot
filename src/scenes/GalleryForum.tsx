@@ -37,7 +37,7 @@ export function GalleryForum({ room }: { room: RoomDefinition; active: boolean }
         floorRepeat={[5, 5]}
         floorRoughness={0.7}
       />
-      <LedWall url="/assets/screens/room-01-wall.png" radius={8.4} arc={2.3} height={4.4} y={1.55} />
+      <LedWall url="/assets/screens/room-01-wall.webp" radius={8.4} arc={2.3} height={4.4} y={1.55} />
       <Seating baseRadius={3.9} rows={3} />
       <Glazing side="left" x={8.0} width={12} />
       <CeilingRig y={4.7} accent={room.color} />

@@ -11,7 +11,7 @@ export type SceneConfig = {
   glazing?: 'left' | 'right';
 };
 
-const wall = (n: string) => `/assets/screens/room-${n}-wall.png`;
+const wall = (n: string) => `/assets/screens/room-${n}-wall.webp`;
 
 /**
  * Per-room scene configuration for StandardRoom. Materials are matched to each

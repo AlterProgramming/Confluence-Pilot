@@ -54,8 +54,10 @@ def main():
         path = res[0] if isinstance(res, (list, tuple)) else res
         if isinstance(path, dict):
             path = path.get("path") or path.get("url")
-        dest = OUT / f"room-{rid}-wall.png"
-        shutil.copy(path, dest)
+        # Save as WebP to keep the LED-wall download small.
+        from PIL import Image
+        dest = OUT / f"room-{rid}-wall.webp"
+        Image.open(path).convert("RGB").save(dest, "WEBP", quality=82, method=5)
         print(f"  room {rid}: {dest.name} in {time.time()-t0:.0f}s")
 
 
