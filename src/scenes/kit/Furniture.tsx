@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
-import { useGLTF } from '@react-three/drei';
+import { Clone, useGLTF } from '@react-three/drei';
 import { Box3, Vector3 } from 'three';
 
 const FURN = '/assets/furniture';
 const FLOOR = -1.5;
 
 /** One real CC0 furniture GLB, native-scale, centred horizontally with its base
- *  on the floor. Poly Haven models are real-world metres, so proportions between
- *  pieces stay correct without per-type normalization. */
+ *  on the floor. Uses drei <Clone> so repeated pieces SHARE geometry/materials
+ *  (cheap to mount) instead of a deep scene.clone(true) per instance. */
 export function FurnitureItem({
   asset,
   position,
@@ -20,28 +20,25 @@ export function FurnitureItem({
   scale?: number;
 }) {
   const { scene } = useGLTF(`${FURN}/${asset}.glb`, false, true);
-  const { clone, offset } = useMemo(() => {
-    const inst = scene.clone(true);
-    inst.updateMatrixWorld(true);
-    const box = new Box3().setFromObject(inst);
+  const offset = useMemo(() => {
+    const box = new Box3().setFromObject(scene);
     const center = box.getCenter(new Vector3());
-    return {
-      clone: inst,
-      offset: [-center.x * scale, -box.min.y * scale, -center.z * scale] as [number, number, number],
-    };
+    return [-center.x * scale, -box.min.y * scale, -center.z * scale] as [number, number, number];
   }, [scene, scale]);
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      <primitive object={clone} scale={scale} position={offset} />
+      <Clone object={scene} scale={scale} position={offset} />
     </group>
   );
 }
 
-/** Emissive monitor perched on a desk (Poly Haven has no monitor model). */
-function Monitor({ position, rotationY, accent, secondary }: { position: [number, number, number]; rotationY: number; accent: string; secondary: string }) {
+/** Emissive monitor perched on a desk (Poly Haven has no monitor model). The
+ *  glow comes from the emissive screen + global IBL — NO per-monitor point light
+ *  (rooms had 6+ of them, a big per-frame + mount cost). */
+function Monitor({ position, rotationY, secondary }: { position: [number, number, number]; rotationY: number; secondary: string }) {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 0.32, 0]} castShadow>
+      <mesh position={[0, 0.32, 0]}>
         <boxGeometry args={[0.62, 0.38, 0.04]} />
         <meshStandardMaterial color="#0a0d12" metalness={0.4} roughness={0.3} />
       </mesh>
@@ -49,11 +46,6 @@ function Monitor({ position, rotationY, accent, secondary }: { position: [number
         <planeGeometry args={[0.56, 0.32]} />
         <meshBasicMaterial color={secondary} toneMapped={false} />
       </mesh>
-      <mesh position={[0, 0.09, 0]}>
-        <cylinderGeometry args={[0.05, 0.09, 0.18, 12]} />
-        <meshStandardMaterial color="#1a1e26" metalness={0.5} roughness={0.4} />
-      </mesh>
-      <pointLight color={accent} intensity={0.5} distance={2} decay={2} position={[0, 0.32, 0.4]} />
     </group>
   );
 }
@@ -72,7 +64,7 @@ export function Workstations({ accent, secondary, rows = 2, perRow = 3 }: { acce
       {spots.map((s, i) => (
         <group key={i}>
           <FurnitureItem asset="office-desk" position={[s.x, FLOOR, s.z]} rotationY={Math.PI} scale={0.92} />
-          <Monitor position={[s.x, FLOOR + 0.78, s.z - 0.1]} rotationY={Math.PI} accent={accent} secondary={secondary} />
+          <Monitor position={[s.x, FLOOR + 0.78, s.z - 0.1]} rotationY={Math.PI} secondary={secondary} />
           <FurnitureItem asset="task-chair" position={[s.x, FLOOR, s.z + 0.95]} rotationY={0} scale={0.95} />
         </group>
       ))}

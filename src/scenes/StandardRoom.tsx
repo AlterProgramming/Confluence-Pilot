@@ -54,6 +54,8 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
           only for the active/destination room and thin out on the low tier. */}
       {layout === 'platform' && <Platform accent={room.color} />}
       {layout !== 'platform' && <Dais accent={room.color} />}
+      {/* Furniture uses drei <Clone> (shared geometry/materials), so mounting is
+          cheap; gated to the active/destination room to keep idle light. */}
       {active && (
         <Suspense fallback={null}>
           {layout === 'workbenches' && (
