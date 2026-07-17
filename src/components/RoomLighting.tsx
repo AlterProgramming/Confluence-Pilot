@@ -14,15 +14,15 @@ export function RoomLighting({ room, active }: { room: RoomDefinition; active: b
 
   return (
     <>
-      {/* Base fill so no space reads as a black void. */}
-      <ambientLight intensity={active ? 0.92 : 0.36} />
-      <hemisphereLight color={room.secondaryColor} groundColor="#1c212b" intensity={active ? 0.78 : 0.32} />
+      {/* Bright base fill so every space reads as lit and inviting, never a void. */}
+      <ambientLight intensity={active ? 1.25 : 0.5} />
+      <hemisphereLight color={room.secondaryColor} groundColor="#2a2f3a" intensity={active ? 1.0 : 0.42} />
 
-      {/* Key light — unique angle per room. */}
+      {/* Warm key light — unique angle per room. */}
       <directionalLight
         castShadow={false}
-        color="#fbfcff"
-        intensity={active ? 2.7 : 0.7}
+        color="#fff3e2"
+        intensity={active ? 3.1 : 0.85}
         position={[keyX, 7.4, keyZ]}
       />
 

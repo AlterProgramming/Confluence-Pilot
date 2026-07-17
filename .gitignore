@@ -12,3 +12,9 @@ scripts/_opt/
 scripts/_shots/
 scripts/__pycache__/
 .env
+
+# Large / test / scratch 3D artifacts (not shipped)
+public/assets/output.glb
+public/assets/room-01-trellis.glb
+public/assets/einstein-bust.glb
+public/viewer.html

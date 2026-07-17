@@ -31,7 +31,7 @@ export function PostEffects() {
       resolutionScale={qualityTier === 'high' ? 0.45 : 0.32}
     />
   );
-  const vignette = <Vignette eskil={false} offset={0.18} darkness={0.43 + travel * 0.08} />;
+  const vignette = <Vignette eskil={false} offset={0.28} darkness={0.26 + travel * 0.08} />;
 
   if (qualityTier === 'low') {
     return (

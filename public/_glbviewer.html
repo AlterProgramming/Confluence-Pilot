@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>GLB Inspector</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #40454f; }
+      canvas { display: block; }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://esm.sh/three@0.185.1",
+          "three/addons/": "https://esm.sh/three@0.185.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from 'three';
+      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+      import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+      import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+      const params = new URLSearchParams(location.search);
+      const src = params.get('src');
+      const W = window.innerWidth, H = window.innerHeight;
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(W, H);
+      renderer.setPixelRatio(1);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+      document.body.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#40454f');
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+      const camera = new THREE.PerspectiveCamera(35, W / H, 0.01, 200);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x40465a, 1.1));
+      const dir = new THREE.DirectionalLight(0xffffff, 2.2);
+      dir.position.set(3, 5, 4);
+      scene.add(dir);
+
+      const loader = new GLTFLoader();
+      loader.setMeshoptDecoder(MeshoptDecoder);
+      loader.load(
+        src,
+        (gltf) => {
+          const obj = gltf.scene;
+          scene.add(obj);
+          const box = new THREE.Box3().setFromObject(obj);
+          const size = box.getSize(new THREE.Vector3());
+          const center = box.getCenter(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z) || 1;
+          obj.position.sub(center);
+          const dist = maxDim * 2.0;
+          camera.position.set(dist * 0.75, dist * 0.5, dist * 0.95);
+          camera.near = maxDim / 100;
+          camera.far = maxDim * 20;
+          camera.updateProjectionMatrix();
+          camera.lookAt(0, 0, 0);
+          window.__ready = true;
+        },
+        undefined,
+        (err) => {
+          scene.background = new THREE.Color('#7a2222'); // red = load failed
+          window.__err = String(err && err.message ? err.message : err);
+          window.__ready = true;
+        },
+      );
+
+      function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+    </script>
+  </body>
+</html>

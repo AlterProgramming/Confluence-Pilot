@@ -46,6 +46,14 @@ function LoadedRoomAsset({
   const normalized = useMemo(() => {
     const instance = scene.clone(true);
     instance.updateMatrixWorld(true);
+    // Let textured (TRELLIS) assets pick up reflections from the Environment IBL.
+    instance.traverse((node) => {
+      const mesh = node as unknown as { isMesh?: boolean; material?: { envMapIntensity?: number } | Array<{ envMapIntensity?: number }> };
+      if (mesh.isMesh && mesh.material) {
+        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const m of mats) if (m && typeof m.envMapIntensity === 'number') m.envMapIntensity = 0.9;
+      }
+    });
     const bounds = new Box3().setFromObject(instance);
     const size = bounds.getSize(new Vector3());
     const center = bounds.getCenter(new Vector3());
