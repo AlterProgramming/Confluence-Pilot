@@ -58,8 +58,12 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#a2f4de',
     shape: 'box',
     architecture: 'living-building',
-    assetUrl: '/assets/room-04-building-node.glb',
-    assetTargetSize: 3.6,
+    assetUrl: '/assets/room-04-hero.glb',
+    assetTargetSize: 3.8,
+    assetMaterialTuning: {
+      envMapIntensity: 0.9,
+      roughnessFloor: 0.4,
+    },
   },
   {
     id: '05',
