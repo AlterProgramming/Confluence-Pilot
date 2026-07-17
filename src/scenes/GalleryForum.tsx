@@ -13,16 +13,49 @@ function Dais({ accent }: { accent: string }) {
         <ringGeometry args={[1.45, 2.05, 64]} />
         <meshStandardMaterial color="#5b4637" metalness={0.08} roughness={0.72} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.018, 0]}>
         <ringGeometry args={[1.98, 2.08, 64]} />
-        <meshBasicMaterial color={accent} toneMapped={false} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.22} roughness={0.5} />
       </mesh>
     </group>
   );
 }
 
+function ExhibitPod({
+  position,
+  accent,
+  tall = false,
+}: {
+  position: [number, number, number];
+  accent: string;
+  tall?: boolean;
+}) {
+  return (
+    <group position={position}>
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[1.05, tall ? 1.5 : 1.15, 1.05]} />
+        <meshStandardMaterial color="#d9d2c7" roughness={0.68} metalness={0.05} />
+      </mesh>
+      <mesh position={[0, tall ? 0.9 : 0.72, 0]} castShadow>
+        <icosahedronGeometry args={[0.32, 1]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.28} roughness={0.38} metalness={0.3} />
+      </mesh>
+      <pointLight color={accent} intensity={0.48} distance={3.2} decay={2} position={[0, tall ? 1.0 : 0.82, 0.5]} />
+    </group>
+  );
+}
+
+function SideExhibits({ accent }: { accent: string }) {
+  return (
+    <group>
+      <ExhibitPod position={[6.15, -0.7, -2.45]} accent={accent} tall />
+      <ExhibitPod position={[6.15, -0.87, -0.75]} accent={accent} />
+    </group>
+  );
+}
+
 /** Room 01 — Confluence Forum & AI Experience Gallery: warm forum with a curved
- *  LED wall, tiered seating, daylight windows, wood floor, warm plaster walls. */
+ * LED wall, tiered seating, daylight windows, and a secondary exhibit zone. */
 export function GalleryForum({ room }: { room: RoomDefinition; active: boolean }) {
   return (
     <group>
@@ -37,7 +70,7 @@ export function GalleryForum({ room }: { room: RoomDefinition; active: boolean }
         floorRepeat={[5, 5]}
         floorRoughness={0.7}
       />
-      <LedWall url="/assets/screens/room-01-wall.webp" radius={8.25} arc={1.78} height={3.55} y={1.45} />
+      <LedWall url="/assets/screens/room-01-wall-art.svg" radius={8.25} arc={1.78} height={3.55} y={1.45} />
       <Seating
         baseRadius={4.45}
         rows={3}
@@ -51,6 +84,7 @@ export function GalleryForum({ room }: { room: RoomDefinition; active: boolean }
       <Glazing side="left" x={8.0} width={12} />
       <CeilingRig y={4.7} accent={room.color} />
       <Dais accent={room.color} />
+      <SideExhibits accent={room.secondaryColor} />
     </group>
   );
 }
