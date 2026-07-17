@@ -1,52 +1,47 @@
 import { useMemo } from 'react';
 import { useTexture } from '@react-three/drei';
-import { DoubleSide, RepeatWrapping, SRGBColorSpace } from 'three';
+import { BackSide, RepeatWrapping, SRGBColorSpace } from 'three';
 
-/** Big curved LED video wall built from horizontal slices of one wide image. */
+/**
+ * Big curved LED video wall as a single cylinder-segment mesh with one shared
+ * texture (1 draw call, 1 GPU upload) — no per-panel texture clones. The image
+ * wraps across the arc; rendered on the inner (concave) face toward the room.
+ */
 export function LedWall({
   url,
-  radius = 8.4,
-  arc = 2.3,
-  height = 4.4,
-  y = 1.55,
-  panels = 8,
+  radius = 8.2,
+  arc = 2.2,
+  height = 4.2,
+  y = 1.5,
 }: {
   url: string;
   radius?: number;
   arc?: number;
   height?: number;
   y?: number;
-  panels?: number;
 }) {
   const tex = useTexture(url);
+  useMemo(() => {
+    tex.wrapS = RepeatWrapping;
+    tex.repeat.x = -1; // un-mirror for the BackSide (inner) face
+    tex.colorSpace = SRGBColorSpace;
+    tex.needsUpdate = true;
+  }, [tex]);
 
-  const slices = useMemo(() => {
-    return Array.from({ length: panels }, (_, i) => {
-      const t = i / (panels - 1) - 0.5;
-      const angle = t * arc;
-      const clone = tex.clone();
-      clone.wrapS = RepeatWrapping;
-      clone.repeat.x = 1 / panels;
-      clone.offset.x = i / panels;
-      clone.colorSpace = SRGBColorSpace;
-      clone.needsUpdate = true;
-      const width = ((radius * arc) / panels) * 1.04;
-      return { clone, width, angle, position: [Math.sin(angle) * radius, y, -Math.cos(angle) * radius] as [number, number, number] };
-    });
-  }, [tex, panels, radius, arc, y]);
+  const thetaStart = Math.PI - arc / 2;
 
   return (
-    <group>
-      <mesh position={[0, y, -radius - 0.15]}>
-        <cylinderGeometry args={[radius + 0.2, radius + 0.2, height + 0.5, 48, 1, true, -arc / 2, arc]} />
-        <meshStandardMaterial color="#05070c" metalness={0.5} roughness={0.6} side={DoubleSide} />
+    <group position={[0, y, 0]}>
+      {/* dark bezel just behind the screen */}
+      <mesh>
+        <cylinderGeometry args={[radius + 0.25, radius + 0.25, height + 0.5, 64, 1, true, thetaStart - 0.05, arc + 0.1]} />
+        <meshStandardMaterial color="#05070c" metalness={0.5} roughness={0.6} side={BackSide} />
       </mesh>
-      {slices.map((p, i) => (
-        <mesh key={i} position={p.position} rotation={[0, p.angle, 0]}>
-          <planeGeometry args={[p.width, height]} />
-          <meshBasicMaterial map={p.clone} toneMapped={false} side={DoubleSide} />
-        </mesh>
-      ))}
+      {/* the screen */}
+      <mesh>
+        <cylinderGeometry args={[radius, radius, height, 64, 1, true, thetaStart, arc]} />
+        <meshBasicMaterial map={tex} toneMapped={false} side={BackSide} />
+      </mesh>
     </group>
   );
 }

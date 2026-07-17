@@ -1,4 +1,5 @@
 import type { RoomDefinition } from '../types/room';
+import { SceneProps } from '../components/SceneProps';
 import { RoomShell } from './kit/RoomShell';
 import { LedWall } from './kit/LedWall';
 import { CeilingRig } from './kit/CeilingRig';
@@ -26,7 +27,7 @@ function Dais({ accent }: { accent: string }) {
  * wall + ceiling light rig + optional daylight windows + a dais under the hero.
  * Used for every room except the fully bespoke Room 01.
  */
-export function StandardRoom({ room }: { room: RoomDefinition; active: boolean }) {
+export function StandardRoom({ room, active }: { room: RoomDefinition; active: boolean }) {
   const cfg = sceneConfigs[room.id] ?? defaultConfig;
   return (
     <group>
@@ -44,6 +45,9 @@ export function StandardRoom({ room }: { room: RoomDefinition; active: boolean }
       {cfg.glazing && <Glazing side={cfg.glazing} x={7.6} width={11} />}
       <CeilingRig y={4.5} accent={room.color} />
       <Dais accent={room.color} />
+      {/* Furniture (GLB props) is the heaviest layer — only mount it for the
+          active/destination room to keep draw calls + texture bandwidth bounded. */}
+      {active && <SceneProps room={room} active={active} />}
     </group>
   );
 }
