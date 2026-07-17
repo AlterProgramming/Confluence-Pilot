@@ -19,13 +19,41 @@ type CameraProxy = {
   fov: number;
 };
 
+type CaptureOffset = {
+  x: number;
+  y: number;
+  z: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+};
+
 const captureParams = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search);
 const captureMode = captureParams?.get('capture') === '1';
 const captureView = captureMode ? captureParams?.get('view') : null;
-const captureOffset =
-  captureView === 'secondary'
-    ? { x: 2.35, y: 0.2, z: 0.55, targetX: 0.45, targetY: 0.08 }
-    : { x: 0, y: 0, z: 0, targetX: 0, targetY: 0 };
+const NO_CAPTURE_OFFSET: CaptureOffset = { x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 };
+
+/** Secondary evidence views deliberately frame each room's program zone rather
+ * than applying the same small lateral nudge to every composition. */
+const secondaryOffsets: Record<string, CaptureOffset> = {
+  '01': { x: 2.35, y: 0.2, z: 0.55, targetX: 0.45, targetY: 0.08, targetZ: 0 },
+  '02': { x: -3.4, y: -0.05, z: -1.1, targetX: -3.7, targetY: -0.25, targetZ: 0.8 },
+  '03': { x: 3.6, y: -0.12, z: -1.15, targetX: 4.1, targetY: -0.2, targetZ: 0.5 },
+  '04': { x: 3.25, y: -0.1, z: -1.35, targetX: 4.2, targetY: -0.1, targetZ: 0.55 },
+  '05': { x: 3.35, y: -0.12, z: -1.2, targetX: 4.45, targetY: -0.18, targetZ: 0.4 },
+  '06': { x: -3.45, y: -0.18, z: -1.3, targetX: -4.35, targetY: -0.25, targetZ: 0.55 },
+  '07': { x: 3.5, y: -0.15, z: -1.15, targetX: 3.75, targetY: -0.2, targetZ: 0.6 },
+  '08': { x: -4.0, y: -0.22, z: -1.65, targetX: -3.6, targetY: -0.35, targetZ: 1.2 },
+  '09': { x: 3.45, y: -0.08, z: -1.3, targetX: 4.45, targetY: -0.05, targetZ: 0.35 },
+  '10': { x: -3.55, y: -0.14, z: -1.15, targetX: -4.6, targetY: -0.2, targetZ: 0.45 },
+  '11': { x: 3.55, y: -0.12, z: -1.25, targetX: 4.15, targetY: -0.18, targetZ: 0.45 },
+  '12': { x: -3.8, y: -0.18, z: -1.35, targetX: -4.25, targetY: -0.25, targetZ: 0.6 },
+};
+
+function getCaptureOffset(roomId: string): CaptureOffset {
+  if (captureView !== 'secondary') return NO_CAPTURE_OFFSET;
+  return secondaryOffsets[roomId] ?? secondaryOffsets['01'];
+}
 
 export function CameraDirector() {
   const { camera, pointer } = useThree();
@@ -36,6 +64,7 @@ export function CameraDirector() {
   const reducedMotion = useExperienceStore((state) => state.reducedMotion);
   const setTransitionProgress = useExperienceStore((state) => state.setTransitionProgress);
   const completeTransition = useExperienceStore((state) => state.completeTransition);
+  const captureOffset = getCaptureOffset(rooms[activeRoom]?.id ?? '');
 
   const initial = rooms[0];
   const proxy = useMemo<CameraProxy>(
@@ -150,7 +179,7 @@ export function CameraDirector() {
     perspectiveCamera.lookAt(
       proxy.targetX + captureOffset.targetX + driftX * 0.2,
       proxy.targetY + captureOffset.targetY + driftY * 0.16,
-      proxy.targetZ,
+      proxy.targetZ + captureOffset.targetZ,
     );
     perspectiveCamera.rotateZ(proxy.roll);
 
