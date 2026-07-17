@@ -13,6 +13,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffb08a',
     shape: 'sphere',
     architecture: 'gallery',
+    assetUrl: '/assets/room-01-experience-kiosk.glb',
+    assetTargetSize: 3.4,
   },
   {
     id: '02',
@@ -24,6 +26,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffd29e',
     shape: 'torus',
     architecture: 'academy',
+    assetUrl: '/assets/room-02-credential-stack.glb',
+    assetTargetSize: 3.0,
   },
   {
     id: '03',
@@ -35,6 +39,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ff97bd',
     shape: 'octahedron',
     architecture: 'studio',
+    assetUrl: '/assets/room-03-fabricator.glb',
+    assetTargetSize: 3.0,
   },
   {
     id: '04',
@@ -46,6 +52,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#a2f4de',
     shape: 'box',
     architecture: 'living-building',
+    assetUrl: '/assets/room-04-building-node.glb',
+    assetTargetSize: 3.6,
   },
   {
     id: '05',
@@ -57,6 +65,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#b8ef9f',
     shape: 'icosahedron',
     architecture: 'neighborhood',
+    assetUrl: '/assets/room-05-city-model.glb',
+    assetTargetSize: 4.0,
   },
   {
     id: '06',
@@ -68,6 +78,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffe3a2',
     shape: 'cylinder',
     architecture: 'infrastructure',
+    assetUrl: '/assets/room-06-survey-rover.glb',
+    assetTargetSize: 3.2,
   },
   {
     id: '07',
@@ -79,6 +91,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#b9c0ff',
     shape: 'octahedron',
     architecture: 'vault',
+    assetUrl: '/assets/room-07-secure-vault.glb',
+    assetTargetSize: 3.0,
   },
   {
     id: '08',
@@ -90,6 +104,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#a6e2ff',
     shape: 'torus',
     architecture: 'hangar',
+    assetUrl: '/assets/room-08-delivery-drone.glb',
+    assetTargetSize: 2.6,
   },
   {
     id: '09',
@@ -101,6 +117,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#d2c5ff',
     shape: 'sphere',
     architecture: 'communications',
+    assetUrl: '/assets/room-09-satellite-terminal.glb',
+    assetTargetSize: 3.2,
   },
   {
     id: '10',
@@ -112,6 +130,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#cbea9a',
     shape: 'icosahedron',
     architecture: 'cold-chain',
+    assetUrl: '/assets/room-10-coldchain-unit.glb',
+    assetTargetSize: 3.4,
   },
   {
     id: '11',
@@ -123,6 +143,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#f7b4d2',
     shape: 'cylinder',
     architecture: 'fintech',
+    assetUrl: '/assets/room-11-fintech-vault.glb',
+    assetTargetSize: 3.0,
   },
   {
     id: '12',
@@ -134,6 +156,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffc0a8',
     shape: 'box',
     architecture: 'main-street',
+    assetUrl: '/assets/room-12-mainstreet-terminal.glb',
+    assetTargetSize: 3.2,
   },
 ];
 

@@ -5,3 +5,9 @@ dist
 *.log
 .vscode/*
 !.vscode/extensions.json
+
+# Asset pipeline intermediates (concept images, scratch, secrets)
+scripts/_concepts/
+scripts/_opt/
+scripts/__pycache__/
+.env

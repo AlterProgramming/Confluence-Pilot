@@ -93,15 +93,40 @@ These rooms currently use reusable generic architecture. Custom assets and conce
 ### Prerequisites
 
 - ✓ HuggingFace token configured
-- ✓ Python environment ready (transformers, huggingface-hub, etc.)
-- ⧖ Generation scripts (in progress)
+- ✓ `gradio_client` + `trimesh` installed
+- ✓ Generation script: `scripts/generate_room_asset.py`
 
-### Planned Generation Order
+### Generation Results (2026-07-16)
 
-1. Room 01 (Experience Gallery) — high-visibility demo kiosk
-2. Room 02 (Workforce Academy) — credential visualization
-3. Room 05 (Smart Neighborhoods) — geospatial showcase
-4. Rooms 03, 04, 06–12 — remaining in priority order
+All 12 hero GLBs generated via free HF Spaces:
+**FLUX.1-schnell** (concept image) → **TripoSR** (image→3D, GLB output).
+
+| Room | GLB | Size | Verts / Faces |
+|------|-----|------|---------------|
+| 01 | room-01-experience-kiosk.glb | 2.0 MB | 51.7k / 103k |
+| 02 | room-02-credential-stack.glb | 3.8 MB | 96.4k / 192k |
+| 03 | room-03-fabricator.glb | 4.6 MB | 117k / 234k |
+| 04 | room-04-building-node.glb | 3.8 MB | 97.6k / 195k |
+| 05 | room-05-city-model.glb | 2.7 MB | 68.2k / 136k |
+| 06 | room-06-survey-rover.glb | 3.1 MB | 80.6k / 161k |
+| 07 | room-07-secure-vault.glb | 4.4 MB | 112k / 223k |
+| 08 | room-08-delivery-drone.glb | 0.8 MB | 19.7k / 39k |
+| 09 | room-09-satellite-terminal.glb | 2.4 MB | 60.9k / 122k |
+| 10 | room-10-coldchain-unit.glb | 2.8 MB | 71.5k / 143k |
+| 11 | room-11-fintech-vault.glb | 2.6 MB | 67.7k / 135k |
+| 12 | room-12-mainstreet-terminal.glb | 2.3 MB | 57.6k / 115k |
+
+**Total: 34.3 MB.** All wired into `src/data/rooms.ts` (`assetUrl` + `assetTargetSize`).
+
+> **Follow-up:** TripoSR meshes are dense (undecimated, ~100–230k faces). For web
+> delivery, decimate to ~30–40k faces and Draco-compress to hit the 1–2 MB target
+> per asset. Particle-target sampling ([[PARTICLE_TARGET_PIPELINE.md]]) can now run
+> against these GLBs.
+
+> **Blocker (upstream):** The app does not yet build — `src/App.tsx`,
+> `ExperienceCanvas.tsx`, and `Room.tsx` import 5 components that are missing from
+> the repo: `Hud`, `GlobalParticles`, `TransitionShaft`, `RoomArchitecture`,
+> `RoomFixtures`. These must be added upstream before assets can be verified in-app.
 
 ### Asset Storage
 
