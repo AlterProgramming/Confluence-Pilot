@@ -1,4 +1,5 @@
 import type { RoomDefinition } from '../types/room';
+import { useExperienceStore } from '../state/useExperienceStore';
 import { SceneProps } from '../components/SceneProps';
 import { RoomShell } from './kit/RoomShell';
 import { LedWall } from './kit/LedWall';
@@ -31,6 +32,7 @@ function Dais({ accent }: { accent: string }) {
 export function StandardRoom({ room, active }: { room: RoomDefinition; active: boolean }) {
   const cfg = sceneConfigs[room.id] ?? defaultConfig;
   const layout = cfg.layout ?? 'default';
+  const low = useExperienceStore((s) => s.qualityTier) === 'low';
   return (
     <group>
       <RoomShell
@@ -44,17 +46,18 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
         floorRoughness={cfg.floorRoughness}
       />
       {cfg.ledWall && <LedWall url={cfg.ledWall} radius={8.2} arc={2.2} height={4.2} y={1.5} />}
-      {cfg.glazing && <Glazing side={cfg.glazing} x={7.6} width={11} />}
+      {cfg.glazing && !low && <Glazing side={cfg.glazing} x={7.6} width={11} />}
       <CeilingRig y={4.5} accent={room.color} />
 
       {/* Layout-specific furnishing (distinct per room type). The heavier layers
-          only mount for the active/destination room. */}
+          only mount for the active/destination room, and thin out on the low
+          adaptive-quality tier. */}
       {layout === 'platform' && <Platform accent={room.color} />}
       {layout !== 'platform' && <Dais accent={room.color} />}
       {active && layout === 'workbenches' && (
-        <Workbenches accent={room.color} secondary={room.secondaryColor} rows={2} perRow={3} />
+        <Workbenches accent={room.color} secondary={room.secondaryColor} rows={low ? 1 : 2} perRow={low ? 2 : 3} />
       )}
-      {active && layout === 'default' && <SceneProps room={room} active={active} />}
+      {active && !low && layout === 'default' && <SceneProps room={room} active={active} />}
     </group>
   );
 }
