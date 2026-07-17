@@ -13,7 +13,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffb08a',
     shape: 'sphere',
     architecture: 'gallery',
-    assetUrl: '/assets/room-01-experience-kiosk.glb',
+    assetUrl: '/assets/room-01-kiosk.glb',
     assetTargetSize: 3.4,
   },
   {
