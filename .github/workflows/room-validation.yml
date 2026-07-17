@@ -33,6 +33,53 @@ jobs:
       - name: Build production bundle
         run: npm run build
 
+      - name: Upload production bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+          if-no-files-found: error
+          retention-days: 1
+
+  evidence:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: '01', number: 1, asset: '/assets/room-01-kiosk.glb' }
+          - { id: '02', number: 2, asset: '/assets/room-02-credential-stack.glb' }
+          - { id: '03', number: 3, asset: '/assets/room-03-fabricator.glb' }
+          - { id: '04', number: 4, asset: '/assets/room-04-building-node.glb' }
+          - { id: '05', number: 5, asset: '/assets/room-05-city-model.glb' }
+          - { id: '06', number: 6, asset: '/assets/room-06-survey-rover.glb' }
+          - { id: '07', number: 7, asset: '/assets/room-07-secure-vault.glb' }
+          - { id: '08', number: 8, asset: '/assets/room-08-delivery-drone.glb' }
+          - { id: '09', number: 9, asset: '/assets/room-09-satellite-terminal.glb' }
+          - { id: '10', number: 10, asset: '/assets/room-10-coldchain-unit.glb' }
+          - { id: '11', number: 11, asset: '/assets/room-11-fintech-vault.glb' }
+          - { id: '12', number: 12, asset: '/assets/room-12-mainstreet-terminal.glb' }
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
       - name: Install evidence browser
         run: npm install --no-save --package-lock=false puppeteer@24.16.0
 
@@ -49,14 +96,14 @@ jobs:
           cat /tmp/confluence-preview.log
           exit 1
 
-      - name: Capture Room 01 validation evidence
-        run: npm run evidence:room01
+      - name: Capture Room ${{ matrix.id }} validation evidence
+        run: node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 ${{ matrix.number }} ${{ matrix.asset }}
 
-      - name: Upload Room 01 evidence
+      - name: Upload Room ${{ matrix.id }} evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: room-01-validation-evidence
-          path: validation/evidence/room-01
+          name: room-${{ matrix.id }}-validation-evidence
+          path: validation/evidence/room-${{ matrix.id }}
           if-no-files-found: error
           retention-days: 14

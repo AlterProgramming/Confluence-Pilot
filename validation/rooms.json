@@ -7,32 +7,62 @@
       "status": "phase-1",
       "referenceBoard": "public/reference/rooms/room-01-concept.jpg",
       "canonicalScreenshot": "",
-      "identityCues": ["curved immersive LED wall", "tiered forum seating", "daylight gallery glazing"],
+      "identityCues": [
+        "curved immersive LED wall",
+        "tiered forum seating",
+        "daylight gallery glazing"
+      ],
       "sceneComponent": "src/scenes/GalleryForum.tsx",
       "registryKey": "01",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "latestReviewDoc": "validation/reviews/room-01-composition-gate.md",
-      "signatureAssets": ["/assets/room-01-kiosk.glb"],
+      "signatureAssets": [
+        "/assets/room-01-kiosk.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "Seating now has separate cushion, back, back-shell, armrest, pedestal, and base parts (no longer block-like); the generic exhibit pods were replaced with purpose-built vision and language demonstrations repositioned near the view axis for legibility. Canonical-camera legibility of the two exhibits and clearance from the Dais/kiosk have not yet been confirmed against regenerated evidence; narrow-viewport legibility is unverified." },
-        "materialsLighting": { "passed": false, "notes": "Kiosk no longer clips to featureless white but sits near the upper exposure limit; seat materials now vary by part (upholstery/back-shell/armrest/pedestal) but are unreviewed on target display hardware; exhibit emissive accents still read brighter than their subordinate role warrants." },
-        "navigation": { "passed": false, "notes": "Automated boundary traversal evidence is used for this gate." },
+        "composition": {
+          "passed": false,
+          "notes": "Seating now has separate cushion, back, back-shell, armrest, pedestal, and base parts (no longer block-like); the generic exhibit pods were replaced with purpose-built vision and language demonstrations repositioned near the view axis for legibility. Canonical-camera legibility of the two exhibits and clearance from the Dais/kiosk have not yet been confirmed against regenerated evidence; narrow-viewport legibility is unverified."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Kiosk no longer clips to featureless white but sits near the upper exposure limit; seat materials now vary by part (upholstery/back-shell/armrest/pedestal) but are unreviewed on target display hardware; exhibit emissive accents still read brighter than their subordinate role warrants."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Automated boundary traversal evidence is used for this gate."
+        },
         "performance": {
           "passed": false,
           "notes": "CI software WebGL measured about 5.7-9.9 seconds against a 2-second target across multiple corrective passes; target lab hardware and warm room-to-room timing remain unmeasured.",
-          "followUp": { "owner": "", "nextStep": "Measure cold load and warm Room 02 -> Room 01 traversal timing on the actual target lab desktop/connection; record the result here." }
+          "followUp": {
+            "owner": "",
+            "nextStep": "Measure cold load and warm Room 02 -> Room 01 traversal timing on the actual target lab desktop/connection; record the result here."
+          }
         },
-        "contentSafety": { "passed": false, "notes": "Decorative wall imagery and the kiosk pseudo-interface still require content review." }
+        "contentSafety": {
+          "passed": false,
+          "notes": "Decorative wall imagery and the kiosk pseudo-interface still require content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
       "knownLimitations": [
         "Composition: seating and exhibit geometry have been reworked across several corrective passes; canonical-camera legibility of the relocated exhibits still needs evidence confirmation, and target-display materials/lighting review remains open.",
         "Target-machine performance has not been measured (CI software-render ready time has run 5.7-9.9s against a 2s target across multiple passes); no owner or date is assigned yet - see manualChecks.performance.followUp.",
         "Content correctness review of the kiosk pseudo-interface and wall-art imagery remains open."
       ],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      }
     },
     {
       "id": "02",
@@ -40,23 +70,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["credential display wall", "training workstations", "assessment and coaching zone"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "credential display wall",
+        "training workstations",
+        "assessment and coaching zone"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "02",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-02-credential-stack.glb"],
+      "signatureAssets": [
+        "/assets/room-02-credential-stack.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with credential stack, workstation rows, and coaching table; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "03",
@@ -64,23 +129,58 @@
       "status": "phase-1",
       "referenceBoard": "public/reference/rooms/room-03-concept.jpg",
       "canonicalScreenshot": "",
-      "identityCues": ["fabrication workbench", "student project display wall", "open collaborative maker tables"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "fabrication workbench",
+        "student project display wall",
+        "open collaborative maker tables"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "03",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-03-fabricator.glb"],
+      "signatureAssets": [
+        "/assets/room-03-fabricator.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with fabrication cell, project display wall, and material storage; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "04",
@@ -88,23 +188,58 @@
       "status": "phase-1",
       "referenceBoard": "public/reference/rooms/room-04-concept.jpg",
       "canonicalScreenshot": "",
-      "identityCues": ["building digital twin display", "visible sensor and control systems", "operations workstation"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "curved operations data-visualization wall",
+        "operator workstations facing the wall",
+        "central ops table with living-building planters"
+      ],
+      "sceneComponent": "src/scenes/ControlRoom.tsx",
+      "registryKey": "04",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-04-building-node.glb"],
+      "signatureAssets": [
+        "/assets/room-04-building-node.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Bespoke ControlRoom scene implemented (curved data-viz wall, operator stations, central ops table, planters, side cabinet); this room was intentionally kept out of the templated ProgramRooms lane. Production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Dark industrial shell (metal floor, concrete walls) with teal accent + rim lighting implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition (ControlRoom); canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "05",
@@ -112,23 +247,58 @@
       "status": "phase-1",
       "referenceBoard": "public/reference/rooms/room-05-concept.jpg",
       "canonicalScreenshot": "",
-      "identityCues": ["neighborhood-scale physical model", "geospatial planning display", "community planning worktable"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "neighborhood-scale physical model",
+        "geospatial planning display",
+        "community planning worktable"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "05",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-05-city-model.glb"],
+      "signatureAssets": [
+        "/assets/room-05-city-model.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with neighborhood table, housing blocks, and geospatial node wall; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "06",
@@ -136,23 +306,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["survey and site-intelligence equipment", "construction planning table", "engineering material and infrastructure cues"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "survey and site-intelligence equipment",
+        "construction planning table",
+        "engineering material and infrastructure cues"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "06",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-06-survey-rover.glb"],
+      "signatureAssets": [
+        "/assets/room-06-survey-rover.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with construction gantry, material rack, and survey station; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "07",
@@ -160,23 +365,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["governance review station", "security and privacy visualization", "controlled evaluation workspace"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "governance review station",
+        "security and privacy visualization",
+        "controlled evaluation workspace"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "07",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-07-secure-vault.glb"],
+      "signatureAssets": [
+        "/assets/room-07-secure-vault.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with controlled review pods, privacy rings, and governance stations; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "08",
@@ -184,23 +424,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["aircraft or drone focal object", "operations and route display", "hangar-scale service zone"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "aircraft or drone focal object",
+        "operations and route display",
+        "hangar-scale service zone"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "08",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-08-delivery-drone.glb"],
+      "signatureAssets": [
+        "/assets/room-08-delivery-drone.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with runway floor, service carts, and hangar gantry; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "09",
@@ -208,23 +483,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["satellite communications terminal", "rural network map", "field-ready resilient equipment"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "satellite communications terminal",
+        "rural network map",
+        "field-ready resilient equipment"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "09",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-09-satellite-terminal.glb"],
+      "signatureAssets": [
+        "/assets/room-09-satellite-terminal.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with satellite dish, communications masts, and network nodes; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "10",
@@ -232,23 +542,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["cold-chain equipment", "food and agriculture traceability display", "supply-chain monitoring station"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "cold-chain equipment",
+        "food and agriculture traceability display",
+        "supply-chain monitoring station"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "10",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-10-coldchain-unit.glb"],
+      "signatureAssets": [
+        "/assets/room-10-coldchain-unit.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with cold storage racks, monitored crates, and traceability workstations; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "11",
@@ -256,23 +601,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["risk and fairness review display", "transparent decision workflow", "secure institutional workspace"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "risk and fairness review display",
+        "transparent decision workflow",
+        "secure institutional workspace"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "11",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-11-fintech-vault.glb"],
+      "signatureAssets": [
+        "/assets/room-11-fintech-vault.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with decision columns, review desks, and risk/fairness displays; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     },
     {
       "id": "12",
@@ -280,23 +660,58 @@
       "status": "phase-1",
       "referenceBoard": "",
       "canonicalScreenshot": "",
-      "identityCues": ["small-business service counter", "community marketplace display", "partner co-design workspace"],
-      "sceneComponent": "",
-      "registryKey": "",
+      "identityCues": [
+        "small-business service counter",
+        "community marketplace display",
+        "partner co-design workspace"
+      ],
+      "sceneComponent": "src/scenes/ProgramRooms.tsx",
+      "registryKey": "12",
       "wideScreenshot": "",
       "secondaryScreenshot": "",
-      "signatureAssets": ["/assets/room-12-mainstreet-terminal.glb"],
+      "signatureAssets": [
+        "/assets/room-12-mainstreet-terminal.glb"
+      ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
-        "composition": { "passed": false, "notes": "" },
-        "materialsLighting": { "passed": false, "notes": "" },
-        "navigation": { "passed": false, "notes": "" },
-        "performance": { "passed": false, "notes": "" },
-        "contentSafety": { "passed": false, "notes": "" }
+        "composition": {
+          "passed": false,
+          "notes": "Distinct Phase 1 composition implemented with storefront modules, community counter, and co-design table; production evidence and human review remain required."
+        },
+        "materialsLighting": {
+          "passed": false,
+          "notes": "Room-specific shell materials are implemented; exposure, contact, and hierarchy require evidence review."
+        },
+        "navigation": {
+          "passed": false,
+          "notes": "Generalized previous/current/next traversal evidence is required for this room."
+        },
+        "performance": {
+          "passed": false,
+          "notes": "Target-machine timing and sustained 12-room traversal have not been measured."
+        },
+        "contentSafety": {
+          "passed": false,
+          "notes": "Wall imagery and generated signature-asset surfaces require explicit content review."
+        }
       },
-      "runtime": { "readyMilliseconds": null, "consoleErrors": null, "roomAssetBytes": null },
-      "knownLimitations": ["Phase 1 reconstruction; validation evidence is incomplete."],
-      "humanReview": { "decision": "pending", "reviewer": "", "reviewedAt": "", "notes": "" }
+      "runtime": {
+        "readyMilliseconds": null,
+        "consoleErrors": null,
+        "roomAssetBytes": null
+      },
+      "knownLimitations": [
+        "Phase 1 bespoke composition; canonical and secondary evidence review is pending.",
+        "Target-machine performance has not been measured.",
+        "Reference board and content review remain open where not yet supplied."
+      ],
+      "humanReview": {
+        "decision": "pending",
+        "reviewer": "",
+        "reviewedAt": "",
+        "notes": ""
+      },
+      "latestReviewDoc": "validation/reviews/rooms-02-12-phase1-lane.md"
     }
   ]
 }

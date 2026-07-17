@@ -2,26 +2,36 @@ import type { ComponentType } from 'react';
 import type { RoomDefinition } from '../types/room';
 import { GalleryForum } from './GalleryForum';
 import { ControlRoom } from './ControlRoom';
-import { StandardRoom } from './StandardRoom';
+import {
+  ColdChainLab,
+  CommunicationsLab,
+  FintechStudio,
+  InfrastructureTestbed,
+  MainStreetStudio,
+  MobilityHangar,
+  NeighborhoodStudio,
+  StudentMakerspace,
+  TrustworthyAILab,
+  WorkforceAcademy,
+} from './ProgramRooms';
 
 export type RoomSceneProps = { room: RoomDefinition; active: boolean };
 
-/**
- * Reference-matched room scenes keyed by room id. A room listed here replaces
- * the generic procedural stack with a real PBR-shell scene. Room 01 is fully
- * bespoke (GalleryForum); the rest use the config-driven StandardRoom.
- */
+/** Reference-grounded scenes keyed by room id. Each room now has its own
+ * composition entry rather than sharing the StandardRoom implementation.
+ * Room 04 keeps the hand-built ControlRoom (matched to its concept board)
+ * rather than the templated ProgramRooms entry the rest of the lane uses. */
 export const roomScenes: Record<string, ComponentType<RoomSceneProps>> = {
   '01': GalleryForum,
-  '02': StandardRoom,
-  '03': StandardRoom,
+  '02': WorkforceAcademy,
+  '03': StudentMakerspace,
   '04': ControlRoom,
-  '05': StandardRoom,
-  '06': StandardRoom,
-  '07': StandardRoom,
-  '08': StandardRoom,
-  '09': StandardRoom,
-  '10': StandardRoom,
-  '11': StandardRoom,
-  '12': StandardRoom,
+  '05': NeighborhoodStudio,
+  '06': InfrastructureTestbed,
+  '07': TrustworthyAILab,
+  '08': MobilityHangar,
+  '09': CommunicationsLab,
+  '10': ColdChainLab,
+  '11': FintechStudio,
+  '12': MainStreetStudio,
 };
