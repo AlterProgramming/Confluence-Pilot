@@ -4,9 +4,10 @@ import path from 'node:path';
 import process from 'node:process';
 
 const BASE_URL = process.argv[2] || 'http://127.0.0.1:4173';
-const roomNumber = Number.parseInt(process.argv[3] || '1', 10);
-const roomId = String(Number.isFinite(roomNumber) ? roomNumber : 1).padStart(2, '0');
-const assetUrl = process.argv[4] || '/assets/room-01-experience-kiosk.glb';
+const parsedRoomNumber = Number.parseInt(process.argv[3] || '1', 10);
+const roomNumber = Math.max(1, Math.min(12, Number.isFinite(parsedRoomNumber) ? parsedRoomNumber : 1));
+const roomId = String(roomNumber).padStart(2, '0');
+const assetUrl = process.argv[4] || `/assets/room-${roomId}-asset.glb`;
 const evidenceDir = path.resolve('validation', 'evidence', `room-${roomId}`);
 const viewport = { width: 1440, height: 900, deviceScaleFactor: 1 };
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -72,7 +73,7 @@ async function openRoomPage(browser, view = 'canonical') {
   const query = new URLSearchParams({
     capture: '1',
     validate: '1',
-    room: String(Number(roomId)),
+    room: String(roomNumber),
     quality: 'balanced',
     view,
   });
@@ -144,6 +145,18 @@ async function captureAssetInspection(browser) {
   }
 }
 
+async function waitForRoom(page, expectedRoomId) {
+  await page.waitForFunction(
+    (id) => window.__CONFLUENCE_VALIDATION__?.ready && window.__CONFLUENCE_VALIDATION__.activeRoomId === id,
+    { timeout: 30_000 },
+    expectedRoomId,
+  );
+  return page.evaluate(() => ({
+    activeRoomId: window.__CONFLUENCE_VALIDATION__?.activeRoomId,
+    isTransitioning: window.__CONFLUENCE_VALIDATION__?.isTransitioning,
+  }));
+}
+
 async function captureTraversal(browser) {
   const { page, diagnostics, state: entryState } = await openRoomPage(browser, 'canonical');
   try {
@@ -156,53 +169,50 @@ async function captureTraversal(browser) {
       (element) => element.disabled,
     );
 
-    const nextStartedAt = Date.now();
-    await page.keyboard.press('ArrowUp');
-    await page.waitForFunction(
-      () => window.__CONFLUENCE_VALIDATION__?.ready && window.__CONFLUENCE_VALIDATION__.activeRoomId === '02',
-      { timeout: 30_000 },
-    );
-    const nextDurationMilliseconds = Date.now() - nextStartedAt;
-    const nextState = await page.evaluate(() => ({
-      activeRoomId: window.__CONFLUENCE_VALIDATION__?.activeRoomId,
-      isTransitioning: window.__CONFLUENCE_VALIDATION__?.isTransitioning,
-    }));
+    const sequence = [roomId];
+    const moves = [];
+    let passed = entryState?.activeRoomId === roomId;
 
-    const returnStartedAt = Date.now();
-    await page.keyboard.press('ArrowDown');
-    await page.waitForFunction(
-      () => window.__CONFLUENCE_VALIDATION__?.ready && window.__CONFLUENCE_VALIDATION__.activeRoomId === '01',
-      { timeout: 30_000 },
-    );
-    const returnDurationMilliseconds = Date.now() - returnStartedAt;
-    const returnState = await page.evaluate(() => ({
-      activeRoomId: window.__CONFLUENCE_VALIDATION__?.activeRoomId,
-      isTransitioning: window.__CONFLUENCE_VALIDATION__?.isTransitioning,
-    }));
+    async function move(key, destinationNumber) {
+      const expectedRoomId = String(destinationNumber).padStart(2, '0');
+      const startedAt = Date.now();
+      await page.keyboard.press(key);
+      const state = await waitForRoom(page, expectedRoomId);
+      const durationMilliseconds = Date.now() - startedAt;
+      sequence.push(expectedRoomId);
+      moves.push({ key, expectedRoomId, durationMilliseconds, state });
+      passed = passed && state.activeRoomId === expectedRoomId && state.isTransitioning === false;
+    }
 
-    const passed =
-      entryState?.activeRoomId === '01' &&
-      previousDisabled === true &&
-      nextDisabled === false &&
-      nextState.activeRoomId === '02' &&
-      nextState.isTransitioning === false &&
-      returnState.activeRoomId === '01' &&
-      returnState.isTransitioning === false &&
+    if (roomNumber > 1) {
+      await move('ArrowDown', roomNumber - 1);
+      await move('ArrowUp', roomNumber);
+    }
+    if (roomNumber < 12) {
+      await move('ArrowUp', roomNumber + 1);
+      await move('ArrowDown', roomNumber);
+    }
+
+    passed =
+      passed &&
+      previousDisabled === (roomNumber === 1) &&
+      nextDisabled === (roomNumber === 12) &&
       diagnostics.pageErrors.length === 0 &&
       diagnostics.consoleErrors.length === 0;
 
     return {
       roomId,
-      boundary: 'Room 01 has no previous room; the previous control must be disabled.',
-      sequence: ['01', '02', '01'],
-      inputMethod: ['ArrowUp', 'ArrowDown'],
+      boundary:
+        roomNumber === 1
+          ? 'Lower boundary: previous control must be disabled.'
+          : roomNumber === 12
+            ? 'Upper boundary: next control must be disabled.'
+            : 'Interior room: previous and next controls must both be enabled.',
+      sequence,
+      moves,
       previousDisabled,
       nextDisabled,
-      nextDurationMilliseconds,
-      returnDurationMilliseconds,
       entryState,
-      nextState,
-      returnState,
       diagnostics,
       passed,
       capturedAt: new Date().toISOString(),
