@@ -1,5 +1,6 @@
-import type { CSSProperties } from 'react';
+import { useProgress } from '@react-three/drei';
 import { rooms } from '../data/rooms';
+import { startAudio } from '../lib/audioEngine';
 import { useExperienceStore } from '../state/useExperienceStore';
 
 export function Hud() {
@@ -8,99 +9,149 @@ export function Hud() {
   const activeRoom = useExperienceStore((state) => state.activeRoom);
   const requestedRoom = useExperienceStore((state) => state.requestedRoom);
   const isTransitioning = useExperienceStore((state) => state.isTransitioning);
+  const transitionProgress = useExperienceStore((state) => state.transitionProgress);
+  const transitionDirection = useExperienceStore((state) => state.transitionDirection);
   const requestRoom = useExperienceStore((state) => state.requestRoom);
   const goToRoom = useExperienceStore((state) => state.goToRoom);
+  const reducedMotion = useExperienceStore((state) => state.reducedMotion);
+  const setReducedMotion = useExperienceStore((state) => state.setReducedMotion);
   const soundEnabled = useExperienceStore((state) => state.soundEnabled);
   const setSoundEnabled = useExperienceStore((state) => state.setSoundEnabled);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
+  const { active: assetsLoading, progress: assetProgress } = useProgress();
 
-  // Show the destination's details while travelling so labels lead the camera.
-  const focusIndex = isTransitioning ? requestedRoom : activeRoom;
-  const room = rooms[focusIndex];
+  const displayIndex = isTransitioning && transitionProgress > 0.52 ? requestedRoom : activeRoom;
+  const room = rooms[displayIndex];
+  const destination = rooms[requestedRoom];
+
+  const enter = () => {
+    if (soundEnabled) startAudio();
+    start();
+  };
 
   return (
-    <div className="hud">
-      <div className="hud-top">
-        <div className="hud-brand">
-          <span>Confluence Institute</span>
-          <strong>Applied AI · Room Pilot</strong>
+    <div className="hud" style={{ '--room-color': room.color } as React.CSSProperties}>
+      <header className="topbar">
+        <div className="brand-lockup">
+          <span className="brand-mark">O</span>
+          <div>
+            <strong>Confluence</strong>
+            <span>Interactive facility pilot · iteration 04</span>
+          </div>
         </div>
-        <div className="hud-counter">
-          <b>{String(focusIndex + 1).padStart(2, '0')}</b> / {String(rooms.length).padStart(2, '0')}
-        </div>
-      </div>
-
-      <nav className="room-rail" aria-label="Room selector">
-        {rooms.map((entry, index) => (
+        <div className="hud-controls">
           <button
-            key={entry.id}
+            className="motion-toggle"
             type="button"
-            title={`${index + 1}. ${entry.shortTitle}`}
-            aria-label={`Go to ${entry.shortTitle}`}
-            data-active={index === focusIndex}
-            style={{ '--accent': entry.color } as CSSProperties}
+            aria-pressed={!soundEnabled}
+            onClick={() => setSoundEnabled(!soundEnabled)}
+          >
+            {soundEnabled ? 'Sound on' : 'Sound muted'}
+          </button>
+          <button
+            className="motion-toggle"
+            type="button"
+            aria-pressed={reducedMotion}
+            onClick={() => setReducedMotion(!reducedMotion)}
+          >
+            {reducedMotion ? 'Motion reduced' : 'Full motion'}
+          </button>
+        </div>
+      </header>
+
+      <section className={`room-copy ${isTransitioning ? 'is-transitioning' : ''}`} aria-live="polite">
+        <p className="eyebrow">Room {room.id} · {room.category}</p>
+        <h1>{room.title}</h1>
+        <p>{room.description}</p>
+        <div className="room-meta">
+          <span>{String(displayIndex + 1).padStart(2, '0')} / {rooms.length}</span>
+          <span>{room.assetUrl ? 'Generated GLB active' : 'GLB hero slot ready'}</span>
+          <span>Authored particle volume: {room.architecture}</span>
+          <span>Adaptive quality: {qualityTier}</span>
+        </div>
+      </section>
+
+      <nav className="room-rail" aria-label="Facility rooms">
+        {rooms.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-label={`Go to room ${item.id}: ${item.title}`}
+            aria-current={index === displayIndex ? 'step' : undefined}
+            className={index === displayIndex ? 'active' : ''}
             onClick={() => goToRoom(index)}
-          />
+          >
+            <span>{item.id}</span>
+          </button>
         ))}
       </nav>
 
-      <div className="hud-bottom">
-        <div className="room-card">
-          <span className="eyebrow">
-            <span className="dot" style={{ background: room.color }} />
-            {room.category} · {room.shortTitle}
-          </span>
-          <h1>{room.title}</h1>
-          <p>{room.description}</p>
-        </div>
-
-        <div className="hud-controls">
-          <span className="qtier">{qualityTier}</span>
-          <button
-            className="hud-btn"
-            type="button"
-            aria-label="Previous room"
-            disabled={isTransitioning || focusIndex === 0}
-            onClick={() => requestRoom(-1)}
-          >
-            ↑
-          </button>
-          <button
-            className="hud-btn"
-            type="button"
-            aria-label="Next room"
-            disabled={isTransitioning || focusIndex === rooms.length - 1}
-            onClick={() => requestRoom(1)}
-          >
-            ↓
-          </button>
-          <button
-            className="hud-btn"
-            type="button"
-            aria-label={soundEnabled ? 'Mute sound' : 'Enable sound'}
-            aria-pressed={soundEnabled}
-            onClick={() => setSoundEnabled(!soundEnabled)}
-          >
-            {soundEnabled ? '♪' : '🔇'}
-          </button>
-        </div>
+      <div className="nav-controls">
+        <button
+          type="button"
+          onClick={() => requestRoom(1)}
+          disabled={!started || isTransitioning || activeRoom === rooms.length - 1}
+          aria-label="Move up to next room"
+        >
+          <span>↑</span>
+          Next room
+        </button>
+        <button
+          type="button"
+          onClick={() => requestRoom(-1)}
+          disabled={!started || isTransitioning || activeRoom === 0}
+          aria-label="Move down to previous room"
+        >
+          <span>↓</span>
+          Previous
+        </button>
       </div>
 
+      <div className={`transition-wash ${isTransitioning ? 'visible' : ''}`} aria-hidden="true">
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
+
+      <div className={`transition-status ${isTransitioning ? 'visible' : ''}`} aria-hidden={!isTransitioning}>
+        <span>{transitionDirection > 0 ? 'Ascending' : 'Descending'} through the conduit</span>
+        <strong>Room {destination.id}</strong>
+        <div><i style={{ transform: `scaleX(${transitionProgress})` }} /></div>
+      </div>
+
+      {assetsLoading && (
+        <div className="asset-loader" aria-live="polite">
+          Loading generated asset · {Math.round(assetProgress)}%
+        </div>
+      )}
+
       {!started && (
-        <div className="start-overlay">
-          <div className="start-inner">
-            <span className="kicker">Persistent 3D Facility</span>
-            <h2>Confluence Room Pilot</h2>
+        <div className="entry-screen">
+          <div className="entry-card">
+            <p className="eyebrow">Real-time room navigation prototype</p>
+            <h2>A building that remains alive while you move through it.</h2>
             <p>
-              A single continuous world of twelve applied-AI rooms. Scroll, swipe, use the
-              arrow keys, or pick a room to travel between anchors.
+              The pilot now uses quantized room-volume particles, instanced furniture systems, adaptive rendering,
+              a rectilinear transition conduit, procedural spatial audio, and safe slots for generated GLB centerpieces.
             </p>
-            <button className="start-btn" type="button" onClick={start}>
-              Enter the building
-            </button>
+            <div className="entry-features" aria-label="Pilot features">
+              <span>One-draw-call adaptive volume field</span>
+              <span>Five furnished room systems</span>
+              <span>Sound generated in-browser</span>
+            </div>
+            <button type="button" onClick={enter}>Enter facility</button>
+            <small>Audio begins only after entering and can be muted at any time.</small>
           </div>
         </div>
       )}
+
+      <footer className="hint">
+        <span className="hint-line" />
+        Swipe up · Scroll · Arrow keys
+      </footer>
     </div>
   );
 }

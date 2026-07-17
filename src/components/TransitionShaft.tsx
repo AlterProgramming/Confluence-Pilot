@@ -1,115 +1,156 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import {
-  Color,
-  CylinderGeometry,
-  InstancedMesh,
-  Matrix4,
-  MeshStandardMaterial,
-  Object3D,
-  TorusGeometry,
-  type Mesh,
-  type MeshBasicMaterial,
-} from 'three';
-import { rooms, ROOM_SPACING } from '../data/rooms';
+import { AdditiveBlending, BackSide, type Group, type Mesh } from 'three';
+import { rooms } from '../data/rooms';
 import { useExperienceStore } from '../state/useExperienceStore';
 
-const SHAFT_Z = -2.1;
-const TOTAL_HEIGHT = (rooms.length - 1) * ROOM_SPACING;
-const ENERGY_RINGS = 3;
+function RectilinearDeck({ y, accent, secondary, opacity }: { y: number; accent: string; secondary: string; opacity: number }) {
+  return (
+    <group position={[0, y, 0]}>
+      {[
+        { position: [0, 0, -4.62], size: [8.9, 0.035, 0.035] },
+        { position: [0, 0, 4.62], size: [8.9, 0.035, 0.035] },
+        { position: [-4.45, 0, 0], size: [0.035, 0.035, 9.25] },
+        { position: [4.45, 0, 0], size: [0.035, 0.035, 9.25] },
+      ].map((bar, index) => (
+        <mesh key={index} position={bar.position as [number, number, number]}>
+          <boxGeometry args={bar.size as [number, number, number]} />
+          <meshBasicMaterial
+            color={index % 2 ? secondary : accent}
+            transparent
+            opacity={opacity}
+            blending={AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+      {[-1, 1].flatMap((xSign) => [-1, 1].map((zSign) => (
+        <mesh
+          key={`${xSign}-${zSign}`}
+          position={[xSign * 3.9, 0, zSign * 4.05]}
+          rotation={[0, xSign === zSign ? Math.PI / 4 : -Math.PI / 4, 0]}
+        >
+          <boxGeometry args={[0.025, 0.025, 1.45]} />
+          <meshBasicMaterial color={secondary} transparent opacity={opacity * 0.55} depthWrite={false} toneMapped={false} />
+        </mesh>
+      )))}
+    </group>
+  );
+}
 
 export function TransitionShaft() {
-  const bracesRef = useRef<InstancedMesh>(null);
-  const energyRefs = useRef<Array<Mesh | null>>([]);
+  const groupRef = useRef<Group>(null);
+  const coreRef = useRef<Mesh>(null);
+  const activeRoom = useExperienceStore((state) => state.activeRoom);
+  const requestedRoom = useExperienceStore((state) => state.requestedRoom);
+  const isTransitioning = useExperienceStore((state) => state.isTransitioning);
+  const reducedMotion = useExperienceStore((state) => state.reducedMotion);
+  const transitionProgress = useExperienceStore((state) => state.transitionProgress);
+  const qualityTier = useExperienceStore((state) => state.qualityTier);
 
-  const braceGeometry = useMemo(() => new TorusGeometry(1.15, 0.05, 6, 40), []);
-  const braceMaterial = useMemo(
-    () => new MeshStandardMaterial({ color: '#20283a', metalness: 0.7, roughness: 0.35, emissive: '#0c1220' }),
-    [],
+  const roomA = rooms[activeRoom];
+  const roomB = rooms[requestedRoom];
+  const height = Math.max(5, Math.abs(roomB.y - roomA.y) - 7.4);
+  const centerY = (roomA.y + roomB.y) * 0.5 + 0.7;
+  const deckSpacing = qualityTier === 'low' ? 3.3 : 2.2;
+  const deckCount = Math.min(24, Math.max(4, Math.floor(height / deckSpacing)));
+  const ringCount = qualityTier === 'high' ? 12 : qualityTier === 'balanced' ? 8 : 4;
+  const pulse = reducedMotion ? 0.22 : Math.sin(transitionProgress * Math.PI);
+
+  const decks = useMemo(
+    () => Array.from({ length: deckCount }, (_, index) => -height / 2 + (index / Math.max(1, deckCount - 1)) * height),
+    [deckCount, height],
   );
-  const railGeometry = useMemo(() => new CylinderGeometry(0.035, 0.035, TOTAL_HEIGHT + 6, 6), []);
-  const railMaterial = useMemo(
-    () => new MeshStandardMaterial({ color: '#2a3346', metalness: 0.66, roughness: 0.4 }),
-    [],
+  const rings = useMemo(
+    () => Array.from({ length: ringCount }, (_, index) => -height / 2 + ((index + 0.5) / ringCount) * height),
+    [height, ringCount],
   );
 
-  const braceCount = useMemo(() => Math.floor(TOTAL_HEIGHT / (ROOM_SPACING / 2)) + 2, []);
-
-  useEffect(() => {
-    const mesh = bracesRef.current;
-    if (!mesh) return;
-    const dummy = new Object3D();
-    const step = ROOM_SPACING / 2;
-    for (let i = 0; i < braceCount; i += 1) {
-      dummy.position.set(0, i * step - 2, 0);
-      dummy.rotation.set(Math.PI / 2, 0, (i % 2) * 0.4);
-      dummy.scale.setScalar(i % 2 === 0 ? 1 : 0.72);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-    }
-    mesh.instanceMatrix.needsUpdate = true;
-  }, [braceCount]);
-
-  const colorA = useMemo(() => new Color(), []);
-  const colorB = useMemo(() => new Color(), []);
-  const mixed = useMemo(() => new Color(), []);
-  const scratch = useMemo(() => new Matrix4(), []);
-
-  // Silence unused warning for the scratch matrix on some TS configs.
-  void scratch;
-
-  useFrame(() => {
-    const state = useExperienceStore.getState();
-    const activeY = rooms[state.activeRoom].y;
-    const requestedY = rooms[state.requestedRoom].y;
-    const progress = state.isTransitioning ? state.transitionProgress : 0;
-
-    colorA.set(rooms[state.activeRoom].color);
-    colorB.set(rooms[state.requestedRoom].color);
-    mixed.lerpColors(colorA, colorB, progress);
-
-    const travel = state.isTransitioning ? Math.sin(progress * Math.PI) : 0;
-    const from = activeY + 0.7;
-    const to = requestedY + 0.7;
-
-    for (let i = 0; i < ENERGY_RINGS; i += 1) {
-      const ring = energyRefs.current[i];
-      if (!ring) continue;
-      const phase = (progress + i / ENERGY_RINGS) % 1;
-      ring.position.y = from + (to - from) * phase;
-      const mat = ring.material as MeshBasicMaterial;
-      mat.color.copy(mixed);
-      mat.opacity = travel * (0.85 - i * 0.18);
-      const scale = 1 + Math.sin(phase * Math.PI) * 0.5;
-      ring.scale.setScalar(scale);
-      ring.visible = travel > 0.01;
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const direction = roomB.y >= roomA.y ? 1 : -1;
+    groupRef.current.rotation.y = reducedMotion ? 0 : Math.sin(clock.getElapsedTime() * 0.42) * 0.025 * direction;
+    if (coreRef.current) {
+      coreRef.current.scale.x = 1 + pulse * 0.24;
+      coreRef.current.scale.z = 1 + pulse * 0.24;
     }
   });
 
+  if (!isTransitioning) return null;
+
   return (
-    <group position={[0, 0, SHAFT_Z]}>
-      <instancedMesh ref={bracesRef} args={[braceGeometry, braceMaterial, braceCount]} frustumCulled={false} />
-
-      <mesh geometry={railGeometry} material={railMaterial} position={[1.05, TOTAL_HEIGHT / 2, 0]} />
-      <mesh geometry={railGeometry} material={railMaterial} position={[-1.05, TOTAL_HEIGHT / 2, 0]} />
-
-      <mesh position={[0, TOTAL_HEIGHT / 2, 0]}>
-        <cylinderGeometry args={[0.26, 0.26, TOTAL_HEIGHT + 6, 10]} />
-        <meshStandardMaterial color="#141a26" metalness={0.5} roughness={0.5} emissive="#0a0f1a" />
+    <group ref={groupRef} position={[0, centerY, 0]}>
+      <mesh>
+        <boxGeometry args={[9.4, height, 9.7, 1, Math.max(1, deckCount), 1]} />
+        <meshBasicMaterial
+          color={roomB.color}
+          transparent
+          opacity={0.018 + pulse * 0.035}
+          side={BackSide}
+          wireframe
+          depthWrite={false}
+        />
       </mesh>
 
-      {Array.from({ length: ENERGY_RINGS }, (_, i) => (
-        <mesh
-          key={i}
-          ref={(node) => {
-            energyRefs.current[i] = node;
-          }}
-          visible={false}
-        >
-          <torusGeometry args={[1.28, 0.06, 8, 48]} />
-          <meshBasicMaterial transparent opacity={0} toneMapped={false} />
+      {decks.map((y, index) => (
+        <RectilinearDeck
+          key={`${deckCount}-${index}`}
+          y={y}
+          accent={index % 2 ? roomA.color : roomB.color}
+          secondary={index % 3 ? roomB.secondaryColor : roomA.secondaryColor}
+          opacity={(index % 3 === 0 ? 0.42 : 0.18) + pulse * 0.24}
+        />
+      ))}
+
+      {rings.map((y, index) => (
+        <mesh key={`${ringCount}-${index}`} position={[0, y, 0]} rotation={[Math.PI / 2, 0, (index % 2) * 0.08]}>
+          <torusGeometry args={[3.2 + (index % 3) * 0.22, 0.018, 4, 36]} />
+          <meshBasicMaterial
+            color={index % 2 ? roomB.secondaryColor : roomA.secondaryColor}
+            transparent
+            opacity={0.2 + pulse * 0.34}
+            blending={AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
         </mesh>
       ))}
+
+      {Array.from({ length: qualityTier === 'low' ? 6 : 10 }, (_, index) => {
+        const angle = (index / (qualityTier === 'low' ? 6 : 10)) * Math.PI * 2;
+        const radius = 4.72;
+        return (
+          <mesh
+            key={index}
+            position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]}
+            rotation={[0, -angle, 0]}
+          >
+            <boxGeometry args={[0.024, height, 0.024]} />
+            <meshBasicMaterial
+              color={index % 2 ? roomA.secondaryColor : roomB.secondaryColor}
+              transparent
+              opacity={0.08 + pulse * 0.24}
+              blending={AdditiveBlending}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        );
+      })}
+
+      <mesh ref={coreRef}>
+        <cylinderGeometry args={[0.92, 0.92, height * 0.96, 12, 1, true]} />
+        <meshBasicMaterial
+          color={roomB.secondaryColor}
+          transparent
+          opacity={0.012 + pulse * 0.048}
+          side={BackSide}
+          blending={AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
     </group>
   );
 }
