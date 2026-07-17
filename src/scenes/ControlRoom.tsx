@@ -1,7 +1,7 @@
 import type { RoomDefinition } from '../types/room';
 import { RoomShell } from './kit/RoomShell';
 import { LedWall } from './kit/LedWall';
-import { FurnitureItem, Workstations } from './kit/Furniture';
+import { CeilingFan, FurnitureItem, Workstations } from './kit/Furniture';
 
 /** Room 04 — Living AI Building & Smart Infrastructure Lab. A dark industrial
  *  operations room: a large curved data-viz wall, operator stations facing it,
@@ -26,6 +26,11 @@ export function ControlRoom({ room }: { room: RoomDefinition; active: boolean })
 
       {/* Operator stations facing the wall (front rows, clear of the centre hero). */}
       <Workstations accent={room.color} secondary={room.secondaryColor} rows={2} perRow={3} />
+
+      {/* Slowly turning ceiling fans — real overhead motion so the ops room reads
+          alive, not frozen. Ceiling is at floorY(-1.5)+height(6.4) = 4.9. */}
+      <CeilingFan ceilingY={4.86} position={[-4.6, 1.4]} scale={1.35} speed={0.7} />
+      <CeilingFan ceilingY={4.86} position={[4.6, 1.4]} scale={1.35} speed={0.62} />
 
       {/* Central ops table in front of the hero. */}
       <FurnitureItem asset="table" position={[0, -1.5, 3.4]} scale={1.15} />

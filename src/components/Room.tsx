@@ -8,6 +8,7 @@ import { RoomCore } from './RoomCore';
 import { RoomDisplays } from './RoomDisplays';
 import { RoomFixtures } from './RoomFixtures';
 import { RoomGrounding } from './RoomGrounding';
+import { LifeMotes } from './LifeMotes';
 import { RoomLighting } from './RoomLighting';
 import { SceneProps } from './SceneProps';
 import { SceneStage } from './SceneStage';
@@ -72,6 +73,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
           fallback={fallback}
         />
       </group>
+      {active && <LifeMotes color={room.color} />}
       <RoomLighting room={room} active={active} />
     </group>
   );

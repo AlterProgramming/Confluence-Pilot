@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Clone, useGLTF } from '@react-three/drei';
-import { Box3, Vector3 } from 'three';
+import { useFrame } from '@react-three/fiber';
+import { Box3, Vector3, type Group } from 'three';
 
 const FURN = '/assets/furniture';
 const FLOOR = -1.5;
@@ -72,13 +73,87 @@ export function Workstations({ accent, secondary, rows = 2, perRow = 3 }: { acce
   );
 }
 
-/** A lounge seating group: sofa + armchairs around a coffee table. */
+/** Pendant lamps hanging from the ceiling — real overhead fixtures so the
+ *  ceiling plane reads inhabited instead of bare. Each pendant hangs by its
+ *  own mount (model's top sits at the ceiling). drei <Clone> shares geometry,
+ *  and IBL lights them, so this adds overhead detail at ~zero per-frame cost. */
+export function CeilingPendants({
+  asset = 'modern_ceiling_lamp_01',
+  ceilingY = 4.66,
+  spots = [
+    [-3.6, -2.2],
+    [3.6, -2.2],
+    [0, 2.4],
+  ],
+  scale = 1,
+}: {
+  asset?: string;
+  ceilingY?: number;
+  spots?: [number, number][];
+  scale?: number;
+}) {
+  const { scene } = useGLTF(`${FURN}/${asset}.glb`, false, true);
+  const offset = useMemo(() => {
+    const box = new Box3().setFromObject(scene);
+    const center = box.getCenter(new Vector3());
+    // Hang from the top: the model's highest point (the ceiling mount) is pinned
+    // to the ceiling plane, so the globe drops down into the room below.
+    return [-center.x * scale, -box.max.y * scale, -center.z * scale] as [number, number, number];
+  }, [scene, scale]);
+  return (
+    <group>
+      {spots.map(([x, z], i) => (
+        <group key={i} position={[x, ceilingY, z]}>
+          <Clone object={scene} scale={scale} position={offset} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** Ceiling fan hung from the ceiling with blades slowly turning — real motion so
+ *  an industrial room reads alive instead of frozen. The whole clone spins on Y
+ *  (the flat mount disc turning is invisible; only the blades read as motion). */
+export function CeilingFan({
+  ceilingY,
+  position,
+  scale = 1.2,
+  speed = 0.7,
+}: {
+  ceilingY: number;
+  position: [number, number];
+  scale?: number;
+  speed?: number;
+}) {
+  const spin = useRef<Group>(null);
+  const { scene } = useGLTF(`${FURN}/ceiling_fan.glb`, false, true);
+  const offset = useMemo(() => {
+    const box = new Box3().setFromObject(scene);
+    const center = box.getCenter(new Vector3());
+    // Pin the top (mount) to the ceiling; centre X/Z so spin is about the axis.
+    return [-center.x * scale, -box.max.y * scale, -center.z * scale] as [number, number, number];
+  }, [scene, scale]);
+  useFrame((_, dt) => {
+    if (spin.current) spin.current.rotation.y += dt * speed;
+  });
+  return (
+    <group position={[position[0], ceilingY, position[1]]}>
+      <group ref={spin}>
+        <Clone object={scene} scale={scale} position={offset} />
+      </group>
+    </group>
+  );
+}
+
+/** A lounge seating group: sofa + mixed seating around a coffee table. Mixes a
+ *  generic armchair with a premium mid-century lounge chair so the group reads
+ *  curated, not stamped from one asset. */
 export function Lounge() {
   return (
     <group>
       <FurnitureItem asset="sofa" position={[0, FLOOR, 2.9]} rotationY={Math.PI} scale={1.05} />
       <FurnitureItem asset="armchair" position={[-2.3, FLOOR, 1.4]} rotationY={0.9} />
-      <FurnitureItem asset="armchair" position={[2.3, FLOOR, 1.4]} rotationY={-0.9} />
+      <FurnitureItem asset="mid_century_lounge_chair" position={[2.3, FLOOR, 1.4]} rotationY={-0.9} />
       <FurnitureItem asset="coffee-table" position={[0, FLOOR, 1.5]} scale={0.95} />
     </group>
   );

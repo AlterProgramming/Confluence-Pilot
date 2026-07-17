@@ -11,6 +11,9 @@ import { preloadRoomAsset } from './RoomAsset';
 const FURNITURE = [
   'armchair', 'task-chair', 'office-desk', 'coffee-table', 'table',
   'sofa', 'bookshelf', 'planter', 'cabinet', 'ceiling-lamp',
+  // Overhead/lounge pieces added to the scenes — preload so they never hitch
+  // when a room mounts mid-transition (pendants + fans mount as room fabric).
+  'modern_ceiling_lamp_01', 'ceiling_fan', 'mid_century_lounge_chair',
 ];
 let furnitureQueued = false;
 

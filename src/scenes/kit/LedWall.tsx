@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTexture } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import { BackSide, RepeatWrapping, SRGBColorSpace } from 'three';
 
 /**
@@ -23,10 +24,16 @@ export function LedWall({
   const tex = useTexture(url);
   useMemo(() => {
     tex.wrapS = RepeatWrapping;
+    tex.wrapT = RepeatWrapping;
     tex.repeat.x = -1; // un-mirror for the BackSide (inner) face
     tex.colorSpace = SRGBColorSpace;
     tex.needsUpdate = true;
   }, [tex]);
+
+  // Slowly drift the content so the data wall reads as live, not a static image.
+  useFrame((_, dt) => {
+    tex.offset.x = (tex.offset.x + dt * 0.007) % 1;
+  });
 
   const thetaStart = Math.PI - arc / 2;
 
