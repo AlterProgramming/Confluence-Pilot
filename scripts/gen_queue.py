@@ -37,6 +37,10 @@ QFILE = QDIR / "jobs.json"
 GEN = ROOT / "scripts" / "generate_3d.sh"
 RAW_DIR = ROOT / "scripts" / "_opt"
 GT = ["npx", "--yes", "@gltf-transform/cli"]
+# Explicit Git Bash. The ambient `bash` on this box is a WSL/MSYS shell whose
+# login PATH prefers a broken npx (`/mnt/c/.../npx` -> "node: not found"), which
+# silently failed every optimize. Git Bash finds the real Windows node/npx.
+GITBASH = "C:/Program Files/Git/bin/bash.exe"
 
 
 def now() -> str:
@@ -92,7 +96,7 @@ def cmd_add(q, args):
 
 def sh(command: str) -> subprocess.CompletedProcess:
     """Run a command in Git Bash from the repo root (forward-slash relative paths)."""
-    return subprocess.run(["bash", "-lc", command], capture_output=True, text=True, cwd=str(ROOT))
+    return subprocess.run([GITBASH, "-c", command], capture_output=True, text=True, cwd=str(ROOT))
 
 
 def generate(job, resolution) -> tuple:
