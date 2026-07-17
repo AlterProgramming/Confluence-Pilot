@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Clone, useGLTF } from '@react-three/drei';
-import { Box3, Vector3 } from 'three';
+import { useFrame } from '@react-three/fiber';
+import { Box3, Vector3, type Group } from 'three';
 
 const FURN = '/assets/furniture';
 const FLOOR = -1.5;
@@ -106,6 +107,40 @@ export function CeilingPendants({
           <Clone object={scene} scale={scale} position={offset} />
         </group>
       ))}
+    </group>
+  );
+}
+
+/** Ceiling fan hung from the ceiling with blades slowly turning — real motion so
+ *  an industrial room reads alive instead of frozen. The whole clone spins on Y
+ *  (the flat mount disc turning is invisible; only the blades read as motion). */
+export function CeilingFan({
+  ceilingY,
+  position,
+  scale = 1.2,
+  speed = 0.7,
+}: {
+  ceilingY: number;
+  position: [number, number];
+  scale?: number;
+  speed?: number;
+}) {
+  const spin = useRef<Group>(null);
+  const { scene } = useGLTF(`${FURN}/ceiling_fan.glb`, false, true);
+  const offset = useMemo(() => {
+    const box = new Box3().setFromObject(scene);
+    const center = box.getCenter(new Vector3());
+    // Pin the top (mount) to the ceiling; centre X/Z so spin is about the axis.
+    return [-center.x * scale, -box.max.y * scale, -center.z * scale] as [number, number, number];
+  }, [scene, scale]);
+  useFrame((_, dt) => {
+    if (spin.current) spin.current.rotation.y += dt * speed;
+  });
+  return (
+    <group position={[position[0], ceilingY, position[1]]}>
+      <group ref={spin}>
+        <Clone object={scene} scale={scale} position={offset} />
+      </group>
     </group>
   );
 }
