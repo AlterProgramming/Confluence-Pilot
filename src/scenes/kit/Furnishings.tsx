@@ -76,6 +76,41 @@ export function Workbenches({
   );
 }
 
+/** A secondary program zone: a reception counter + a pair of exhibit pods off
+ *  to one side, so each room reads as more than a single centred object. */
+export function SecondaryZone({ accent, side = 'right' }: { accent: string; side?: 'left' | 'right' }) {
+  const sx = side === 'right' ? 1 : -1;
+  const pods: Array<[number, number, number, number]> = [
+    [sx * 6.0, -2.05, -2.4, 1.5],
+    [sx * 6.1, -2.22, -0.7, 1.15],
+  ];
+  return (
+    <group>
+      <mesh position={[sx * 5.7, -1.02, 2.7]} rotation={[0, sx * -0.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.5, 0.95, 0.72]} />
+        <meshStandardMaterial color="#2a2f38" metalness={0.3} roughness={0.5} />
+      </mesh>
+      <mesh position={[sx * 5.7, -0.5, 2.7]} rotation={[0, sx * -0.5, 0]}>
+        <boxGeometry args={[2.5, 0.06, 0.72]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} roughness={0.4} />
+      </mesh>
+      {pods.map(([x, y, z, h], i) => (
+        <group key={i} position={[x, y, z]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.95, h, 0.95]} />
+            <meshStandardMaterial color="#b3aa9f" roughness={0.72} metalness={0.05} />
+          </mesh>
+          <mesh position={[0, h / 2 + 0.22, 0]} castShadow>
+            <icosahedronGeometry args={[0.3, 1]} />
+            <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.3} roughness={0.4} metalness={0.2} />
+          </mesh>
+          <pointLight color={accent} intensity={0.3} distance={2.6} decay={2} position={[0, h / 2 + 0.4, 0.4]} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
 /** A raised display stage under the centrepiece — studio / hangar hero. */
 export function Platform({ accent, radius = 2.9, height = 0.32 }: { accent: string; radius?: number; height?: number }) {
   return (

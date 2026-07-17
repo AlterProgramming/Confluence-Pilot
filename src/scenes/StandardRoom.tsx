@@ -5,7 +5,7 @@ import { RoomShell } from './kit/RoomShell';
 import { LedWall } from './kit/LedWall';
 import { CeilingRig } from './kit/CeilingRig';
 import { Glazing } from './kit/Glazing';
-import { Platform, Workbenches } from './kit/Furnishings';
+import { Platform, SecondaryZone, Workbenches } from './kit/Furnishings';
 import { defaultConfig, sceneConfigs } from './sceneConfigs';
 
 /** Low presentation dais ring under the centrepiece. */
@@ -58,6 +58,8 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
         <Workbenches accent={room.color} secondary={room.secondaryColor} rows={low ? 1 : 2} perRow={low ? 2 : 3} />
       )}
       {active && !low && layout === 'default' && <SceneProps room={room} active={active} />}
+      {/* Secondary program zone (reception + exhibit pods), opposite the glazing. */}
+      {active && !low && <SecondaryZone accent={room.color} side={cfg.glazing === 'right' ? 'left' : 'right'} />}
     </group>
   );
 }
