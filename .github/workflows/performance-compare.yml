@@ -20,7 +20,7 @@ jobs:
   compare:
     if: github.event_name != 'pull_request' || github.head_ref == 'agent/performance-smoothing'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Check out optimized branch
         uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
           npm ci
           npm run build
 
-      - name: Run matched benchmarks
+      - name: Run three matched trials
         env:
           HEADLESS: '1'
           PERF_ROUTE: '3'
@@ -64,75 +64,114 @@ jobs:
             if [[ -n "${SERVER_PID:-}" ]]; then
               kill "$SERVER_PID" 2>/dev/null || true
               wait "$SERVER_PID" 2>/dev/null || true
+              unset SERVER_PID
             fi
           }
           trap cleanup EXIT
 
-          (cd /tmp/confluence-main/dist && python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/confluence-baseline-preview.log 2>&1) &
-          SERVER_PID=$!
-          for attempt in {1..45}; do
-            curl --silent --fail http://127.0.0.1:4173/ > /dev/null && break
-            sleep 1
-          done
-          node scripts/perf_harness.mjs http://127.0.0.1:4173 2 2>&1 | tee validation/perf/baseline-console.log
-          cp validation/perf/report.json validation/perf/baseline.json
-          cleanup
-          unset SERVER_PID
+          run_case() {
+            local label="$1"
+            local directory="$2"
+            local trial="$3"
+            local preview_log="/tmp/confluence-${label}-${trial}-preview.log"
 
-          (cd dist-optimized && python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/confluence-optimized-preview.log 2>&1) &
-          SERVER_PID=$!
-          for attempt in {1..45}; do
-            curl --silent --fail http://127.0.0.1:4173/ > /dev/null && break
-            sleep 1
-          done
-          node scripts/perf_harness.mjs http://127.0.0.1:4173 2 2>&1 | tee validation/perf/optimized-console.log
-          cp validation/perf/report.json validation/perf/optimized.json
-          cleanup
-          unset SERVER_PID
+            (cd "$directory" && python3 -m http.server 4173 --bind 127.0.0.1 > "$preview_log" 2>&1) &
+            SERVER_PID=$!
+            for attempt in {1..45}; do
+              if curl --silent --fail http://127.0.0.1:4173/ > /dev/null; then
+                break
+              fi
+              sleep 1
+            done
 
-      - name: Compare reports
+            node scripts/perf_harness.mjs http://127.0.0.1:4173 2 2>&1 \
+              | tee "validation/perf/${label}-${trial}-console.log"
+            cp validation/perf/report.json "validation/perf/${label}-${trial}.json"
+            cleanup
+          }
+
+          # Alternate order to reduce runner warm-up and thermal bias.
+          run_case baseline /tmp/confluence-main/dist 1
+          run_case optimized dist-optimized 1
+          run_case optimized dist-optimized 2
+          run_case baseline /tmp/confluence-main/dist 2
+          run_case baseline /tmp/confluence-main/dist 3
+          run_case optimized dist-optimized 3
+
+      - name: Compare medians and enforce performance gate
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const baseline = JSON.parse(fs.readFileSync('validation/perf/baseline.json', 'utf8'));
-          const optimized = JSON.parse(fs.readFileSync('validation/perf/optimized.json', 'utf8'));
-          const lowerMetrics = ['p95ms', 'p99ms', 'worstMs', 'hitches50', 'hitches100', 'frameBudgetDebtMs'];
+
+          const readTrials = (label) => [1, 2, 3].map((trial) =>
+            JSON.parse(fs.readFileSync(`validation/perf/${label}-${trial}.json`, 'utf8')),
+          );
+          const baselineTrials = readTrials('baseline');
+          const optimizedTrials = readTrials('optimized');
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b);
+            return sorted[Math.floor(sorted.length / 2)];
+          };
           const percent = (before, after, lower) => before
             ? +((lower ? before - after : after - before) / before * 100).toFixed(1)
             : null;
+          const aggregate = (trials, path) => median(trials.map((trial) => {
+            let value = trial;
+            for (const key of path) value = value?.[key];
+            return value;
+          }));
+
+          const lowerMetrics = ['p95ms', 'p99ms', 'worstMs', 'hitches50', 'hitches100', 'frameBudgetDebtMs'];
           const phases = {};
           for (const phase of ['idle', 'firstPass', 'replayPass']) {
             phases[phase] = {};
             for (const metric of ['avgFps', ...lowerMetrics]) {
+              const baseline = aggregate(baselineTrials, [phase, metric]);
+              const optimized = aggregate(optimizedTrials, [phase, metric]);
               phases[phase][metric] = {
-                baseline: baseline[phase]?.[metric],
-                optimized: optimized[phase]?.[metric],
-                improvementPct: percent(baseline[phase]?.[metric], optimized[phase]?.[metric], metric !== 'avgFps'),
+                baseline,
+                optimized,
+                improvementPct: percent(baseline, optimized, metric !== 'avgFps'),
               };
             }
           }
+
           const settle = {};
           for (const pass of ['firstPassSettle', 'replayPassSettle']) {
             settle[pass] = {};
             for (const metric of ['medianMs', 'p95Ms', 'worstMs']) {
+              const baseline = aggregate(baselineTrials, [pass, metric]);
+              const optimized = aggregate(optimizedTrials, [pass, metric]);
               settle[pass][metric] = {
-                baseline: baseline[pass]?.[metric],
-                optimized: optimized[pass]?.[metric],
-                improvementPct: percent(baseline[pass]?.[metric], optimized[pass]?.[metric], true),
+                baseline,
+                optimized,
+                improvementPct: percent(baseline, optimized, true),
               };
             }
           }
+
+          const checks = {
+            coldAverageFpsAtLeastFivePercent: phases.firstPass.avgFps.improvementPct >= 5,
+            coldFrameDebtAtLeastFivePercent: phases.firstPass.frameBudgetDebtMs.improvementPct >= 5,
+            coldArrivalAtLeastFivePercent: settle.firstPassSettle.medianMs.improvementPct >= 5,
+            coldWorstFrameNoMoreThanFivePercentWorse: phases.firstPass.worstMs.improvementPct >= -5,
+            replayFrameDebtNotWorse: phases.replayPass.frameBudgetDebtMs.improvementPct >= 0,
+            idleFrameDebtNoMoreThanFivePercentWorse: phases.idle.frameBudgetDebtMs.improvementPct >= -5,
+          };
+          const passed = Object.values(checks).every(Boolean);
           const comparison = {
             generatedAt: new Date().toISOString(),
-            gpu: optimized.gpu,
-            viewport: optimized.viewport,
-            route: optimized.route,
+            gpu: optimizedTrials[0].gpu,
+            viewport: optimizedTrials[0].viewport,
+            route: optimizedTrials[0].route,
+            trialCount: 3,
             baselineCommit: 'main',
             optimizedCommit: process.env.GITHUB_SHA,
             phases,
             settle,
-            baselineLongTasks: baseline.longTasks,
-            optimizedLongTasks: optimized.longTasks,
+            checks,
+            passed,
+            rawTrials: { baseline: baselineTrials, optimized: optimizedTrials },
           };
           fs.writeFileSync('validation/perf/comparison.json', JSON.stringify(comparison, null, 2));
 
@@ -145,13 +184,16 @@ jobs:
             ['Worst frame (ms)', item('firstPass', 'worstMs')],
             ['Frames >100 ms', item('firstPass', 'hitches100')],
             ['Frame-budget debt (ms)', item('firstPass', 'frameBudgetDebtMs')],
+            ['Arrival time (ms)', settle.firstPassSettle.medianMs],
           ];
+          const checkRows = Object.entries(checks).map(([name, ok]) => `| ${name} | ${ok ? 'PASS' : 'FAIL'} |`);
           const markdown = [
-            '# Confluence matched performance comparison',
+            '# Confluence repeated matched performance comparison',
             '',
             `GPU: ${comparison.gpu}`,
             `Viewport: ${comparison.viewport.width}×${comparison.viewport.height}`,
             'Route: Room 02 → Room 03',
+            'Trials: 3 per build, alternating order; values below are medians.',
             '',
             '## Cold transition',
             '',
@@ -159,10 +201,17 @@ jobs:
             '|---|---:|---:|---:|',
             ...rows.map(([label, value]) => `| ${label} | ${value.baseline} | ${value.optimized} | ${pct(value.improvementPct)} |`),
             '',
-            'Positive percentages mean the optimized branch performed better. Settle time is reported separately because the branch intentionally moves setup work into a bounded preparation phase.',
+            '## Merge gate',
+            '',
+            '| Check | Result |',
+            '|---|---|',
+            ...checkRows,
+            '',
+            `**Overall: ${passed ? 'PASS' : 'FAIL'}**`,
           ].join('\n');
           fs.writeFileSync('validation/perf/comparison.md', markdown + '\n');
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown + '\n');
+          if (!passed) process.exitCode = 1;
           NODE
 
       - name: Upload comparison
