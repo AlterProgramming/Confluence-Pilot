@@ -11,7 +11,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 
 const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const BASE = process.argv[2] || 'http://127.0.0.1:4173';
-const START = Math.max(1, Math.min(12, Number.parseInt(process.argv[3] || '4', 10) || 4);
+const START = Math.max(1, Math.min(12, Number.parseInt(process.argv[3] || '4', 10) || 4));
 const HEADLESS = process.env.HEADLESS === '1';
 const WIDTH = Math.max(480, Number.parseInt(process.env.PERF_WIDTH || '1600', 10) || 1600);
 const HEIGHT = Math.max(270, Number.parseInt(process.env.PERF_HEIGHT || '900', 10) || 900);
@@ -79,8 +79,8 @@ await page.evaluateOnNewDocument(() => {
   };
 
   const primitiveTriangles = (mode, count) => {
-    if (mode === 0x0004) return Math.floor(count / 3); // TRIANGLES
-    if (mode === 0x0005 || mode === 0x0006) return Math.max(0, count - 2); // STRIP/FAN
+    if (mode === 0x0004) return Math.floor(count / 3);
+    if (mode === 0x0005 || mode === 0x0006) return Math.max(0, count - 2);
     return 0;
   };
 
@@ -97,8 +97,7 @@ await page.evaluateOnNewDocument(() => {
           return original.apply(this, args);
         };
       } catch {
-        // Some browser builds expose non-writable native methods. The remaining
-        // counters still provide useful evidence, so instrumentation is best-effort.
+        // Some browser builds expose non-writable native methods.
       }
     };
 
@@ -161,10 +160,6 @@ await page.evaluateOnNewDocument(() => {
   };
 });
 
-// Confluence intentionally continues preloading neighbouring rooms after first
-// paint, so networkidle and the evidence-only ready flag are not performance
-// startup signals. Begin once the requested room and canvas are mounted, then
-// use the original harness's fixed settle window before collecting frames.
 await page.goto(`${BASE}/?capture=1&validate=1&room=${START}&motion=full`, {
   waitUntil: 'domcontentloaded',
   timeout: 30_000,
