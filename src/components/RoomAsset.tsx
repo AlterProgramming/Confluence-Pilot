@@ -3,14 +3,18 @@ import { useAnimations, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Box3, Mesh, MeshStandardMaterial, Vector3, type Group, type Material } from 'three';
 import type { AssetMaterialTuning, RoomDefinition } from '../types/room';
+import { useExperienceStore } from '../state/useExperienceStore';
 
 type RoomAssetProps = Pick<
   RoomDefinition,
   'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize' | 'assetMaterialTuning'
 > & {
+  roomId: string;
   active: boolean;
   fallback: ReactNode;
 };
+
+const HEAVY_HERO_ROOMS = new Set(['03', '04']);
 
 class AssetErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -104,8 +108,6 @@ function LoadedRoomAsset({
     };
   }, [actions, active, names]);
 
-  // Gentle idle motion (slow turn + hover) so the centrepiece feels alive.
-  // Only the active/destination room spends a per-frame callback on it.
   useFrame(({ clock }) => {
     if (!active || names.length > 0) return;
     const t = clock.getElapsedTime();
@@ -131,6 +133,7 @@ export function preloadRoomAsset(url?: string) {
 }
 
 export function RoomAsset({
+  roomId,
   assetUrl,
   assetScale = 1,
   assetPosition = [0, 0.25, 0],
@@ -140,7 +143,10 @@ export function RoomAsset({
   active,
   fallback,
 }: RoomAssetProps) {
-  if (!assetUrl) return fallback;
+  const qualityTier = useExperienceStore((state) => state.qualityTier);
+  const useFullHero = qualityTier === 'high' || !HEAVY_HERO_ROOMS.has(roomId);
+
+  if (!assetUrl || !useFullHero) return fallback;
 
   return (
     <AssetErrorBoundary fallback={fallback}>
