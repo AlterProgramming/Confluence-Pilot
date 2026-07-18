@@ -119,11 +119,13 @@ export function CeilingFan({
   position,
   scale = 1.2,
   speed = 0.7,
+  active = true,
 }: {
   ceilingY: number;
   position: [number, number];
   scale?: number;
   speed?: number;
+  active?: boolean;
 }) {
   const spin = useRef<Group>(null);
   const { scene } = useGLTF(`${FURN}/ceiling_fan.glb`, false, true);
@@ -134,7 +136,7 @@ export function CeilingFan({
     return [-center.x * scale, -box.max.y * scale, -center.z * scale] as [number, number, number];
   }, [scene, scale]);
   useFrame((_, dt) => {
-    if (spin.current) spin.current.rotation.y += dt * speed;
+    if (active && spin.current) spin.current.rotation.y += dt * speed;
   });
   return (
     <group position={[position[0], ceilingY, position[1]]}>

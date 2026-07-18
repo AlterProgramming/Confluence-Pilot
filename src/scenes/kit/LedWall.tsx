@@ -14,12 +14,14 @@ export function LedWall({
   arc = 2.2,
   height = 4.2,
   y = 1.5,
+  active = true,
 }: {
   url: string;
   radius?: number;
   arc?: number;
   height?: number;
   y?: number;
+  active?: boolean;
 }) {
   const tex = useTexture(url);
   useEffect(() => {
@@ -30,8 +32,10 @@ export function LedWall({
     tex.needsUpdate = true;
   }, [tex]);
 
-  // Slowly drift the content so the data wall reads as live, not a static image.
+  // Only the active/destination room advances video-wall content. Adjacent
+  // rooms remain visually ready without spending a texture write every frame.
   useFrame((_, dt) => {
+    if (!active) return;
     tex.offset.x = (tex.offset.x + dt * 0.007) % 1;
   });
 

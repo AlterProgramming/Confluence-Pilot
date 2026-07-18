@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint src vite.config.ts",
+    "perf": "node scripts/perf_harness.mjs",
     "evidence:room01": "node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 1 /assets/room-01-kiosk.glb",
     "evidence:rooms02-12": "node scripts/capture_rooms_02_12.mjs http://127.0.0.1:4173",
     "audio:generate": "node scripts/generate_audio.mjs",

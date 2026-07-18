@@ -1,0 +1,297 @@
+name: Performance comparison
+
+on:
+  push:
+    branches:
+      - agent/performance-smoothing
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: performance-comparison-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    if: github.event_name != 'pull_request' || github.head_ref == 'agent/performance-smoothing'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out optimized branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies and browser
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false puppeteer@24.16.0
+
+      - name: Build optimized and normalized main bundles
+        run: |
+          set -euo pipefail
+          npm run build
+          mv dist dist-optimized
+
+          git fetch origin main
+          git worktree add /tmp/confluence-main origin/main
+          cd /tmp/confluence-main
+          npm ci
+
+          # Capture mode starts balanced in main, but PerformanceMonitor can
+          # promote it after startup. Disable only that benchmark-time mutation
+          # so both builds are measured at the same balanced quality tier.
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('src/state/useExperienceStore.ts')
+          source = path.read_text()
+          old = 'setQualityTier: (value) => set({ qualityTier: value }),' 
+          new = 'setQualityTier: () => undefined,'
+          if old not in source:
+              raise SystemExit('Could not normalize main quality tier for benchmark')
+          path.write_text(source.replace(old, new))
+          PY
+
+          npm run build
+
+      - name: Run three matched trials
+        env:
+          HEADLESS: '1'
+          PERF_ROUTE: '3'
+          PERF_WIDTH: '480'
+          PERF_HEIGHT: '270'
+          PERF_SKIP_VIOLENT: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p validation/perf
+          export CHROME_PATH="$(node -e "console.log(require('puppeteer').executablePath())")"
+
+          cleanup() {
+            if [[ -n "${SERVER_PID:-}" ]]; then
+              kill "$SERVER_PID" 2>/dev/null || true
+              wait "$SERVER_PID" 2>/dev/null || true
+              unset SERVER_PID
+            fi
+          }
+          trap cleanup EXIT
+
+          run_case() {
+            local label="$1"
+            local directory="$2"
+            local trial="$3"
+            local port="$4"
+            local preview_log="/tmp/confluence-${label}-${trial}-preview.log"
+
+            python3 -m http.server "$port" --bind 127.0.0.1 --directory "$directory" > "$preview_log" 2>&1 &
+            SERVER_PID=$!
+            for attempt in {1..45}; do
+              if curl --silent --fail "http://127.0.0.1:${port}/" > "validation/perf/${label}-${trial}-index.html"; then
+                break
+              fi
+              sleep 1
+            done
+
+            node scripts/perf_harness.mjs "http://127.0.0.1:${port}" 2 2>&1 \
+              | tee "validation/perf/${label}-${trial}-console.log"
+            cp validation/perf/report.json "validation/perf/${label}-${trial}.json"
+            cleanup
+          }
+
+          # Every case gets a unique port, so a stale process cannot serve the
+          # wrong bundle. Order alternates to reduce runner warm-up bias.
+          run_case baseline /tmp/confluence-main/dist 1 4201
+          run_case optimized dist-optimized 1 4202
+          run_case optimized dist-optimized 2 4203
+          run_case baseline /tmp/confluence-main/dist 2 4204
+          run_case baseline /tmp/confluence-main/dist 3 4205
+          run_case optimized dist-optimized 3 4206
+
+      - name: Compare medians and enforce performance gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const readTrials = (label) => [1, 2, 3].map((trial) =>
+            JSON.parse(fs.readFileSync(`validation/perf/${label}-${trial}.json`, 'utf8')),
+          );
+          const baselineTrials = readTrials('baseline');
+          const optimizedTrials = readTrials('optimized');
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b);
+            return sorted[Math.floor(sorted.length / 2)];
+          };
+          const percent = (before, after, lower) => before
+            ? +((lower ? before - after : after - before) / before * 100).toFixed(1)
+            : null;
+          const aggregate = (trials, path) => median(trials.map((trial) => {
+            let value = trial;
+            for (const key of path) value = value?.[key];
+            return value;
+          }));
+
+          const bundleScript = (label, trial) => {
+            const html = fs.readFileSync(`validation/perf/${label}-${trial}-index.html`, 'utf8');
+            return html.match(/<script[^>]+src="([^"]+\.js)"/)?.[1] ?? 'missing';
+          };
+          const baselineBundles = [1, 2, 3].map((trial) => bundleScript('baseline', trial));
+          const optimizedBundles = [1, 2, 3].map((trial) => bundleScript('optimized', trial));
+          const distinctBundleIdentities =
+            baselineBundles.every((value) => value === baselineBundles[0])
+            && optimizedBundles.every((value) => value === optimizedBundles[0])
+            && baselineBundles[0] !== optimizedBundles[0];
+
+          const lowerMetrics = ['p95ms', 'p99ms', 'worstMs', 'hitches50', 'hitches100', 'frameBudgetDebtMs'];
+          const phases = {};
+          for (const phase of ['idle', 'firstPass', 'replayPass']) {
+            phases[phase] = {};
+            for (const metric of ['avgFps', ...lowerMetrics]) {
+              const baseline = aggregate(baselineTrials, [phase, metric]);
+              const optimized = aggregate(optimizedTrials, [phase, metric]);
+              phases[phase][metric] = {
+                baseline,
+                optimized,
+                improvementPct: percent(baseline, optimized, metric !== 'avgFps'),
+              };
+            }
+          }
+
+          const settle = {};
+          for (const pass of ['firstPassSettle', 'replayPassSettle']) {
+            settle[pass] = {};
+            for (const metric of ['medianMs', 'p95Ms', 'worstMs']) {
+              const baseline = aggregate(baselineTrials, [pass, metric]);
+              const optimized = aggregate(optimizedTrials, [pass, metric]);
+              settle[pass][metric] = {
+                baseline,
+                optimized,
+                improvementPct: percent(baseline, optimized, true),
+              };
+            }
+          }
+
+          const workload = {};
+          for (const metric of [
+            'bufferUploadBytes',
+            'bufferUploads',
+            'trianglesPerFrame',
+            'drawCallsPerFrame',
+            'shaderCompiles',
+            'textureUploads',
+          ]) {
+            const baseline = aggregate(baselineTrials, ['transitions', 0, 'gpuWork', metric]);
+            const optimized = aggregate(optimizedTrials, ['transitions', 0, 'gpuWork', metric]);
+            workload[metric] = {
+              baseline,
+              optimized,
+              improvementPct: percent(baseline, optimized, true),
+            };
+          }
+
+          const heavyHeroPattern = /\/assets\/room-0[34]-hero\.glb$/;
+          const fetchedHeavyHero = (trial) =>
+            trial.network.largestResources.some((resource) => heavyHeroPattern.test(resource.name));
+          const baselineHeavyHeroesFetched = baselineTrials.every(fetchedHeavyHero);
+          const optimizedHeavyHeroesSkipped = optimizedTrials.every((trial) => !fetchedHeavyHero(trial));
+
+          const checks = {
+            distinctBundleIdentities,
+            baselineHeavyHeroesFetched,
+            optimizedHeavyHeroesSkipped,
+            coldBufferBytesAtLeastFiftyPercentLower: workload.bufferUploadBytes.improvementPct >= 50,
+            coldTrianglesPerFrameAtLeastThirtyPercentLower: workload.trianglesPerFrame.improvementPct >= 30,
+            coldShaderCompilesNoMoreThanTenPercentWorse: workload.shaderCompiles.improvementPct >= -10,
+            coldAverageFpsNoMoreThanTenPercentWorse: phases.firstPass.avgFps.improvementPct >= -10,
+            coldFrameDebtNoMoreThanTenPercentWorse: phases.firstPass.frameBudgetDebtMs.improvementPct >= -10,
+            coldArrivalNoMoreThanTenPercentWorse: settle.firstPassSettle.medianMs.improvementPct >= -10,
+            coldWorstFrameNoMoreThanTenPercentWorse: phases.firstPass.worstMs.improvementPct >= -10,
+            replayFrameDebtNoMoreThanTenPercentWorse: phases.replayPass.frameBudgetDebtMs.improvementPct >= -10,
+            idleFrameDebtNoMoreThanTenPercentWorse: phases.idle.frameBudgetDebtMs.improvementPct >= -10,
+          };
+          const passed = Object.values(checks).every(Boolean);
+          const comparison = {
+            generatedAt: new Date().toISOString(),
+            gpu: optimizedTrials[0].gpu,
+            viewport: optimizedTrials[0].viewport,
+            route: optimizedTrials[0].route,
+            trialCount: 3,
+            baselineCommit: 'main (quality normalized to balanced for benchmark)',
+            optimizedCommit: process.env.GITHUB_SHA,
+            bundleIdentities: { baseline: baselineBundles, optimized: optimizedBundles },
+            phases,
+            settle,
+            workload,
+            heavyHeroRequests: {
+              baselineEveryTrial: baselineHeavyHeroesFetched,
+              optimizedSkippedEveryTrial: optimizedHeavyHeroesSkipped,
+            },
+            checks,
+            passed,
+            rawTrials: { baseline: baselineTrials, optimized: optimizedTrials },
+          };
+          fs.writeFileSync('validation/perf/comparison.json', JSON.stringify(comparison, null, 2));
+
+          const pct = (value) => value === null ? 'n/a' : `${value >= 0 ? '+' : ''}${value}%`;
+          const rows = [
+            ['Buffer upload bytes', workload.bufferUploadBytes],
+            ['Triangles / frame', workload.trianglesPerFrame],
+            ['Draw calls / frame', workload.drawCallsPerFrame],
+            ['Shader compiles', workload.shaderCompiles],
+            ['Average FPS', phases.firstPass.avgFps],
+            ['Frame-budget debt (ms)', phases.firstPass.frameBudgetDebtMs],
+            ['Worst frame (ms)', phases.firstPass.worstMs],
+            ['Arrival time (ms)', settle.firstPassSettle.medianMs],
+          ];
+          const checkRows = Object.entries(checks).map(([name, ok]) => `| ${name} | ${ok ? 'PASS' : 'FAIL'} |`);
+          const markdown = [
+            '# Confluence matched performance proof',
+            '',
+            `GPU: ${comparison.gpu}`,
+            `Viewport: ${comparison.viewport.width}×${comparison.viewport.height}`,
+            'Route: Room 02 → Room 03',
+            'Trials: 3 per build, alternating order; values below are medians.',
+            `Main bundle: ${baselineBundles[0]}`,
+            `Optimized bundle: ${optimizedBundles[0]}`,
+            '',
+            '## Cold-transition workload and timing',
+            '',
+            '| Metric | Main | Optimized | Improvement |',
+            '|---|---:|---:|---:|',
+            ...rows.map(([label, value]) => `| ${label} | ${value.baseline} | ${value.optimized} | ${pct(value.improvementPct)} |`),
+            '',
+            `Heavy Room 03/04 heroes fetched by main: ${baselineHeavyHeroesFetched}`,
+            `Heavy Room 03/04 heroes skipped by optimized build: ${optimizedHeavyHeroesSkipped}`,
+            '',
+            'The merge gate requires large deterministic GPU workload reductions and rejects timing regressions beyond 10% on the noisy software renderer.',
+            '',
+            '## Merge gate',
+            '',
+            '| Check | Result |',
+            '|---|---|',
+            ...checkRows,
+            '',
+            `**Overall: ${passed ? 'PASS' : 'FAIL'}**`,
+          ].join('\n');
+          fs.writeFileSync('validation/perf/comparison.md', markdown + '\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown + '\n');
+          if (!passed) process.exitCode = 1;
+          NODE
+
+      - name: Upload comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-comparison
+          path: validation/perf
+          if-no-files-found: warn
+          retention-days: 14
