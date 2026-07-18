@@ -9,14 +9,27 @@ const DPR_RESTORE_DELAY_MS = 360;
 const IDLE_WARM_DELAY_MS = 850;
 const WARM_TIMEOUT_MS = 5_000;
 
+type IdleCapableWindow = Window & {
+  requestIdleCallback?: (
+    callback: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void,
+    options?: { timeout?: number },
+  ) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+function idleWindow() {
+  return window as IdleCapableWindow;
+}
+
 function nextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
 function waitForIdle(timeout = 1_000) {
   return new Promise<void>((resolve) => {
-    if (typeof window.requestIdleCallback === 'function') {
-      window.requestIdleCallback(() => resolve(), { timeout });
+    const browser = idleWindow();
+    if (typeof browser.requestIdleCallback === 'function') {
+      browser.requestIdleCallback(() => resolve(), { timeout });
       return;
     }
     window.setTimeout(resolve, 48);
@@ -24,9 +37,10 @@ function waitForIdle(timeout = 1_000) {
 }
 
 function scheduleIdle(callback: () => void, timeout = 1_200) {
-  if (typeof window.requestIdleCallback === 'function') {
-    const handle = window.requestIdleCallback(callback, { timeout });
-    return () => window.cancelIdleCallback(handle);
+  const browser = idleWindow();
+  if (typeof browser.requestIdleCallback === 'function') {
+    const handle = browser.requestIdleCallback(() => callback(), { timeout });
+    return () => browser.cancelIdleCallback?.(handle);
   }
   const handle = window.setTimeout(callback, 64);
   return () => window.clearTimeout(handle);
@@ -107,7 +121,7 @@ export function PerformanceGovernor() {
     const candidate = candidates[0];
     if (candidate === undefined) return;
 
-    let cancelIdle = () => undefined;
+    let cancelIdle: () => void = () => undefined;
     const timer = window.setTimeout(() => {
       cancelIdle = scheduleIdle(() => {
         const state = useExperienceStore.getState();
