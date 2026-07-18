@@ -11,7 +11,6 @@ type ValidationSnapshot = {
   activeRoomId: string;
   requestedRoomIndex: number;
   requestedRoomId: string;
-  isPreparing: boolean;
   isTransitioning: boolean;
   transitionProgress: number;
   assetsLoading: boolean;
@@ -33,7 +32,6 @@ export function ValidationBridge() {
   const started = useExperienceStore((state) => state.started);
   const activeRoom = useExperienceStore((state) => state.activeRoom);
   const requestedRoom = useExperienceStore((state) => state.requestedRoom);
-  const isPreparing = useExperienceStore((state) => state.isPreparing);
   const isTransitioning = useExperienceStore((state) => state.isTransitioning);
   const transitionProgress = useExperienceStore((state) => state.transitionProgress);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
@@ -45,7 +43,7 @@ export function ValidationBridge() {
 
     const activeDefinition = rooms[activeRoom];
     const requestedDefinition = rooms[requestedRoom];
-    const ready = started && !isPreparing && !isTransitioning && !assetsLoading;
+    const ready = started && !isTransitioning && !assetsLoading;
     const snapshot: ValidationSnapshot = {
       version: 1,
       ready,
@@ -54,7 +52,6 @@ export function ValidationBridge() {
       activeRoomId: activeDefinition?.id ?? '',
       requestedRoomIndex: requestedRoom,
       requestedRoomId: requestedDefinition?.id ?? '',
-      isPreparing,
       isTransitioning,
       transitionProgress,
       assetsLoading,
@@ -75,7 +72,6 @@ export function ValidationBridge() {
     assetProgress,
     assetsLoading,
     goToRoom,
-    isPreparing,
     isTransitioning,
     qualityTier,
     requestedRoom,
