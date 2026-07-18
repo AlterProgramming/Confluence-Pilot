@@ -23,7 +23,9 @@ export function PostEffects() {
   // During a move the scene is already doing its most expensive work. Keep the
   // cinematic wash, but lower fill-rate and remove full-screen effects that are
   // difficult to perceive while the camera is travelling.
-  const composerScale = busy ? (qualityTier === 'low' ? 0.58 : 0.7) : 1;
+  const composerScale = busy
+    ? qualityTier === 'low' ? 0.58 : 0.7
+    : qualityTier === 'low' ? 0.72 : 1;
   const bloomScale = busy ? 0.2 : qualityTier === 'high' ? 0.45 : 0.32;
   const bloom = (
     <Bloom
