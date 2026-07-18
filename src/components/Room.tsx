@@ -70,6 +70,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
           assetRotation={room.assetRotation}
           assetTargetSize={room.assetTargetSize}
           assetMaterialTuning={room.assetMaterialTuning}
+          active={active}
           fallback={fallback}
         />
       </group>
