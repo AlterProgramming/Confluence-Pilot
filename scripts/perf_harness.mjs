@@ -54,9 +54,12 @@ page.on('pageerror', (error) => errors.push(error.message));
 page.on('console', (message) => message.type() === 'error' && errors.push(message.text()));
 await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
 
+// Confluence intentionally continues preloading neighbouring rooms after first
+// paint, so networkidle is not an application-readiness signal. Wait for DOM
+// startup, then rely on the app's validation bridge below.
 await page.goto(`${BASE}/?capture=1&validate=1&room=${START}&motion=full`, {
-  waitUntil: 'networkidle2',
-  timeout: 90_000,
+  waitUntil: 'domcontentloaded',
+  timeout: 30_000,
 });
 await page.bringToFront();
 await page.waitForFunction(
@@ -64,7 +67,7 @@ await page.waitForFunction(
     const state = window.__CONFLUENCE_VALIDATION__;
     return Boolean(state?.ready && state.activeRoomIndex === room - 1);
   },
-  { timeout: 90_000 },
+  { timeout: 120_000 },
   START,
 );
 await sleep(1200);
