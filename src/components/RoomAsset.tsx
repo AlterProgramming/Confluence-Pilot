@@ -8,6 +8,7 @@ type RoomAssetProps = Pick<
   RoomDefinition,
   'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize' | 'assetMaterialTuning'
 > & {
+  active: boolean;
   fallback: ReactNode;
 };
 
@@ -55,6 +56,7 @@ function LoadedRoomAsset({
   rotation,
   targetSize,
   materialTuning,
+  active,
 }: {
   url: string;
   scale: number;
@@ -62,6 +64,7 @@ function LoadedRoomAsset({
   rotation: [number, number, number];
   targetSize: number;
   materialTuning?: AssetMaterialTuning;
+  active: boolean;
 }) {
   const groupRef = useRef<Group>(null);
   const { scene, animations } = useGLTF(url, false, true);
@@ -93,16 +96,18 @@ function LoadedRoomAsset({
 
   useEffect(() => {
     const firstAction = names[0] ? actions[names[0]] : undefined;
-    firstAction?.reset().fadeIn(0.25).play();
+    if (!firstAction) return;
+    if (active) firstAction.reset().fadeIn(0.2).play();
+    else firstAction.fadeOut(0.12).stop();
     return () => {
-      firstAction?.fadeOut(0.15);
+      firstAction.stop();
     };
-  }, [actions, names]);
+  }, [actions, active, names]);
 
   // Gentle idle motion (slow turn + hover) so the centrepiece feels alive.
-  // Skipped when the GLB ships its own animation.
+  // Only the active/destination room spends a per-frame callback on it.
   useFrame(({ clock }) => {
-    if (names.length > 0) return;
+    if (!active || names.length > 0) return;
     const t = clock.getElapsedTime();
     const inst = normalized.instance;
     inst.rotation.y = t * 0.16;
@@ -132,6 +137,7 @@ export function RoomAsset({
   assetRotation = [0, 0, 0],
   assetTargetSize = 3.5,
   assetMaterialTuning,
+  active,
   fallback,
 }: RoomAssetProps) {
   if (!assetUrl) return fallback;
@@ -146,6 +152,7 @@ export function RoomAsset({
           rotation={assetRotation}
           targetSize={assetTargetSize}
           materialTuning={assetMaterialTuning}
+          active={active}
         />
       </Suspense>
     </AssetErrorBoundary>
