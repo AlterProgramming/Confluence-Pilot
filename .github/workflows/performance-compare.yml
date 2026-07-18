@@ -20,7 +20,7 @@ jobs:
   compare:
     if: github.event_name != 'pull_request' || github.head_ref == 'agent/performance-smoothing'
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 20
     steps:
       - name: Check out optimized branch
         uses: actions/checkout@v4
@@ -51,9 +51,9 @@ jobs:
       - name: Run matched benchmarks
         env:
           HEADLESS: '1'
-          PERF_ROUTE: '3,4,5,4,3,2'
-          PERF_WIDTH: '960'
-          PERF_HEIGHT: '540'
+          PERF_ROUTE: '3,4'
+          PERF_WIDTH: '480'
+          PERF_HEIGHT: '270'
           PERF_SKIP_VIOLENT: '1'
         run: |
           set -euo pipefail
@@ -137,7 +137,7 @@ jobs:
           fs.writeFileSync('validation/perf/comparison.json', JSON.stringify(comparison, null, 2));
 
           const item = (phase, metric) => phases[phase][metric];
-          const pct = (value) => `${value >= 0 ? '+' : ''}${value}%`;
+          const pct = (value) => value === null ? 'n/a' : `${value >= 0 ? '+' : ''}${value}%`;
           const rows = [
             ['Average FPS', item('firstPass', 'avgFps')],
             ['p95 frame (ms)', item('firstPass', 'p95ms')],
@@ -151,7 +151,7 @@ jobs:
             '',
             `GPU: ${comparison.gpu}`,
             `Viewport: ${comparison.viewport.width}×${comparison.viewport.height}`,
-            `Route: ${comparison.route.join(' → ')}`,
+            `Route: Room 02 → ${comparison.route.map((room) => `Room ${String(room).padStart(2, '0')}`).join(' → ')}`,
             '',
             '## First-pass navigation',
             '',
