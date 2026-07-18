@@ -30,10 +30,14 @@ const captureMode = initialQuery?.get('capture') === '1';
 const captureFullMotion = initialQuery?.get('motion') === 'full';
 const queryRoom = Number.parseInt(initialQuery?.get('room') ?? '1', 10);
 const initialRoom = clampRoom(Number.isFinite(queryRoom) ? queryRoom - 1 : 0);
+const requestedQuality = initialQuery?.get('quality');
+const forcedQuality: QualityTier | null =
+  requestedQuality === 'high' || requestedQuality === 'balanced' || requestedQuality === 'low'
+    ? requestedQuality
+    : null;
 
 function initialQuality(): QualityTier {
-  const forced = initialQuery?.get('quality');
-  if (forced === 'high' || forced === 'balanced' || forced === 'low') return forced;
+  if (forcedQuality) return forcedQuality;
   if (captureMode || typeof navigator === 'undefined') return 'balanced';
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
   const cores = navigator.hardwareConcurrency ?? 8;
@@ -93,5 +97,7 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   },
   setReducedMotion: (value) => set({ reducedMotion: value }),
   setSoundEnabled: (value) => set({ soundEnabled: value }),
-  setQualityTier: (value) => set({ qualityTier: value }),
+  setQualityTier: (value) => {
+    if (!forcedQuality) set({ qualityTier: value });
+  },
 }));
