@@ -55,8 +55,9 @@ page.on('console', (message) => message.type() === 'error' && errors.push(messag
 await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
 
 // Confluence intentionally continues preloading neighbouring rooms after first
-// paint, so networkidle is not an application-readiness signal. Wait for DOM
-// startup, then rely on the app's validation bridge below.
+// paint, so networkidle and the evidence-only ready flag are not performance
+// startup signals. Begin once the requested room and canvas are mounted, then
+// use the original harness's fixed settle window before collecting frames.
 await page.goto(`${BASE}/?capture=1&validate=1&room=${START}&motion=full`, {
   waitUntil: 'domcontentloaded',
   timeout: 30_000,
@@ -65,12 +66,18 @@ await page.bringToFront();
 await page.waitForFunction(
   (room) => {
     const state = window.__CONFLUENCE_VALIDATION__;
-    return Boolean(state?.ready && state.activeRoomIndex === room - 1);
+    return Boolean(
+      document.querySelector('canvas')
+      && state?.started
+      && state.activeRoomIndex === room - 1
+      && !state.isPreparing
+      && !state.isTransitioning
+    );
   },
-  { timeout: 120_000 },
+  { timeout: 60_000 },
   START,
 );
-await sleep(1200);
+await sleep(4500);
 
 const gpu = await page.evaluate(() => {
   const canvas = document.querySelector('canvas');
