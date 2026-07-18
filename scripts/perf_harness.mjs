@@ -4,7 +4,8 @@
 // replay behavior can be compared directly.
 //
 // Usage: node scripts/perf_harness.mjs [baseUrl] [startRoom]
-// Optional env: CHROME_PATH, HEADLESS=1, PERF_ROUTE=5,6,7,8,9,8,7,6,5,4
+// Optional env: CHROME_PATH, HEADLESS=1, PERF_ROUTE=5,6,7,8,9,8,7,6,5,4,
+// PERF_WIDTH=960, PERF_HEIGHT=540, PERF_SKIP_VIOLENT=1
 import puppeteer from 'puppeteer-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
@@ -12,6 +13,9 @@ const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Ap
 const BASE = process.argv[2] || 'http://127.0.0.1:4173';
 const START = Math.max(1, Math.min(12, Number.parseInt(process.argv[3] || '4', 10) || 4));
 const HEADLESS = process.env.HEADLESS === '1';
+const WIDTH = Math.max(480, Number.parseInt(process.env.PERF_WIDTH || '1600', 10) || 1600);
+const HEIGHT = Math.max(270, Number.parseInt(process.env.PERF_HEIGHT || '900', 10) || 900);
+const SKIP_VIOLENT = process.env.PERF_SKIP_VIOLENT === '1';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function defaultRoute(start) {
@@ -33,12 +37,15 @@ const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: HEADLESS,
   args: [
-    '--window-size=1600,900',
+    `--window-size=${WIDTH},${HEIGHT}`,
+    '--no-sandbox',
+    '--disable-dev-shm-usage',
     '--ignore-gpu-blocklist',
     '--enable-gpu-rasterization',
     '--enable-zero-copy',
+    '--enable-unsafe-swiftshader',
   ],
-  defaultViewport: { width: 1600, height: 900 },
+  defaultViewport: { width: WIDTH, height: HEIGHT },
 });
 
 const page = await browser.newPage();
@@ -105,7 +112,7 @@ async function navigate(room, label) {
       const state = window.__CONFLUENCE_VALIDATION__;
       return Boolean(state?.ready && state.activeRoomIndex === roomNumber - 1 && !state.isPreparing && !state.isTransitioning);
     },
-    { timeout: 30_000 },
+    { timeout: 45_000 },
     room,
   );
   const end = await page.evaluate(() => performance.now());
@@ -131,20 +138,22 @@ for (let index = 0; index < ROUTE.length; index += 1) {
 }
 await mark('replay-pass-end');
 
-await mark('violent-start');
-for (let index = 0; index < 24; index += 1) {
-  await page.keyboard.press(index % 8 < 6 ? 'ArrowUp' : 'ArrowDown');
-  await sleep(110);
+if (!SKIP_VIOLENT) {
+  await mark('violent-start');
+  for (let index = 0; index < 24; index += 1) {
+    await page.keyboard.press(index % 8 < 6 ? 'ArrowUp' : 'ArrowDown');
+    await sleep(110);
+  }
+  await page.waitForFunction(
+    () => {
+      const state = window.__CONFLUENCE_VALIDATION__;
+      return Boolean(state?.ready && !state.isPreparing && !state.isTransitioning);
+    },
+    { timeout: 45_000 },
+  );
+  await sleep(600);
+  await mark('violent-end');
 }
-await page.waitForFunction(
-  () => {
-    const state = window.__CONFLUENCE_VALIDATION__;
-    return Boolean(state?.ready && !state.isPreparing && !state.isTransitioning);
-  },
-  { timeout: 30_000 },
-);
-await sleep(600);
-await mark('violent-end');
 
 const data = await page.evaluate(() => {
   cancelAnimationFrame(window.__perf._raf);
@@ -218,13 +227,14 @@ const report = {
   generatedAt: new Date().toISOString(),
   gpu,
   headed: !HEADLESS,
+  viewport: { width: WIDTH, height: HEIGHT },
   startRoom: START,
   route: ROUTE,
   errors: errors.slice(0, 10),
   idle: stats(between('idle-start', 'idle-end')),
   firstPass: stats(between('first-pass-start', 'first-pass-end')),
   replayPass: stats(between('replay-pass-start', 'replay-pass-end')),
-  violentSwipe: stats(between('violent-start', 'violent-end')),
+  violentSwipe: SKIP_VIOLENT ? null : stats(between('violent-start', 'violent-end')),
   firstPassSettle: settleSummary('first'),
   replayPassSettle: settleSummary('replay'),
   longTasks: {
@@ -242,7 +252,7 @@ const report = {
 
 mkdirSync('validation/perf', { recursive: true });
 writeFileSync('validation/perf/report.json', JSON.stringify(report, null, 2));
-console.log('GPU:', gpu, '| errors:', errors.length, '| route:', ROUTE.join(' -> '));
+console.log('GPU:', gpu, '| errors:', errors.length, '| viewport:', `${WIDTH}x${HEIGHT}`, '| route:', ROUTE.join(' -> '));
 for (const key of ['idle', 'firstPass', 'replayPass', 'violentSwipe']) {
   console.log(key.padEnd(14), JSON.stringify(report[key]));
 }
