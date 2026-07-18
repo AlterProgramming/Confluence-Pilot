@@ -7,7 +7,6 @@ type ExperienceState = {
   started: boolean;
   activeRoom: number;
   requestedRoom: number;
-  warmingRoom: number | null;
   isTransitioning: boolean;
   transitionDirection: -1 | 0 | 1;
   transitionProgress: number;
@@ -17,7 +16,6 @@ type ExperienceState = {
   start: () => void;
   requestRoom: (delta: -1 | 1) => void;
   goToRoom: (index: number) => void;
-  setWarmingRoom: (index: number | null) => void;
   setTransitionProgress: (progress: number) => void;
   completeTransition: () => void;
   setReducedMotion: (value: boolean) => void;
@@ -48,7 +46,6 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   started: captureMode,
   activeRoom: initialRoom,
   requestedRoom: initialRoom,
-  warmingRoom: null,
   isTransitioning: false,
   transitionDirection: 0,
   transitionProgress: 0,
@@ -65,7 +62,6 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
 
     set({
       requestedRoom: next,
-      warmingRoom: null,
       isTransitioning: true,
       transitionDirection: delta,
       transitionProgress: 0,
@@ -80,19 +76,16 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
 
     set({
       requestedRoom: next,
-      warmingRoom: null,
       isTransitioning: true,
       transitionDirection: next > state.activeRoom ? 1 : -1,
       transitionProgress: 0,
     });
   },
-  setWarmingRoom: (index) => set({ warmingRoom: index }),
   setTransitionProgress: (progress) => set({ transitionProgress: progress }),
   completeTransition: () => {
     const requestedRoom = get().requestedRoom;
     set({
       activeRoom: requestedRoom,
-      warmingRoom: null,
       isTransitioning: false,
       transitionDirection: 0,
       transitionProgress: 0,
