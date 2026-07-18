@@ -34,11 +34,13 @@ const requestedQuality = initialQuery?.get('quality');
 const forcedQuality: QualityTier | null =
   requestedQuality === 'high' || requestedQuality === 'balanced' || requestedQuality === 'low'
     ? requestedQuality
-    : null;
+    : captureMode
+      ? 'balanced'
+      : null;
 
 function initialQuality(): QualityTier {
   if (forcedQuality) return forcedQuality;
-  if (captureMode || typeof navigator === 'undefined') return 'balanced';
+  if (typeof navigator === 'undefined') return 'balanced';
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
   const cores = navigator.hardwareConcurrency ?? 8;
   if (memory <= 4 || cores <= 4) return 'low';
