@@ -113,14 +113,18 @@ async function navigate(room, label) {
   await page.waitForFunction(
     (roomNumber) => {
       const state = window.__CONFLUENCE_VALIDATION__;
-      return Boolean(state?.ready && state.activeRoomIndex === roomNumber - 1 && !state.isPreparing && !state.isTransitioning);
+      // Arrival is the end of the visible camera move. Background neighbour
+      // preloads may continue afterward and must not inflate transition timing.
+      return Boolean(state && state.activeRoomIndex === roomNumber - 1 && !state.isPreparing && !state.isTransitioning);
     },
     { timeout: 45_000 },
     room,
   );
   const end = await page.evaluate(() => performance.now());
   await mark(`${label}-end`);
-  return { label, room, settleMs: +(end - start).toFixed(1) };
+  const result = { label, room, settleMs: +(end - start).toFixed(1) };
+  console.log('transition', JSON.stringify(result));
+  return result;
 }
 
 await mark('idle-start');
@@ -150,7 +154,7 @@ if (!SKIP_VIOLENT) {
   await page.waitForFunction(
     () => {
       const state = window.__CONFLUENCE_VALIDATION__;
-      return Boolean(state?.ready && !state.isPreparing && !state.isTransitioning);
+      return Boolean(state && !state.isPreparing && !state.isTransitioning);
     },
     { timeout: 45_000 },
   );
