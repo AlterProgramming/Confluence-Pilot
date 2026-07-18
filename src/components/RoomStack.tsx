@@ -20,7 +20,9 @@ let furnitureQueued = false;
 export function RoomStack() {
   const activeRoom = useExperienceStore((state) => state.activeRoom);
   const requestedRoom = useExperienceStore((state) => state.requestedRoom);
+  const isPreparing = useExperienceStore((state) => state.isPreparing);
   const isTransitioning = useExperienceStore((state) => state.isTransitioning);
+  const destinationActive = isPreparing || isTransitioning;
 
   useEffect(() => {
     if (furnitureQueued) return;
@@ -52,15 +54,15 @@ export function RoomStack() {
     <group>
       {rooms.map((room, index) => {
         const nearActive = Math.abs(index - activeRoom) <= 1;
-        const nearDestination = isTransitioning && Math.abs(index - requestedRoom) <= 1;
+        const nearDestination = destinationActive && Math.abs(index - requestedRoom) <= 1;
         const shouldRender = nearActive || nearDestination;
         if (!shouldRender) return null;
         return (
           <Room
             key={room.id}
             room={room}
-            active={index === activeRoom || (isTransitioning && index === requestedRoom)}
-            settled={!isTransitioning && index === activeRoom}
+            active={index === activeRoom || (destinationActive && index === requestedRoom)}
+            settled={!isPreparing && !isTransitioning && index === activeRoom}
           />
         );
       })}
