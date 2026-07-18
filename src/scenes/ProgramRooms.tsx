@@ -79,9 +79,9 @@ function ProgramShell({ room, active, children }: ProgramRoomProps & { children:
         floorRepeat={[5, 5]}
         floorRoughness={room.id === '11' ? 0.3 : 0.68}
       />
-      <LedWall url={profile.ledWall} radius={(profile.width ?? 16) / 2 + 0.2} arc={2.05} height={4} y={1.5} />
+      <LedWall active={active} url={profile.ledWall} radius={(profile.width ?? 16) / 2 + 0.2} arc={2.05} height={4} y={1.5} />
       {profile.glazing && !low && <Glazing side={profile.glazing} x={(profile.width ?? 16) / 2 - 0.4} width={11} />}
-      <CeilingRig y={(profile.height ?? 6.2) - 1.7} accent={room.color} />
+      <CeilingRig active={active} y={(profile.height ?? 6.2) - 1.7} accent={room.color} />
       {active && children}
     </group>
   );
