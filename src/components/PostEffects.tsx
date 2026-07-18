@@ -11,18 +11,14 @@ import { BlendFunction } from 'postprocessing';
 import { useExperienceStore } from '../state/useExperienceStore';
 
 export function PostEffects() {
-  const preparing = useExperienceStore((state) => state.isPreparing);
   const transitioning = useExperienceStore((state) => state.isTransitioning);
   const reducedMotion = useExperienceStore((state) => state.reducedMotion);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
-  const busy = preparing || transitioning;
+  const busy = transitioning;
   const travel = transitioning && !reducedMotion;
   const quality = qualityTier === 'high' ? 1 : qualityTier === 'balanced' ? 0.72 : 0.38;
   const offset = useMemo(() => new Vector2(0.00016, 0.00008), []);
 
-  // During a move the scene is already doing its most expensive work. Keep the
-  // cinematic wash, but lower fill-rate and remove full-screen effects that are
-  // difficult to perceive while the camera is travelling.
   const composerScale = busy
     ? qualityTier === 'low' ? 0.58 : 0.7
     : qualityTier === 'low' ? 0.72 : 1;
