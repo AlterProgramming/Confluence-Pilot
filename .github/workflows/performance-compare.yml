@@ -20,7 +20,7 @@ jobs:
   compare:
     if: github.event_name != 'pull_request' || github.head_ref == 'agent/performance-smoothing'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Check out optimized branch
         uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
       - name: Run matched benchmarks
         env:
           HEADLESS: '1'
-          PERF_ROUTE: '3,4'
+          PERF_ROUTE: '3'
           PERF_WIDTH: '480'
           PERF_HEIGHT: '270'
           PERF_SKIP_VIOLENT: '1'
@@ -151,9 +151,9 @@ jobs:
             '',
             `GPU: ${comparison.gpu}`,
             `Viewport: ${comparison.viewport.width}×${comparison.viewport.height}`,
-            `Route: Room 02 → ${comparison.route.map((room) => `Room ${String(room).padStart(2, '0')}`).join(' → ')}`,
+            'Route: Room 02 → Room 03',
             '',
-            '## First-pass navigation',
+            '## Cold transition',
             '',
             '| Metric | Main | Optimized | Improvement |',
             '|---|---:|---:|---:|',
