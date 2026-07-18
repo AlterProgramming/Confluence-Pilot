@@ -22,11 +22,22 @@ function revealOffset(room: RoomDefinition): [number, number, number] {
   return [0, -0.14, 0.12];
 }
 
-export function Room({ room, active, settled }: { room: RoomDefinition; active: boolean; settled: boolean }) {
+export function Room({
+  room,
+  active,
+  warming = false,
+  settled,
+}: {
+  room: RoomDefinition;
+  active: boolean;
+  warming?: boolean;
+  settled: boolean;
+}) {
   const contentRef = useRef<Group>(null);
   const BespokeScene = roomScenes[room.id];
+  const sceneActive = active || warming;
   const usesRoomSet = ['gallery', 'academy', 'studio', 'living-building', 'neighborhood'].includes(room.architecture);
-  const fallback = usesRoomSet ? null : <RoomCore room={room} active={active} />;
+  const fallback = usesRoomSet ? null : <RoomCore room={room} active={sceneActive} />;
 
   useEffect(() => {
     if (!settled || !contentRef.current) return;
@@ -49,18 +60,18 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
   }, [room, settled]);
 
   return (
-    <group position={[0, room.y, 0]}>
+    <group name={`confluence-room-${room.id}`} position={[0, room.y, 0]}>
       <RoomGrounding room={room} active={active} />
       <SceneStage room={room} active={active} />
       <group ref={contentRef}>
         {BespokeScene ? (
-          <BespokeScene room={room} active={active} />
+          <BespokeScene room={room} active={sceneActive} />
         ) : (
           <>
-            <RoomArchitecture room={room} active={active} />
-            <RoomDisplays room={room} active={active} />
-            <RoomFixtures room={room} active={active} />
-            <SceneProps room={room} active={active} />
+            <RoomArchitecture room={room} active={sceneActive} />
+            <RoomDisplays room={room} active={sceneActive} />
+            <RoomFixtures room={room} active={sceneActive} />
+            <SceneProps room={room} active={sceneActive} />
           </>
         )}
         <RoomAsset
