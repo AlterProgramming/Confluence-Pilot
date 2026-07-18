@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { AdaptiveDpr, Environment, Lightformer, PerformanceMonitor, Preload } from '@react-three/drei';
+import { Environment, Lightformer, PerformanceMonitor, Preload } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping } from 'three';
 import { useExperienceStore } from '../state/useExperienceStore';
@@ -21,6 +21,7 @@ function StudioEnvironment() {
 }
 import { CameraDirector } from './CameraDirector';
 import { GlobalParticles } from './GlobalParticles';
+import { PerformanceGovernor } from './PerformanceGovernor';
 import { PostEffects } from './PostEffects';
 import { RoomStack } from './RoomStack';
 import { TransitionShaft } from './TransitionShaft';
@@ -54,7 +55,6 @@ export function ExperienceCanvas() {
       }}
     >
       <AdaptiveQuality>
-        <AdaptiveDpr pixelated />
         <Atmosphere />
         <Suspense fallback={null}>
           <StudioEnvironment />
@@ -65,6 +65,7 @@ export function ExperienceCanvas() {
         <TransitionShaft />
         <GlobalParticles />
         <CameraDirector />
+        <PerformanceGovernor />
         <PostEffects />
         <Preload all />
       </AdaptiveQuality>
