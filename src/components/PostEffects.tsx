@@ -11,31 +11,34 @@ import { BlendFunction } from 'postprocessing';
 import { useExperienceStore } from '../state/useExperienceStore';
 
 export function PostEffects() {
+  const preparing = useExperienceStore((state) => state.isPreparing);
   const transitioning = useExperienceStore((state) => state.isTransitioning);
   const reducedMotion = useExperienceStore((state) => state.reducedMotion);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
-  const travel = transitioning && !reducedMotion ? 1 : 0;
+  const busy = preparing || transitioning;
+  const travel = transitioning && !reducedMotion;
   const quality = qualityTier === 'high' ? 1 : qualityTier === 'balanced' ? 0.72 : 0.38;
-  const offset = useMemo(() => new Vector2(), []);
-  offset.set(
-    0.00016 + travel * 0.00175 * quality,
-    0.00008 + travel * 0.00072 * quality,
-  );
+  const offset = useMemo(() => new Vector2(0.00016, 0.00008), []);
 
+  // During a move the scene is already doing its most expensive work. Keep the
+  // cinematic wash, but lower fill-rate and remove full-screen effects that are
+  // difficult to perceive while the camera is travelling.
+  const composerScale = busy ? (qualityTier === 'low' ? 0.58 : 0.7) : 1;
+  const bloomScale = busy ? 0.2 : qualityTier === 'high' ? 0.45 : 0.32;
   const bloom = (
     <Bloom
-      intensity={(0.34 + travel * 0.68) * quality}
-      luminanceThreshold={0.69 - travel * 0.11}
+      intensity={(busy ? 0.22 : 0.34) * quality}
+      luminanceThreshold={busy ? 0.76 : 0.69}
       luminanceSmoothing={0.24}
       mipmapBlur
-      resolutionScale={qualityTier === 'high' ? 0.45 : 0.32}
+      resolutionScale={bloomScale}
     />
   );
-  const vignette = <Vignette eskil={false} offset={0.28} darkness={0.26 + travel * 0.08} />;
+  const vignette = <Vignette eskil={false} offset={0.28} darkness={busy ? 0.3 : 0.26} />;
 
-  if (qualityTier === 'low') {
+  if (qualityTier === 'low' || busy) {
     return (
-      <EffectComposer multisampling={0} enableNormalPass={false} resolutionScale={0.72}>
+      <EffectComposer multisampling={0} enableNormalPass={false} resolutionScale={composerScale}>
         {bloom}
         {vignette}
       </EffectComposer>
@@ -46,7 +49,7 @@ export function PostEffects() {
     <ChromaticAberration
       offset={offset}
       radialModulation
-      modulationOffset={0.12 + travel * 0.36}
+      modulationOffset={travel ? 0.18 : 0.12}
       blendFunction={BlendFunction.NORMAL}
     />
   );
@@ -65,7 +68,7 @@ export function PostEffects() {
     <EffectComposer multisampling={0} enableNormalPass={false}>
       {bloom}
       {aberration}
-      <Noise opacity={0.025 + travel * 0.018} blendFunction={BlendFunction.SOFT_LIGHT} />
+      <Noise opacity={0.025} blendFunction={BlendFunction.SOFT_LIGHT} />
       {vignette}
     </EffectComposer>
   );
