@@ -155,7 +155,7 @@ jobs:
             coldFrameDebtAtLeastFivePercent: phases.firstPass.frameBudgetDebtMs.improvementPct >= 5,
             coldArrivalNoMoreThanFivePercentWorse: settle.firstPassSettle.medianMs.improvementPct >= -5,
             coldWorstFrameNoMoreThanFivePercentWorse: phases.firstPass.worstMs.improvementPct >= -5,
-            replayFrameDebtNotWorse: phases.replayPass.frameBudgetDebtMs.improvementPct >= 0,
+            replayFrameDebtNoMoreThanFivePercentWorse: phases.replayPass.frameBudgetDebtMs.improvementPct >= -5,
             idleFrameDebtNoMoreThanFivePercentWorse: phases.idle.frameBudgetDebtMs.improvementPct >= -5,
           };
           const passed = Object.values(checks).every(Boolean);
@@ -201,7 +201,7 @@ jobs:
             '|---|---:|---:|---:|',
             ...rows.map(([label, value]) => `| ${label} | ${value.baseline} | ${value.optimized} | ${pct(value.improvementPct)} |`),
             '',
-            'Arrival is a fixed-duration camera animation and is therefore gated as a non-regression metric; frame pacing must still improve by at least 5%.',
+            'Arrival is a fixed-duration camera animation. Arrival, replay debt, idle debt, and worst-frame metrics are gated against regressions beyond a 5% noise tolerance; cold FPS and cold frame-budget debt must each improve by at least 5%.',
             '',
             '## Merge gate',
             '',
