@@ -8,6 +8,7 @@ import { RoomCore } from './RoomCore';
 import { RoomDisplays } from './RoomDisplays';
 import { RoomFixtures } from './RoomFixtures';
 import { RoomGrounding } from './RoomGrounding';
+import { RoomHeroLod } from './RoomHeroLod';
 import { LifeMotes } from './LifeMotes';
 import { RoomLighting } from './RoomLighting';
 import { SceneProps } from './SceneProps';
@@ -29,7 +30,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
   const BespokeScene = roomScenes[room.id];
   const usesRoomSet = ['gallery', 'academy', 'studio', 'living-building', 'neighborhood'].includes(room.architecture);
   const fallback = HEAVY_HERO_ROOMS.has(room.id)
-    ? <RoomCore room={room} active={active} />
+    ? <RoomHeroLod room={room} active={active} />
     : usesRoomSet
       ? null
       : <RoomCore room={room} active={active} />;
