@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Environment, Lightformer, PerformanceMonitor, Preload } from '@react-three/drei';
+import { Environment, Lightformer, PerformanceMonitor } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping } from 'three';
 import { useExperienceStore } from '../state/useExperienceStore';
@@ -67,7 +67,6 @@ export function ExperienceCanvas() {
         <CameraDirector />
         <PerformanceGovernor />
         <PostEffects />
-        <Preload all />
       </AdaptiveQuality>
     </Canvas>
   );
