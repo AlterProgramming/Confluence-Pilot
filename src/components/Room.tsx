@@ -14,6 +14,8 @@ import { SceneProps } from './SceneProps';
 import { SceneStage } from './SceneStage';
 import { roomScenes } from '../scenes/registry';
 
+const HEAVY_HERO_ROOMS = new Set(['03', '04']);
+
 function revealOffset(room: RoomDefinition): [number, number, number] {
   if (room.architecture === 'academy') return [0, -0.24, 0.16];
   if (room.architecture === 'studio') return [-0.22, -0.1, 0.08];
@@ -22,22 +24,15 @@ function revealOffset(room: RoomDefinition): [number, number, number] {
   return [0, -0.14, 0.12];
 }
 
-export function Room({
-  room,
-  active,
-  warming = false,
-  settled,
-}: {
-  room: RoomDefinition;
-  active: boolean;
-  warming?: boolean;
-  settled: boolean;
-}) {
+export function Room({ room, active, settled }: { room: RoomDefinition; active: boolean; settled: boolean }) {
   const contentRef = useRef<Group>(null);
   const BespokeScene = roomScenes[room.id];
-  const sceneActive = active || warming;
   const usesRoomSet = ['gallery', 'academy', 'studio', 'living-building', 'neighborhood'].includes(room.architecture);
-  const fallback = usesRoomSet ? null : <RoomCore room={room} active={sceneActive} />;
+  const fallback = HEAVY_HERO_ROOMS.has(room.id)
+    ? <RoomCore room={room} active={active} />
+    : usesRoomSet
+      ? null
+      : <RoomCore room={room} active={active} />;
 
   useEffect(() => {
     if (!settled || !contentRef.current) return;
@@ -60,21 +55,22 @@ export function Room({
   }, [room, settled]);
 
   return (
-    <group name={`confluence-room-${room.id}`} position={[0, room.y, 0]}>
+    <group position={[0, room.y, 0]}>
       <RoomGrounding room={room} active={active} />
       <SceneStage room={room} active={active} />
       <group ref={contentRef}>
         {BespokeScene ? (
-          <BespokeScene room={room} active={sceneActive} />
+          <BespokeScene room={room} active={active} />
         ) : (
           <>
-            <RoomArchitecture room={room} active={sceneActive} />
-            <RoomDisplays room={room} active={sceneActive} />
-            <RoomFixtures room={room} active={sceneActive} />
-            <SceneProps room={room} active={sceneActive} />
+            <RoomArchitecture room={room} active={active} />
+            <RoomDisplays room={room} active={active} />
+            <RoomFixtures room={room} active={active} />
+            <SceneProps room={room} active={active} />
           </>
         )}
         <RoomAsset
+          roomId={room.id}
           assetUrl={room.assetUrl}
           assetScale={room.assetScale}
           assetPosition={room.assetPosition}
