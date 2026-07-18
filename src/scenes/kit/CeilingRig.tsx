@@ -11,19 +11,20 @@ export function CeilingRig({
   strips = [-3, 0, 3],
   stripWidth = 9,
   ring = true,
+  active = true,
 }: {
   y?: number;
   accent?: string;
   strips?: number[];
   stripWidth?: number;
   ring?: boolean;
+  active?: boolean;
 }) {
   const ringMat = useRef<MeshBasicMaterial>(null);
   useFrame(({ clock }) => {
-    if (ringMat.current) {
-      // Slow breathing between ~0.42 and ~0.72 opacity.
-      ringMat.current.opacity = 0.57 + Math.sin(clock.getElapsedTime() * 0.6) * 0.15;
-    }
+    if (!active || !ringMat.current) return;
+    // Slow breathing between ~0.42 and ~0.72 opacity.
+    ringMat.current.opacity = 0.57 + Math.sin(clock.getElapsedTime() * 0.6) * 0.15;
   });
   return (
     <group position={[0, y, 0]}>

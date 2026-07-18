@@ -8,11 +8,14 @@ import { RoomCore } from './RoomCore';
 import { RoomDisplays } from './RoomDisplays';
 import { RoomFixtures } from './RoomFixtures';
 import { RoomGrounding } from './RoomGrounding';
+import { RoomHeroLod } from './RoomHeroLod';
 import { LifeMotes } from './LifeMotes';
 import { RoomLighting } from './RoomLighting';
 import { SceneProps } from './SceneProps';
 import { SceneStage } from './SceneStage';
 import { roomScenes } from '../scenes/registry';
+
+const HEAVY_HERO_ROOMS = new Set(['03', '04']);
 
 function revealOffset(room: RoomDefinition): [number, number, number] {
   if (room.architecture === 'academy') return [0, -0.24, 0.16];
@@ -26,7 +29,11 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
   const contentRef = useRef<Group>(null);
   const BespokeScene = roomScenes[room.id];
   const usesRoomSet = ['gallery', 'academy', 'studio', 'living-building', 'neighborhood'].includes(room.architecture);
-  const fallback = usesRoomSet ? null : <RoomCore room={room} active={active} />;
+  const fallback = HEAVY_HERO_ROOMS.has(room.id)
+    ? <RoomHeroLod room={room} active={active} />
+    : usesRoomSet
+      ? null
+      : <RoomCore room={room} active={active} />;
 
   useEffect(() => {
     if (!settled || !contentRef.current) return;
@@ -64,12 +71,14 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
           </>
         )}
         <RoomAsset
+          roomId={room.id}
           assetUrl={room.assetUrl}
           assetScale={room.assetScale}
           assetPosition={room.assetPosition}
           assetRotation={room.assetRotation}
           assetTargetSize={room.assetTargetSize}
           assetMaterialTuning={room.assetMaterialTuning}
+          active={active}
           fallback={fallback}
         />
       </group>

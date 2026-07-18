@@ -46,9 +46,9 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
         floorRepeat={cfg.floorRepeat}
         floorRoughness={cfg.floorRoughness}
       />
-      {cfg.ledWall && <LedWall url={cfg.ledWall} radius={8.2} arc={2.2} height={4.2} y={1.5} />}
+      {cfg.ledWall && <LedWall active={active} url={cfg.ledWall} radius={8.2} arc={2.2} height={4.2} y={1.5} />}
       {cfg.glazing && !low && <Glazing side={cfg.glazing} x={7.6} width={11} />}
-      <CeilingRig y={4.5} accent={room.color} />
+      <CeilingRig active={active} y={4.5} accent={room.color} />
       {/* Real overhead pendant fixtures so the ceiling reads inhabited (a repeated
           complaint that rooms 2-12 "gruesomely lack" ceilings). Cheap Clones,
           dropped on the low tier. */}

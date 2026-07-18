@@ -3,13 +3,18 @@ import { useAnimations, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Box3, Mesh, MeshStandardMaterial, Vector3, type Group, type Material } from 'three';
 import type { AssetMaterialTuning, RoomDefinition } from '../types/room';
+import { useExperienceStore } from '../state/useExperienceStore';
 
 type RoomAssetProps = Pick<
   RoomDefinition,
   'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize' | 'assetMaterialTuning'
 > & {
+  roomId: string;
+  active: boolean;
   fallback: ReactNode;
 };
+
+const HEAVY_HERO_ROOMS = new Set(['03', '04']);
 
 class AssetErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -55,6 +60,7 @@ function LoadedRoomAsset({
   rotation,
   targetSize,
   materialTuning,
+  active,
 }: {
   url: string;
   scale: number;
@@ -62,6 +68,7 @@ function LoadedRoomAsset({
   rotation: [number, number, number];
   targetSize: number;
   materialTuning?: AssetMaterialTuning;
+  active: boolean;
 }) {
   const groupRef = useRef<Group>(null);
   const { scene, animations } = useGLTF(url, false, true);
@@ -93,16 +100,16 @@ function LoadedRoomAsset({
 
   useEffect(() => {
     const firstAction = names[0] ? actions[names[0]] : undefined;
-    firstAction?.reset().fadeIn(0.25).play();
+    if (!firstAction) return;
+    if (active) firstAction.reset().fadeIn(0.2).play();
+    else firstAction.fadeOut(0.12).stop();
     return () => {
-      firstAction?.fadeOut(0.15);
+      firstAction.stop();
     };
-  }, [actions, names]);
+  }, [actions, active, names]);
 
-  // Gentle idle motion (slow turn + hover) so the centrepiece feels alive.
-  // Skipped when the GLB ships its own animation.
   useFrame(({ clock }) => {
-    if (names.length > 0) return;
+    if (!active || names.length > 0) return;
     const t = clock.getElapsedTime();
     const inst = normalized.instance;
     inst.rotation.y = t * 0.16;
@@ -126,15 +133,20 @@ export function preloadRoomAsset(url?: string) {
 }
 
 export function RoomAsset({
+  roomId,
   assetUrl,
   assetScale = 1,
   assetPosition = [0, 0.25, 0],
   assetRotation = [0, 0, 0],
   assetTargetSize = 3.5,
   assetMaterialTuning,
+  active,
   fallback,
 }: RoomAssetProps) {
-  if (!assetUrl) return fallback;
+  const qualityTier = useExperienceStore((state) => state.qualityTier);
+  const useFullHero = qualityTier === 'high' || !HEAVY_HERO_ROOMS.has(roomId);
+
+  if (!assetUrl || !useFullHero) return fallback;
 
   return (
     <AssetErrorBoundary fallback={fallback}>
@@ -146,6 +158,7 @@ export function RoomAsset({
           rotation={assetRotation}
           targetSize={assetTargetSize}
           materialTuning={assetMaterialTuning}
+          active={active}
         />
       </Suspense>
     </AssetErrorBoundary>
