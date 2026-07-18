@@ -11,8 +11,6 @@ import { preloadRoomAsset } from './RoomAsset';
 const FURNITURE = [
   'armchair', 'task-chair', 'office-desk', 'coffee-table', 'table',
   'sofa', 'bookshelf', 'planter', 'cabinet', 'ceiling-lamp',
-  // Overhead/lounge pieces added to the scenes — preload so they never hitch
-  // when a room mounts mid-transition (pendants + fans mount as room fabric).
   'modern_ceiling_lamp_01', 'ceiling_fan', 'mid_century_lounge_chair',
 ];
 let furnitureQueued = false;
@@ -20,9 +18,8 @@ let furnitureQueued = false;
 export function RoomStack() {
   const activeRoom = useExperienceStore((state) => state.activeRoom);
   const requestedRoom = useExperienceStore((state) => state.requestedRoom);
-  const isPreparing = useExperienceStore((state) => state.isPreparing);
+  const warmingRoom = useExperienceStore((state) => state.warmingRoom);
   const isTransitioning = useExperienceStore((state) => state.isTransitioning);
-  const destinationActive = isPreparing || isTransitioning;
 
   useEffect(() => {
     if (furnitureQueued) return;
@@ -31,11 +28,10 @@ export function RoomStack() {
   }, []);
 
   useEffect(() => {
-    // Preload hero + LED wall for the active, destination, and their neighbours,
-    // so the next scene's assets are parsed before we ever swipe into it.
     const candidates = new Set([
       activeRoom,
       requestedRoom,
+      warmingRoom ?? activeRoom,
       activeRoom - 1,
       activeRoom + 1,
       requestedRoom - 1,
@@ -48,21 +44,25 @@ export function RoomStack() {
       const led = sceneConfigs[room.id]?.ledWall;
       if (led) useTexture.preload(led);
     });
-  }, [activeRoom, requestedRoom]);
+  }, [activeRoom, requestedRoom, warmingRoom]);
 
   return (
     <group>
       {rooms.map((room, index) => {
         const nearActive = Math.abs(index - activeRoom) <= 1;
-        const nearDestination = destinationActive && Math.abs(index - requestedRoom) <= 1;
-        const shouldRender = nearActive || nearDestination;
+        const nearDestination = isTransitioning && Math.abs(index - requestedRoom) <= 1;
+        const isWarming = warmingRoom === index && !isTransitioning && index !== activeRoom;
+        const shouldRender = nearActive || nearDestination || isWarming;
         if (!shouldRender) return null;
+
+        const active = index === activeRoom || (isTransitioning && index === requestedRoom);
         return (
           <Room
             key={room.id}
             room={room}
-            active={index === activeRoom || (destinationActive && index === requestedRoom)}
-            settled={!isPreparing && !isTransitioning && index === activeRoom}
+            active={active}
+            warming={isWarming}
+            settled={!isTransitioning && index === activeRoom}
           />
         );
       })}
