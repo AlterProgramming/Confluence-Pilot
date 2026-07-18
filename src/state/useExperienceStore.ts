@@ -7,7 +7,7 @@ type ExperienceState = {
   started: boolean;
   activeRoom: number;
   requestedRoom: number;
-  isPreparing: boolean;
+  warmingRoom: number | null;
   isTransitioning: boolean;
   transitionDirection: -1 | 0 | 1;
   transitionProgress: number;
@@ -17,7 +17,7 @@ type ExperienceState = {
   start: () => void;
   requestRoom: (delta: -1 | 1) => void;
   goToRoom: (index: number) => void;
-  beginTransition: () => void;
+  setWarmingRoom: (index: number | null) => void;
   setTransitionProgress: (progress: number) => void;
   completeTransition: () => void;
   setReducedMotion: (value: boolean) => void;
@@ -48,7 +48,7 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   started: captureMode,
   activeRoom: initialRoom,
   requestedRoom: initialRoom,
-  isPreparing: false,
+  warmingRoom: null,
   isTransitioning: false,
   transitionDirection: 0,
   transitionProgress: 0,
@@ -58,47 +58,41 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   start: () => set({ started: true }),
   requestRoom: (delta) => {
     const state = get();
-    if (!state.started || state.isPreparing || state.isTransitioning) return;
+    if (!state.started || state.isTransitioning) return;
 
     const next = clampRoom(state.activeRoom + delta);
     if (next === state.activeRoom) return;
 
     set({
       requestedRoom: next,
-      isPreparing: true,
+      warmingRoom: null,
+      isTransitioning: true,
       transitionDirection: delta,
       transitionProgress: 0,
     });
   },
   goToRoom: (index) => {
     const state = get();
-    if (!state.started || state.isPreparing || state.isTransitioning) return;
+    if (!state.started || state.isTransitioning) return;
 
     const next = clampRoom(index);
     if (next === state.activeRoom) return;
 
     set({
       requestedRoom: next,
-      isPreparing: true,
+      warmingRoom: null,
+      isTransitioning: true,
       transitionDirection: next > state.activeRoom ? 1 : -1,
       transitionProgress: 0,
     });
   },
-  beginTransition: () => {
-    const state = get();
-    if (!state.isPreparing) return;
-    if (state.requestedRoom === state.activeRoom) {
-      set({ isPreparing: false, transitionDirection: 0, transitionProgress: 0 });
-      return;
-    }
-    set({ isPreparing: false, isTransitioning: true, transitionProgress: 0 });
-  },
+  setWarmingRoom: (index) => set({ warmingRoom: index }),
   setTransitionProgress: (progress) => set({ transitionProgress: progress }),
   completeTransition: () => {
     const requestedRoom = get().requestedRoom;
     set({
       activeRoom: requestedRoom,
-      isPreparing: false,
+      warmingRoom: null,
       isTransitioning: false,
       transitionDirection: 0,
       transitionProgress: 0,
