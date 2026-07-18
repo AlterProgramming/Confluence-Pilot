@@ -8,6 +8,7 @@ export function Hud() {
   const start = useExperienceStore((state) => state.start);
   const activeRoom = useExperienceStore((state) => state.activeRoom);
   const requestedRoom = useExperienceStore((state) => state.requestedRoom);
+  const isPreparing = useExperienceStore((state) => state.isPreparing);
   const isTransitioning = useExperienceStore((state) => state.isTransitioning);
   const transitionProgress = useExperienceStore((state) => state.transitionProgress);
   const transitionDirection = useExperienceStore((state) => state.transitionDirection);
@@ -19,6 +20,7 @@ export function Hud() {
   const setSoundEnabled = useExperienceStore((state) => state.setSoundEnabled);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
   const { active: assetsLoading, progress: assetProgress } = useProgress();
+  const busy = isPreparing || isTransitioning;
 
   const displayIndex = isTransitioning && transitionProgress > 0.52 ? requestedRoom : activeRoom;
   const room = rooms[displayIndex];
@@ -80,6 +82,7 @@ export function Hud() {
             aria-current={index === displayIndex ? 'step' : undefined}
             className={index === displayIndex ? 'active' : ''}
             onClick={() => goToRoom(index)}
+            disabled={busy}
           >
             <span>{item.id}</span>
           </button>
@@ -90,7 +93,7 @@ export function Hud() {
         <button
           type="button"
           onClick={() => requestRoom(1)}
-          disabled={!started || isTransitioning || activeRoom === rooms.length - 1}
+          disabled={!started || busy || activeRoom === rooms.length - 1}
           aria-label="Move up to next room"
         >
           <span>↑</span>
@@ -99,7 +102,7 @@ export function Hud() {
         <button
           type="button"
           onClick={() => requestRoom(-1)}
-          disabled={!started || isTransitioning || activeRoom === 0}
+          disabled={!started || busy || activeRoom === 0}
           aria-label="Move down to previous room"
         >
           <span>↓</span>
@@ -116,10 +119,14 @@ export function Hud() {
         <i />
       </div>
 
-      <div className={`transition-status ${isTransitioning ? 'visible' : ''}`} aria-hidden={!isTransitioning}>
-        <span>{transitionDirection > 0 ? 'Ascending' : 'Descending'} through the conduit</span>
+      <div className={`transition-status ${busy ? 'visible' : ''}`} aria-hidden={!busy}>
+        <span>
+          {isPreparing
+            ? 'Preparing destination on the GPU'
+            : `${transitionDirection > 0 ? 'Ascending' : 'Descending'} through the conduit`}
+        </span>
         <strong>Room {destination.id}</strong>
-        <div><i style={{ transform: `scaleX(${transitionProgress})` }} /></div>
+        <div><i style={{ transform: `scaleX(${isPreparing ? 0.18 : transitionProgress})` }} /></div>
       </div>
 
       {assetsLoading && (
