@@ -22,11 +22,29 @@ function revealOffset(room: RoomDefinition): [number, number, number] {
   return [0, -0.14, 0.12];
 }
 
-export function Room({ room, active, settled }: { room: RoomDefinition; active: boolean; settled: boolean }) {
+export function Room({
+  room,
+  active,
+  settled,
+  visible = true,
+}: {
+  room: RoomDefinition;
+  active: boolean;
+  settled: boolean;
+  visible?: boolean;
+}) {
   const contentRef = useRef<Group>(null);
   const BespokeScene = roomScenes[room.id];
   const usesRoomSet = ['gallery', 'academy', 'studio', 'living-building', 'neighborhood'].includes(room.architecture);
   const fallback = usesRoomSet ? null : <RoomCore room={room} active={active} />;
+  const assetProps = {
+    ...(room.assetUrl !== undefined ? { assetUrl: room.assetUrl } : {}),
+    ...(room.assetScale !== undefined ? { assetScale: room.assetScale } : {}),
+    ...(room.assetPosition !== undefined ? { assetPosition: room.assetPosition } : {}),
+    ...(room.assetRotation !== undefined ? { assetRotation: room.assetRotation } : {}),
+    ...(room.assetTargetSize !== undefined ? { assetTargetSize: room.assetTargetSize } : {}),
+    ...(room.assetMaterialTuning !== undefined ? { assetMaterialTuning: room.assetMaterialTuning } : {}),
+  };
 
   useEffect(() => {
     if (!settled || !contentRef.current) return;
@@ -49,7 +67,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
   }, [room, settled]);
 
   return (
-    <group position={[0, room.y, 0]}>
+    <group position={[0, room.y, 0]} visible={visible}>
       <RoomGrounding room={room} active={active} />
       <SceneStage room={room} active={active} />
       <group ref={contentRef}>
@@ -63,15 +81,7 @@ export function Room({ room, active, settled }: { room: RoomDefinition; active: 
             <SceneProps room={room} active={active} />
           </>
         )}
-        <RoomAsset
-          assetUrl={room.assetUrl}
-          assetScale={room.assetScale}
-          assetPosition={room.assetPosition}
-          assetRotation={room.assetRotation}
-          assetTargetSize={room.assetTargetSize}
-          assetMaterialTuning={room.assetMaterialTuning}
-          fallback={fallback}
-        />
+        <RoomAsset {...assetProps} active={visible} fallback={fallback} />
       </group>
       {active && <LifeMotes color={room.color} />}
       <RoomLighting room={room} active={active} />

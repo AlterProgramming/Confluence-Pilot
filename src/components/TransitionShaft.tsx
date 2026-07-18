@@ -1,8 +1,8 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { AdditiveBlending, BackSide, type Group, type Mesh } from 'three';
-import { rooms } from '../data/rooms';
-import { useExperienceStore } from '../state/useExperienceStore';
+import { getRoom } from '../data/rooms';
+import { getFrameTransitionProgress, useExperienceStore } from '../state/useExperienceStore';
 
 function RectilinearDeck({ y, accent, secondary, opacity }: { y: number; accent: string; secondary: string; opacity: number }) {
   return (
@@ -49,8 +49,8 @@ export function TransitionShaft() {
   const transitionProgress = useExperienceStore((state) => state.transitionProgress);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
 
-  const roomA = rooms[activeRoom];
-  const roomB = rooms[requestedRoom];
+  const roomA = getRoom(activeRoom);
+  const roomB = getRoom(requestedRoom);
   const height = Math.max(5, Math.abs(roomB.y - roomA.y) - 7.4);
   const centerY = (roomA.y + roomB.y) * 0.5 + 0.7;
   const deckSpacing = qualityTier === 'low' ? 3.3 : 2.2;
@@ -69,11 +69,12 @@ export function TransitionShaft() {
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
+    const framePulse = reducedMotion ? 0.22 : Math.sin(getFrameTransitionProgress() * Math.PI);
     const direction = roomB.y >= roomA.y ? 1 : -1;
     groupRef.current.rotation.y = reducedMotion ? 0 : Math.sin(clock.getElapsedTime() * 0.42) * 0.025 * direction;
     if (coreRef.current) {
-      coreRef.current.scale.x = 1 + pulse * 0.24;
-      coreRef.current.scale.z = 1 + pulse * 0.24;
+      coreRef.current.scale.x = 1 + framePulse * 0.24;
+      coreRef.current.scale.z = 1 + framePulse * 0.24;
     }
   });
 

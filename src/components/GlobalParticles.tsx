@@ -7,17 +7,23 @@ import {
   Vector3,
   type Group,
 } from 'three';
-import { rooms } from '../data/rooms';
-import { useExperienceStore } from '../state/useExperienceStore';
+import { getRoom, rooms } from '../data/rooms';
+import { getFrameTransitionProgress, useExperienceStore } from '../state/useExperienceStore';
 import type { RoomDefinition, RoomShape } from '../types/room';
 
 const TAU = Math.PI * 2;
+const renderMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('render') === '1';
 
 type Random = () => number;
 type Vec3 = [number, number, number];
 type QuantizedTarget = { data: Uint16Array; min: Vec3; max: Vec3 };
 
+function getTarget(targets: QuantizedTarget[], index: number): QuantizedTarget {
+  return targets[index] ?? targets[0]!;
+}
+
 function particleBudget() {
+  if (renderMode) return 1_600;
   if (typeof window === 'undefined') return 6_500;
   const mobile = window.innerWidth < 760;
   const lowConcurrency = (navigator.hardwareConcurrency ?? 8) <= 4;
@@ -207,24 +213,25 @@ function createRoomTarget(room: RoomDefinition, count: number, seed: number): Qu
     raw[stride + 1] = point[1] + 0.72;
     raw[stride + 2] = point[2];
     for (let axis = 0; axis < 3; axis += 1) {
-      min[axis] = Math.min(min[axis], raw[stride + axis]);
-      max[axis] = Math.max(max[axis], raw[stride + axis]);
+      const value = raw[stride + axis]!;
+      min[axis] = Math.min(min[axis]!, value);
+      max[axis] = Math.max(max[axis]!, value);
     }
   }
 
   // Keep a small guard band so quantization never clips the authored volume.
   for (let axis = 0; axis < 3; axis += 1) {
-    const padding = Math.max(0.02, (max[axis] - min[axis]) * 0.012);
-    min[axis] -= padding;
-    max[axis] += padding;
+    const padding = Math.max(0.02, (max[axis]! - min[axis]!) * 0.012);
+    min[axis] = min[axis]! - padding;
+    max[axis] = max[axis]! + padding;
   }
 
   const data = new Uint16Array(count * 3);
   for (let index = 0; index < count; index += 1) {
     const stride = index * 3;
     for (let axis = 0; axis < 3; axis += 1) {
-      const range = Math.max(0.0001, max[axis] - min[axis]);
-      const normalized = Math.max(0, Math.min(1, (raw[stride + axis] - min[axis]) / range));
+      const range = Math.max(0.0001, max[axis]! - min[axis]!);
+      const normalized = Math.max(0, Math.min(1, (raw[stride + axis]! - min[axis]!) / range));
       data[stride + axis] = Math.round(normalized * 65535);
     }
   }
@@ -346,12 +353,12 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-export function GlobalParticles() {
+function ActiveGlobalParticles() {
   const groupRef = useRef<Group>(null);
   const materialRef = useRef<ShaderMaterial>(null);
   const activeRoom = useExperienceStore((state) => state.activeRoom);
   const requestedRoom = useExperienceStore((state) => state.requestedRoom);
-  const count = useMemo(particleBudget, []);
+  const count = useMemo(() => particleBudget(), []);
 
   const { scatter, seeds, targets } = useMemo(() => {
     const random = mulberry32(20260716);
@@ -387,35 +394,37 @@ export function GlobalParticles() {
       uDirection: { value: 1 },
       uPixelRatio: { value: Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio, 1.45) },
       uReducedMotion: { value: 0 },
-      uColorA: { value: new Color(rooms[0].secondaryColor) },
-      uColorB: { value: new Color(rooms[0].secondaryColor) },
-      uFromMin: { value: new Vector3(...targets[0].min) },
-      uFromMax: { value: new Vector3(...targets[0].max) },
-      uToMin: { value: new Vector3(...targets[0].min) },
-      uToMax: { value: new Vector3(...targets[0].max) },
+      uColorA: { value: new Color(getRoom(0).secondaryColor) },
+      uColorB: { value: new Color(getRoom(0).secondaryColor) },
+      uFromMin: { value: new Vector3(...getTarget(targets, 0).min) },
+      uFromMax: { value: new Vector3(...getTarget(targets, 0).max) },
+      uToMin: { value: new Vector3(...getTarget(targets, 0).min) },
+      uToMax: { value: new Vector3(...getTarget(targets, 0).max) },
     }),
-    [],
+    [targets],
   );
 
   useFrame(({ clock }) => {
     if (!groupRef.current || !materialRef.current) return;
     const state = useExperienceStore.getState();
-    const roomA = rooms[state.activeRoom];
-    const roomB = rooms[state.requestedRoom];
-    const progress = state.isTransitioning ? state.transitionProgress : 0;
+    const roomA = getRoom(state.activeRoom);
+    const roomB = getRoom(state.requestedRoom);
+    const fromTarget = getTarget(targets, state.activeRoom);
+    const toTarget = getTarget(targets, state.requestedRoom);
+    const progress = state.isTransitioning ? getFrameTransitionProgress() : 0;
 
     groupRef.current.position.y = roomA.y + (roomB.y - roomA.y) * progress;
-    materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
-    materialRef.current.uniforms.uProgress.value = progress;
-    materialRef.current.uniforms.uTransition.value = state.isTransitioning ? 1 : 0;
-    materialRef.current.uniforms.uDirection.value = state.transitionDirection || 1;
-    materialRef.current.uniforms.uReducedMotion.value = state.reducedMotion ? 1 : 0;
-    materialRef.current.uniforms.uColorA.value.set(roomA.secondaryColor);
-    materialRef.current.uniforms.uColorB.value.set(roomB.secondaryColor);
-    materialRef.current.uniforms.uFromMin.value.set(...targets[state.activeRoom].min);
-    materialRef.current.uniforms.uFromMax.value.set(...targets[state.activeRoom].max);
-    materialRef.current.uniforms.uToMin.value.set(...targets[state.requestedRoom].min);
-    materialRef.current.uniforms.uToMax.value.set(...targets[state.requestedRoom].max);
+    materialRef.current.uniforms.uTime!.value = clock.getElapsedTime();
+    materialRef.current.uniforms.uProgress!.value = progress;
+    materialRef.current.uniforms.uTransition!.value = state.isTransitioning ? 1 : 0;
+    materialRef.current.uniforms.uDirection!.value = state.transitionDirection || 1;
+    materialRef.current.uniforms.uReducedMotion!.value = state.reducedMotion ? 1 : 0;
+    materialRef.current.uniforms.uColorA!.value.set(roomA.secondaryColor);
+    materialRef.current.uniforms.uColorB!.value.set(roomB.secondaryColor);
+    materialRef.current.uniforms.uFromMin!.value.set(...fromTarget.min);
+    materialRef.current.uniforms.uFromMax!.value.set(...fromTarget.max);
+    materialRef.current.uniforms.uToMin!.value.set(...toTarget.min);
+    materialRef.current.uniforms.uToMax!.value.set(...toTarget.max);
   });
 
   return (
@@ -423,8 +432,8 @@ export function GlobalParticles() {
       <points frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[scatter, 3]} />
-          <bufferAttribute key={`from-${activeRoom}`} attach="attributes-aFromQ" args={[targets[activeRoom].data, 3, true]} />
-          <bufferAttribute key={`to-${requestedRoom}`} attach="attributes-aToQ" args={[targets[requestedRoom].data, 3, true]} />
+          <bufferAttribute key={`from-${activeRoom}`} attach="attributes-aFromQ" args={[getTarget(targets, activeRoom).data, 3, true]} />
+          <bufferAttribute key={`to-${requestedRoom}`} attach="attributes-aToQ" args={[getTarget(targets, requestedRoom).data, 3, true]} />
           <bufferAttribute attach="attributes-aScatter" args={[scatter, 3]} />
           <bufferAttribute attach="attributes-aSeed" args={[seeds, 4]} />
         </bufferGeometry>
@@ -441,4 +450,14 @@ export function GlobalParticles() {
       </points>
     </group>
   );
+}
+
+export function GlobalParticles() {
+  const qualityTier = useExperienceStore((state) => state.qualityTier);
+  const reducedMotion = useExperienceStore((state) => state.reducedMotion);
+  // Recording already uses the procedural transition proxy. Excluding this
+  // cosmetic pass avoids replacing its GPU attribute buffers on every room
+  // change while the transition is rendering.
+  if (renderMode || qualityTier === 'low' || reducedMotion) return null;
+  return <ActiveGlobalParticles />;
 }

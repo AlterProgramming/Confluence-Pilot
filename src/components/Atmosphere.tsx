@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Color, Fog } from 'three';
-import { rooms } from '../data/rooms';
+import { getRoom } from '../data/rooms';
 import { useExperienceStore } from '../state/useExperienceStore';
 
 export function Atmosphere() {
@@ -17,8 +17,8 @@ export function Atmosphere() {
     const state = useExperienceStore.getState();
     const progress = state.isTransitioning ? state.transitionProgress : 0;
     const travel = state.isTransitioning ? Math.sin(progress * Math.PI) : 0;
-    colorA.set(rooms[state.activeRoom].color);
-    colorB.set(rooms[state.requestedRoom].color);
+    colorA.set(getRoom(state.activeRoom).color);
+    colorB.set(getRoom(state.requestedRoom).color);
     mixed.lerpColors(colorA, colorB, progress);
 
     backgroundRef.current.copy(dark).lerp(mixed, 0.12 + travel * 0.03);

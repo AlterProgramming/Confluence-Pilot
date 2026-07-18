@@ -1,0 +1,229 @@
+{
+  "generatedAt": "2026-07-17T20:05:47.620Z",
+  "root": "public/assets",
+  "total": {
+    "count": 176,
+    "bytes": 74027353,
+    "mb": 70.6
+  },
+  "byExtension": [
+    {
+      "extension": ".glb",
+      "count": 156,
+      "bytes": 70125488,
+      "mb": 66.88
+    },
+    {
+      "extension": ".mp3",
+      "count": 5,
+      "bytes": 2821171,
+      "mb": 2.69
+    },
+    {
+      "extension": ".webp",
+      "count": 12,
+      "bytes": 1073714,
+      "mb": 1.02
+    },
+    {
+      "extension": ".json",
+      "count": 1,
+      "bytes": 3686,
+      "mb": 0
+    },
+    {
+      "extension": ".svg",
+      "count": 1,
+      "bytes": 3220,
+      "mb": 0
+    },
+    {
+      "extension": ".txt",
+      "count": 1,
+      "bytes": 74,
+      "mb": 0
+    }
+  ],
+  "largest": [
+    {
+      "path": "public/assets/room-07-hero.glb",
+      "extension": ".glb",
+      "bytes": 4723992,
+      "mb": 4.51
+    },
+    {
+      "path": "public/assets/room-04-hero.glb",
+      "extension": ".glb",
+      "bytes": 4304436,
+      "mb": 4.11
+    },
+    {
+      "path": "public/assets/room-03-hero.glb",
+      "extension": ".glb",
+      "bytes": 3658996,
+      "mb": 3.49
+    },
+    {
+      "path": "public/assets/room-10-hero.glb",
+      "extension": ".glb",
+      "bytes": 2964168,
+      "mb": 2.83
+    },
+    {
+      "path": "public/assets/room-06-hero.glb",
+      "extension": ".glb",
+      "bytes": 2871984,
+      "mb": 2.74
+    },
+    {
+      "path": "public/assets/room-05-hero.glb",
+      "extension": ".glb",
+      "bytes": 2472632,
+      "mb": 2.36
+    },
+    {
+      "path": "public/assets/room-11-hero.glb",
+      "extension": ".glb",
+      "bytes": 2424240,
+      "mb": 2.31
+    },
+    {
+      "path": "public/assets/audio/confluence-ambient-main.mp3",
+      "extension": ".mp3",
+      "bytes": 2160621,
+      "mb": 2.06
+    },
+    {
+      "path": "public/assets/room-12-hero.glb",
+      "extension": ".glb",
+      "bytes": 2142096,
+      "mb": 2.04
+    },
+    {
+      "path": "public/assets/room-09-hero.glb",
+      "extension": ".glb",
+      "bytes": 1974732,
+      "mb": 1.88
+    },
+    {
+      "path": "public/assets/furniture/korean_public_payphone_01.glb",
+      "extension": ".glb",
+      "bytes": 1306388,
+      "mb": 1.25
+    },
+    {
+      "path": "public/assets/room-01-hero.glb",
+      "extension": ".glb",
+      "bytes": 1140544,
+      "mb": 1.09
+    },
+    {
+      "path": "public/assets/room-01-kiosk.glb",
+      "extension": ".glb",
+      "bytes": 1069884,
+      "mb": 1.02
+    },
+    {
+      "path": "public/assets/room-02-hero.glb",
+      "extension": ".glb",
+      "bytes": 1052884,
+      "mb": 1
+    },
+    {
+      "path": "public/assets/furniture/gothic_statue.glb",
+      "extension": ".glb",
+      "bytes": 840144,
+      "mb": 0.8
+    },
+    {
+      "path": "public/assets/furniture/Camera_01.glb",
+      "extension": ".glb",
+      "bytes": 822872,
+      "mb": 0.78
+    },
+    {
+      "path": "public/assets/room-08-hero.glb",
+      "extension": ".glb",
+      "bytes": 814792,
+      "mb": 0.78
+    },
+    {
+      "path": "public/assets/furniture/concrete_cat_statue.glb",
+      "extension": ".glb",
+      "bytes": 660372,
+      "mb": 0.63
+    },
+    {
+      "path": "public/assets/furniture/bar_chair_round_01.glb",
+      "extension": ".glb",
+      "bytes": 546332,
+      "mb": 0.52
+    },
+    {
+      "path": "public/assets/furniture/bookshelf.glb",
+      "extension": ".glb",
+      "bytes": 529640,
+      "mb": 0.51
+    },
+    {
+      "path": "public/assets/furniture/fancy_picture_frame_02.glb",
+      "extension": ".glb",
+      "bytes": 490916,
+      "mb": 0.47
+    },
+    {
+      "path": "public/assets/furniture/CoffeeCart_01.glb",
+      "extension": ".glb",
+      "bytes": 481980,
+      "mb": 0.46
+    },
+    {
+      "path": "public/assets/audio/ambient-room-bed.mp3",
+      "extension": ".mp3",
+      "bytes": 481115,
+      "mb": 0.46
+    },
+    {
+      "path": "public/assets/furniture/modern_coffee_table_02.glb",
+      "extension": ".glb",
+      "bytes": 469944,
+      "mb": 0.45
+    },
+    {
+      "path": "public/assets/furniture/gaming_console.glb",
+      "extension": ".glb",
+      "bytes": 465332,
+      "mb": 0.44
+    },
+    {
+      "path": "public/assets/furniture/gothic_coffee_table.glb",
+      "extension": ".glb",
+      "bytes": 464504,
+      "mb": 0.44
+    },
+    {
+      "path": "public/assets/furniture/book_encyclopedia_set_01.glb",
+      "extension": ".glb",
+      "bytes": 463064,
+      "mb": 0.44
+    },
+    {
+      "path": "public/assets/furniture/hanging_industrial_lamp.glb",
+      "extension": ".glb",
+      "bytes": 454884,
+      "mb": 0.43
+    },
+    {
+      "path": "public/assets/furniture/boombox.glb",
+      "extension": ".glb",
+      "bytes": 441276,
+      "mb": 0.42
+    },
+    {
+      "path": "public/assets/furniture/adjustable_wrench.glb",
+      "extension": ".glb",
+      "bytes": 438684,
+      "mb": 0.42
+    }
+  ]
+}

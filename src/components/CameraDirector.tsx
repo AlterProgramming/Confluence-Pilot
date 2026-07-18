@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { PerspectiveCamera } from 'three';
 import gsap from 'gsap';
-import { rooms } from '../data/rooms';
+import { getRoom } from '../data/rooms';
 import { useExperienceStore } from '../state/useExperienceStore';
 
 // Keep navigation tied to elapsed time even when a low-power GPU drops frames.
@@ -30,6 +30,7 @@ type CaptureOffset = {
 
 const captureParams = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search);
 const captureMode = captureParams?.get('capture') === '1';
+const renderMode = captureParams?.get('render') === '1';
 const captureView = captureMode ? captureParams?.get('view') : null;
 const NO_CAPTURE_OFFSET: CaptureOffset = { x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 };
 
@@ -57,7 +58,7 @@ const secondaryOffsets: Record<string, CaptureOffset> = {
 
 function getCaptureOffset(roomId: string): CaptureOffset {
   if (captureView !== 'secondary') return NO_CAPTURE_OFFSET;
-  return secondaryOffsets[roomId] ?? secondaryOffsets['01'];
+  return secondaryOffsets[roomId] ?? secondaryOffsets['01']!;
 }
 
 export function CameraDirector() {
@@ -69,9 +70,9 @@ export function CameraDirector() {
   const reducedMotion = useExperienceStore((state) => state.reducedMotion);
   const setTransitionProgress = useExperienceStore((state) => state.setTransitionProgress);
   const completeTransition = useExperienceStore((state) => state.completeTransition);
-  const captureOffset = getCaptureOffset(rooms[activeRoom]?.id ?? '');
+  const captureOffset = getCaptureOffset(getRoom(activeRoom).id);
 
-  const initial = rooms[0];
+  const initial = getRoom(0);
   const proxy = useMemo<CameraProxy>(
     () => ({
       x: initial.camera[0],
@@ -89,9 +90,10 @@ export function CameraDirector() {
   const progressProxy = useRef({ value: 0 });
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const previousFov = useRef(proxy.fov);
+  const lastCommittedProgress = useRef(0);
 
   useEffect(() => {
-    const room = rooms[activeRoom];
+    const room = getRoom(activeRoom);
     if (isTransitioning) return;
 
     proxy.x = room.camera[0];
@@ -109,16 +111,22 @@ export function CameraDirector() {
 
     timelineRef.current?.kill();
 
-    const destination = rooms[requestedRoom];
+    const destination = getRoom(requestedRoom);
     const distance = Math.max(1, Math.abs(requestedRoom - activeRoom));
     const direction = requestedRoom > activeRoom ? 1 : -1;
     const duration = reducedMotion ? 0.12 : 1.42 + Math.min(1.05, (distance - 1) * 0.16);
     const sideExcursion = direction * Math.min(1.7, 0.95 + distance * 0.12);
     progressProxy.current.value = 0;
+    lastCommittedProgress.current = 0;
 
     const timeline = gsap.timeline({
       defaults: { ease: 'power3.inOut' },
-      onUpdate: () => setTransitionProgress(progressProxy.current.value),
+      onUpdate: () => {
+        const value = progressProxy.current.value;
+        const shouldCommit = !renderMode && (Math.abs(value - lastCommittedProgress.current) >= 0.06 || value >= 0.995);
+        setTransitionProgress(value, shouldCommit);
+        if (shouldCommit) lastCommittedProgress.current = value;
+      },
       onComplete: completeTransition,
     });
 

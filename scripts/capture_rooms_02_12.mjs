@@ -7,14 +7,14 @@ const rooms = [
   [2, '/assets/room-02-credential-stack.glb'],
   [3, '/assets/room-03-fabricator.glb'],
   [4, '/assets/room-04-building-node.glb'],
-  [5, '/assets/room-05-city-model.glb'],
-  [6, '/assets/room-06-survey-rover.glb'],
-  [7, '/assets/room-07-secure-vault.glb'],
-  [8, '/assets/room-08-delivery-drone.glb'],
-  [9, '/assets/room-09-satellite-terminal.glb'],
-  [10, '/assets/room-10-coldchain-unit.glb'],
-  [11, '/assets/room-11-fintech-vault.glb'],
-  [12, '/assets/room-12-mainstreet-terminal.glb'],
+  [5, '/assets/room-05-hero.glb'],
+  [6, '/assets/room-06-hero.glb'],
+  [7, '/assets/room-07-hero.glb'],
+  [8, '/assets/room-08-hero.glb'],
+  [9, '/assets/room-09-hero.glb'],
+  [10, '/assets/room-10-hero.glb'],
+  [11, '/assets/room-11-hero.glb'],
+  [12, '/assets/room-12-hero.glb'],
 ];
 
 let failed = false;

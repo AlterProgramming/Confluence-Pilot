@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-07-17T17:30:50.338Z",
+  "provider": "elevenlabs",
+  "sources": {
+    "trackList": "docs/audio-tracklist.md",
+    "studyGuide": "docs/music-composition-study.md",
+    "engine": "src/lib/audioEngine.ts"
+  },
+  "assets": [
+    {
+      "type": "music",
+      "name": "confluence-ambient-main",
+      "output": "public/assets/audio/confluence-ambient-main.mp3",
+      "bytes": 2160621,
+      "contentType": "audio/mpeg",
+      "songId": "0XVecXzqIsyPyvWIHySv",
+      "characterCost": null
+    },
+    {
+      "type": "sound-effect",
+      "name": "transition-forward",
+      "output": "public/assets/audio/transition-forward.mp3",
+      "bytes": 65245,
+      "contentType": "audio/mpeg",
+      "songId": null,
+      "characterCost": "40"
+    },
+    {
+      "type": "sound-effect",
+      "name": "transition-back",
+      "output": "public/assets/audio/transition-back.mp3",
+      "bytes": 65245,
+      "contentType": "audio/mpeg",
+      "songId": null,
+      "characterCost": "40"
+    },
+    {
+      "type": "sound-effect",
+      "name": "room-arrival-chime",
+      "output": "public/assets/audio/room-arrival-chime.mp3",
+      "bytes": 48945,
+      "contentType": "audio/mpeg",
+      "songId": null,
+      "characterCost": "30"
+    },
+    {
+      "type": "sound-effect",
+      "name": "ambient-room-bed",
+      "output": "public/assets/audio/ambient-room-bed.mp3",
+      "bytes": 481115,
+      "contentType": "audio/mpeg",
+      "songId": null,
+      "characterCost": "300"
+    }
+  ],
+  "prompts": {
+    "music": "Instrumental ambient music loop for the Confluence room pilot, 90 seconds. Mood: calm wonder, intelligent exhibition space, slow spatial breath, refined and cinematic but restrained. Harmony: F minor center with gentle Bb major suspended color, deep 58 Hz/87 Hz drone relationship, soft overtones, no vocals. Texture: warm low synth drone, airy granular shimmer, distant glass harmonics, very slow filter motion, wide stereo reverb. Structure: sparse opening, gradual textural bloom, subtle transition pulse, return to an imperceptible loop point. Avoid drums, pop song structure, lead melody, lyrics, harsh impacts, busy arpeggios.",
+    "soundEffects": [
+      {
+        "name": "transition-forward",
+        "duration_seconds": 4,
+        "loop": false,
+        "prompt_influence": 0.52,
+        "text": "A refined sci-fi gallery transition whoosh: soft filtered air pressure rising upward, glassy shimmer, subtle low-frequency sweep, no explosion, no harsh transient, designed for moving forward through a vertical room conduit."
+      },
+      {
+        "name": "transition-back",
+        "duration_seconds": 4,
+        "loop": false,
+        "prompt_influence": 0.52,
+        "text": "A refined sci-fi gallery transition whoosh in reverse direction: airy filtered descent, low resonant sweep falling gently, distant glass harmonics, no explosion, no harsh transient, designed for moving backward through a vertical room conduit."
+      },
+      {
+        "name": "room-arrival-chime",
+        "duration_seconds": 3,
+        "loop": false,
+        "prompt_influence": 0.48,
+        "text": "A delicate arrival chime for an immersive AI exhibition room: one soft sine-like bell, warm sub resonance, brief crystalline tail, spacious reverb, elegant and understated."
+      },
+      {
+        "name": "ambient-room-bed",
+        "duration_seconds": 30,
+        "loop": true,
+        "prompt_influence": 0.42,
+        "text": "Seamless looping ambient room tone for an AI exhibition gallery: deep warm drone, faint air movement, subtle electrical life, glassy harmonic shimmer, very slow modulation, no melody, no beat, no voices."
+      }
+    ]
+  }
+}

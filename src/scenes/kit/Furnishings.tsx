@@ -48,8 +48,20 @@ export function Workbenches({
     return a;
   }, [rows, perRow, spacingX, z0, rowGap]);
 
-  const monitors = useMemo<Xf[]>(() => desks.map((d) => ({ pos: [d.pos[0], d.pos[1] + 0.62, d.pos[2] - 0.24], rot: d.rot })), [desks]);
-  const legs = useMemo<Xf[]>(() => desks.flatMap((d) => [-0.7, 0.7].map((dx) => ({ pos: [d.pos[0] + dx, d.pos[1] - 0.5, d.pos[2]] as [number, number, number], rot: d.rot }))), [desks]);
+  const monitors = useMemo<Xf[]>(
+    () => desks.map((d) => ({
+      pos: [d.pos[0], d.pos[1] + 0.62, d.pos[2] - 0.24],
+      ...(d.rot !== undefined ? { rot: d.rot } : {}),
+    })),
+    [desks],
+  );
+  const legs = useMemo<Xf[]>(
+    () => desks.flatMap((d) => [-0.7, 0.7].map((dx) => ({
+      pos: [d.pos[0] + dx, d.pos[1] - 0.5, d.pos[2]] as [number, number, number],
+      ...(d.rot !== undefined ? { rot: d.rot } : {}),
+    }))),
+    [desks],
+  );
 
   const deskRef = useRef<InstancedMesh>(null);
   const monRef = useRef<InstancedMesh>(null);

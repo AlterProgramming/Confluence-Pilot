@@ -51,9 +51,11 @@ function makeScreenTexture(accent: string, secondary: string): CanvasTexture | n
   ctx.strokeStyle = rgb(a, 0.5);
   ctx.lineWidth = 1.4;
   for (let i = 0; i < nodes.length - 1; i += 1) {
+    const current = nodes[i]!;
+    const next = nodes[i + 1]!;
     ctx.beginPath();
-    ctx.moveTo(nodes[i].x, nodes[i].y);
-    ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
+    ctx.moveTo(current.x, current.y);
+    ctx.lineTo(next.x, next.y);
     ctx.stroke();
   }
   nodes.forEach((n, i) => {

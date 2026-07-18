@@ -3,6 +3,17 @@ import { rooms } from '../data/rooms';
 
 export type QualityTier = 'high' | 'balanced' | 'low';
 
+export type PerformanceSnapshot = {
+  sampledAt: number;
+  windowMs: number;
+  samples: number;
+  averageIntervalMs: number;
+  p95Ms: number;
+  worstMs: number;
+  longFrames: number;
+  stability: 'stable' | 'watching' | 'stressed';
+};
+
 type ExperienceState = {
   started: boolean;
   activeRoom: number;
@@ -13,14 +24,20 @@ type ExperienceState = {
   reducedMotion: boolean;
   soundEnabled: boolean;
   qualityTier: QualityTier;
+  renderDistance: number;
+  performance: PerformanceSnapshot | null;
+  renderWarmupReady: boolean;
   start: () => void;
   requestRoom: (delta: -1 | 1) => void;
   goToRoom: (index: number) => void;
-  setTransitionProgress: (progress: number) => void;
+  setTransitionProgress: (progress: number, commit?: boolean) => void;
   completeTransition: () => void;
   setReducedMotion: (value: boolean) => void;
   setSoundEnabled: (value: boolean) => void;
   setQualityTier: (value: QualityTier) => void;
+  setRenderDistance: (value: number) => void;
+  setPerformance: (value: PerformanceSnapshot) => void;
+  setRenderWarmupReady: (value: boolean) => void;
 };
 
 const clampRoom = (index: number) => Math.max(0, Math.min(rooms.length - 1, index));
@@ -30,6 +47,15 @@ const captureMode = initialQuery?.get('capture') === '1';
 const captureFullMotion = initialQuery?.get('motion') === 'full';
 const queryRoom = Number.parseInt(initialQuery?.get('room') ?? '1', 10);
 const initialRoom = clampRoom(Number.isFinite(queryRoom) ? queryRoom - 1 : 0);
+let frameTransitionProgress = 0;
+
+export function getFrameTransitionProgress() {
+  return frameTransitionProgress;
+}
+
+function setFrameTransitionProgress(progress: number) {
+  frameTransitionProgress = Math.max(0, Math.min(1, progress));
+}
 
 function initialQuality(): QualityTier {
   const forced = initialQuery?.get('quality');
@@ -52,6 +78,9 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   reducedMotion: captureMode && !captureFullMotion,
   soundEnabled: !captureMode,
   qualityTier: initialQuality(),
+  renderDistance: initialQuality() === 'high' ? 3 : initialQuality() === 'balanced' ? 2 : 1,
+  performance: null,
+  renderWarmupReady: false,
   start: () => set({ started: true }),
   requestRoom: (delta) => {
     const state = get();
@@ -60,6 +89,7 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
     const next = clampRoom(state.activeRoom + delta);
     if (next === state.activeRoom) return;
 
+    setFrameTransitionProgress(0);
     set({
       requestedRoom: next,
       isTransitioning: true,
@@ -74,6 +104,7 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
     const next = clampRoom(index);
     if (next === state.activeRoom) return;
 
+    setFrameTransitionProgress(0);
     set({
       requestedRoom: next,
       isTransitioning: true,
@@ -81,9 +112,13 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
       transitionProgress: 0,
     });
   },
-  setTransitionProgress: (progress) => set({ transitionProgress: progress }),
+  setTransitionProgress: (progress, commit = true) => {
+    setFrameTransitionProgress(progress);
+    if (commit) set({ transitionProgress: frameTransitionProgress });
+  },
   completeTransition: () => {
     const requestedRoom = get().requestedRoom;
+    setFrameTransitionProgress(0);
     set({
       activeRoom: requestedRoom,
       isTransitioning: false,
@@ -94,4 +129,7 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   setReducedMotion: (value) => set({ reducedMotion: value }),
   setSoundEnabled: (value) => set({ soundEnabled: value }),
   setQualityTier: (value) => set({ qualityTier: value }),
+  setRenderDistance: (value) => set({ renderDistance: Math.max(1, Math.min(5, Math.trunc(value))) }),
+  setPerformance: (value) => set({ performance: value }),
+  setRenderWarmupReady: (value) => set({ renderWarmupReady: value }),
 }));

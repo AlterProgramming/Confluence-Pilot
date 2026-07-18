@@ -63,7 +63,7 @@ export function LifeMotes({ color, count = 42, radius = 6.5, height = 4 }: { col
   }, [color, count, radius, height]);
 
   useFrame(({ clock }) => {
-    material.uniforms.uTime.value = clock.getElapsedTime();
+    material.uniforms.uTime!.value = clock.getElapsedTime();
   });
 
   return <points ref={ref} geometry={geometry} material={material} frustumCulled={false} />;

@@ -9,20 +9,21 @@ type RoomAssetProps = Pick<
   'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize' | 'assetMaterialTuning'
 > & {
   fallback: ReactNode;
+  active?: boolean;
 };
 
 class AssetErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.warn('Room GLB failed to load; procedural fallback retained.', error, info.componentStack);
   }
 
-  render() {
+  override render() {
     return this.state.failed ? this.props.fallback : this.props.children;
   }
 }
@@ -48,6 +49,53 @@ function tuneMaterial(source: Material, tuning?: AssetMaterialTuning): Material 
   return pbr;
 }
 
+type PreparedAsset = {
+  template: Group;
+  center: [number, number, number];
+  largestAxis: number;
+};
+
+const preparedAssets = new Map<string, PreparedAsset>();
+
+function tuningKey(tuning?: AssetMaterialTuning) {
+  if (!tuning) return 'default';
+  return [
+    tuning.envMapIntensity ?? '',
+    tuning.emissiveIntensity ?? '',
+    tuning.colorMultiplier ?? '',
+    tuning.roughnessFloor ?? '',
+  ].join('|');
+}
+
+function prepareAssetTemplate(url: string, scene: Group, materialTuning?: AssetMaterialTuning): PreparedAsset {
+  const key = `${url}::${tuningKey(materialTuning)}`;
+  const cached = preparedAssets.get(key);
+  if (cached) return cached;
+
+  const template = scene.clone(true);
+  template.updateMatrixWorld(true);
+  template.traverse((node) => {
+    const mesh = node as Mesh;
+    if (!mesh.isMesh || !mesh.material) return;
+    const original = mesh.material;
+    if (Array.isArray(original)) {
+      mesh.material = original.map((material) => tuneMaterial(material, materialTuning));
+    } else {
+      mesh.material = tuneMaterial(original, materialTuning);
+    }
+  });
+  const bounds = new Box3().setFromObject(template);
+  const size = bounds.getSize(new Vector3());
+  const center = bounds.getCenter(new Vector3());
+  const prepared = {
+    template,
+    center: [-center.x, -center.y, -center.z] as [number, number, number],
+    largestAxis: Math.max(size.x, size.y, size.z, 0.001),
+  };
+  preparedAssets.set(key, prepared);
+  return prepared;
+}
+
 function LoadedRoomAsset({
   url,
   scale,
@@ -55,6 +103,7 @@ function LoadedRoomAsset({
   rotation,
   targetSize,
   materialTuning,
+  active,
 }: {
   url: string;
   scale: number;
@@ -62,34 +111,20 @@ function LoadedRoomAsset({
   rotation: [number, number, number];
   targetSize: number;
   materialTuning?: AssetMaterialTuning;
+  active: boolean;
 }) {
   const groupRef = useRef<Group>(null);
   const { scene, animations } = useGLTF(url, false, true);
   const { actions, names } = useAnimations(animations, groupRef);
 
   const normalized = useMemo(() => {
-    const instance = scene.clone(true);
-    instance.updateMatrixWorld(true);
-    instance.traverse((node) => {
-      const mesh = node as Mesh;
-      if (!mesh.isMesh || !mesh.material) return;
-      const original = mesh.material;
-      if (Array.isArray(original)) {
-        mesh.material = original.map((material) => tuneMaterial(material, materialTuning));
-      } else {
-        mesh.material = tuneMaterial(original, materialTuning);
-      }
-    });
-    const bounds = new Box3().setFromObject(instance);
-    const size = bounds.getSize(new Vector3());
-    const center = bounds.getCenter(new Vector3());
-    const largestAxis = Math.max(size.x, size.y, size.z, 0.001);
+    const prepared = prepareAssetTemplate(url, scene, materialTuning);
     return {
-      instance,
-      center: [-center.x, -center.y, -center.z] as [number, number, number],
-      normalizedScale: (targetSize / largestAxis) * scale,
+      instance: prepared.template.clone(true),
+      center: prepared.center,
+      normalizedScale: (targetSize / prepared.largestAxis) * scale,
     };
-  }, [materialTuning, scale, scene, targetSize]);
+  }, [materialTuning, scale, scene, targetSize, url]);
 
   useEffect(() => {
     const firstAction = names[0] ? actions[names[0]] : undefined;
@@ -102,6 +137,7 @@ function LoadedRoomAsset({
   // Gentle idle motion (slow turn + hover) so the centrepiece feels alive.
   // Skipped when the GLB ships its own animation.
   useFrame(({ clock }) => {
+    if (!active) return;
     if (names.length > 0) return;
     const t = clock.getElapsedTime();
     const inst = normalized.instance;
@@ -125,6 +161,23 @@ export function preloadRoomAsset(url?: string) {
   if (url) useGLTF.preload(url, false, true);
 }
 
+export function RoomAssetPreparer({
+  url,
+  materialTuning,
+  onPrepared,
+}: {
+  url: string;
+  materialTuning?: AssetMaterialTuning;
+  onPrepared: (key: string) => void;
+}) {
+  const { scene } = useGLTF(url, false, true);
+  useEffect(() => {
+    prepareAssetTemplate(url, scene, materialTuning);
+    onPrepared(`asset:${url}:${tuningKey(materialTuning)}`);
+  }, [materialTuning, onPrepared, scene, url]);
+  return null;
+}
+
 export function RoomAsset({
   assetUrl,
   assetScale = 1,
@@ -132,21 +185,24 @@ export function RoomAsset({
   assetRotation = [0, 0, 0],
   assetTargetSize = 3.5,
   assetMaterialTuning,
+  active = true,
   fallback,
 }: RoomAssetProps) {
   if (!assetUrl) return fallback;
+  const loadedProps = {
+    url: assetUrl,
+    scale: assetScale,
+    position: assetPosition,
+    rotation: assetRotation,
+    targetSize: assetTargetSize,
+    active,
+    ...(assetMaterialTuning !== undefined ? { materialTuning: assetMaterialTuning } : {}),
+  };
 
   return (
     <AssetErrorBoundary fallback={fallback}>
       <Suspense fallback={fallback}>
-        <LoadedRoomAsset
-          url={assetUrl}
-          scale={assetScale}
-          position={assetPosition}
-          rotation={assetRotation}
-          targetSize={assetTargetSize}
-          materialTuning={assetMaterialTuning}
-        />
+        <LoadedRoomAsset {...loadedProps} />
       </Suspense>
     </AssetErrorBoundary>
   );

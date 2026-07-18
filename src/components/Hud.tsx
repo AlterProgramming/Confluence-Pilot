@@ -1,5 +1,5 @@
 import { useProgress } from '@react-three/drei';
-import { rooms } from '../data/rooms';
+import { getRoom, rooms } from '../data/rooms';
 import { startAudio } from '../lib/audioEngine';
 import { useExperienceStore } from '../state/useExperienceStore';
 
@@ -19,10 +19,11 @@ export function Hud() {
   const setSoundEnabled = useExperienceStore((state) => state.setSoundEnabled);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
   const { active: assetsLoading, progress: assetProgress } = useProgress();
+  const showAssetLoader = isTransitioning && assetsLoading && assetProgress < 100;
 
   const displayIndex = isTransitioning && transitionProgress > 0.52 ? requestedRoom : activeRoom;
-  const room = rooms[displayIndex];
-  const destination = rooms[requestedRoom];
+  const room = getRoom(displayIndex);
+  const destination = getRoom(requestedRoom);
 
   const enter = () => {
     if (soundEnabled) startAudio();
@@ -122,7 +123,7 @@ export function Hud() {
         <div><i style={{ transform: `scaleX(${transitionProgress})` }} /></div>
       </div>
 
-      {assetsLoading && (
+      {showAssetLoader && (
         <div className="asset-loader" aria-live="polite">
           Loading generated asset · {Math.round(assetProgress)}%
         </div>

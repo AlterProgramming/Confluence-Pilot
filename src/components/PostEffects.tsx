@@ -10,12 +10,14 @@ import {
 import { BlendFunction } from 'postprocessing';
 import { useExperienceStore } from '../state/useExperienceStore';
 
-export function PostEffects() {
+const renderMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('render') === '1';
+
+function ActivePostEffects() {
   const transitioning = useExperienceStore((state) => state.isTransitioning);
   const reducedMotion = useExperienceStore((state) => state.reducedMotion);
   const qualityTier = useExperienceStore((state) => state.qualityTier);
   const travel = transitioning && !reducedMotion ? 1 : 0;
-  const quality = qualityTier === 'high' ? 1 : qualityTier === 'balanced' ? 0.72 : 0.38;
+  const quality = renderMode ? 0.52 : qualityTier === 'high' ? 1 : qualityTier === 'balanced' ? 0.72 : 0.38;
   const offset = useMemo(() => new Vector2(), []);
   offset.set(
     0.00016 + travel * 0.00175 * quality,
@@ -28,7 +30,7 @@ export function PostEffects() {
       luminanceThreshold={0.69 - travel * 0.11}
       luminanceSmoothing={0.24}
       mipmapBlur
-      resolutionScale={qualityTier === 'high' ? 0.45 : 0.32}
+      resolutionScale={renderMode ? 0.24 : qualityTier === 'high' ? 0.45 : 0.32}
     />
   );
   const vignette = <Vignette eskil={false} offset={0.28} darkness={0.26 + travel * 0.08} />;
@@ -52,6 +54,15 @@ export function PostEffects() {
   );
 
   if (qualityTier === 'balanced') {
+    if (renderMode) {
+      return (
+        <EffectComposer multisampling={0} enableNormalPass={false} resolutionScale={0.82}>
+          {bloom}
+          {vignette}
+        </EffectComposer>
+      );
+    }
+
     return (
       <EffectComposer multisampling={0} enableNormalPass={false}>
         {bloom}
@@ -69,4 +80,9 @@ export function PostEffects() {
       {vignette}
     </EffectComposer>
   );
+}
+
+export function PostEffects() {
+  const qualityTier = useExperienceStore((state) => state.qualityTier);
+  return renderMode || qualityTier === 'low' ? null : <ActivePostEffects />;
 }

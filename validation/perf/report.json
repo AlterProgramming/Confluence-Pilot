@@ -1,37 +1,654 @@
 {
   "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x000046A3) Direct3D11 vs_5_0 ps_5_0, D3D11)",
   "errors": [],
+  "assets": {
+    "static": {
+      "total": {
+        "count": 176,
+        "bytes": 74027353,
+        "mb": 70.6
+      },
+      "byExtension": [
+        {
+          "extension": ".glb",
+          "count": 156,
+          "bytes": 70125488,
+          "mb": 66.88
+        },
+        {
+          "extension": ".mp3",
+          "count": 5,
+          "bytes": 2821171,
+          "mb": 2.69
+        },
+        {
+          "extension": ".webp",
+          "count": 12,
+          "bytes": 1073714,
+          "mb": 1.02
+        },
+        {
+          "extension": ".json",
+          "count": 1,
+          "bytes": 3686,
+          "mb": 0
+        },
+        {
+          "extension": ".svg",
+          "count": 1,
+          "bytes": 3220,
+          "mb": 0
+        },
+        {
+          "extension": ".txt",
+          "count": 1,
+          "bytes": 74,
+          "mb": 0
+        }
+      ],
+      "largest": [
+        {
+          "path": "public/assets/room-07-hero.glb",
+          "extension": ".glb",
+          "bytes": 4723992,
+          "mb": 4.51
+        },
+        {
+          "path": "public/assets/room-04-hero.glb",
+          "extension": ".glb",
+          "bytes": 4304436,
+          "mb": 4.11
+        },
+        {
+          "path": "public/assets/room-03-hero.glb",
+          "extension": ".glb",
+          "bytes": 3658996,
+          "mb": 3.49
+        },
+        {
+          "path": "public/assets/room-10-hero.glb",
+          "extension": ".glb",
+          "bytes": 2964168,
+          "mb": 2.83
+        },
+        {
+          "path": "public/assets/room-06-hero.glb",
+          "extension": ".glb",
+          "bytes": 2871984,
+          "mb": 2.74
+        },
+        {
+          "path": "public/assets/room-05-hero.glb",
+          "extension": ".glb",
+          "bytes": 2472632,
+          "mb": 2.36
+        },
+        {
+          "path": "public/assets/room-11-hero.glb",
+          "extension": ".glb",
+          "bytes": 2424240,
+          "mb": 2.31
+        },
+        {
+          "path": "public/assets/audio/confluence-ambient-main.mp3",
+          "extension": ".mp3",
+          "bytes": 2160621,
+          "mb": 2.06
+        },
+        {
+          "path": "public/assets/room-12-hero.glb",
+          "extension": ".glb",
+          "bytes": 2142096,
+          "mb": 2.04
+        },
+        {
+          "path": "public/assets/room-09-hero.glb",
+          "extension": ".glb",
+          "bytes": 1974732,
+          "mb": 1.88
+        },
+        {
+          "path": "public/assets/furniture/korean_public_payphone_01.glb",
+          "extension": ".glb",
+          "bytes": 1306388,
+          "mb": 1.25
+        },
+        {
+          "path": "public/assets/room-01-hero.glb",
+          "extension": ".glb",
+          "bytes": 1140544,
+          "mb": 1.09
+        },
+        {
+          "path": "public/assets/room-01-kiosk.glb",
+          "extension": ".glb",
+          "bytes": 1069884,
+          "mb": 1.02
+        },
+        {
+          "path": "public/assets/room-02-hero.glb",
+          "extension": ".glb",
+          "bytes": 1052884,
+          "mb": 1
+        },
+        {
+          "path": "public/assets/furniture/gothic_statue.glb",
+          "extension": ".glb",
+          "bytes": 840144,
+          "mb": 0.8
+        }
+      ]
+    },
+    "runtime": {
+      "count": 48,
+      "totals": {
+        "transferSize": 36837460,
+        "encodedBodySize": 36823060,
+        "decodedBodySize": 37898911,
+        "latestResponseEnd": 43891.29999998212
+      },
+      "latestResponseEndMs": 43891.3,
+      "largestDecoded": [
+        {
+          "name": "/assets/room-07-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2076.5,
+          "responseEnd": 2304.0999999940395,
+          "duration": 227.59999999403954,
+          "transferSize": 4724292,
+          "encodedBodySize": 4723992,
+          "decodedBodySize": 4723992
+        },
+        {
+          "name": "/assets/room-04-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2071.2999999821186,
+          "responseEnd": 2285.0999999940395,
+          "duration": 213.80000001192093,
+          "transferSize": 4304736,
+          "encodedBodySize": 4304436,
+          "decodedBodySize": 4304436
+        },
+        {
+          "name": "/assets/room-03-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2070.699999988079,
+          "responseEnd": 2263.699999988079,
+          "duration": 193,
+          "transferSize": 3659296,
+          "encodedBodySize": 3658996,
+          "decodedBodySize": 3658996
+        },
+        {
+          "name": "/assets/room-10-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2078.199999988079,
+          "responseEnd": 2404.0999999940395,
+          "duration": 325.90000000596046,
+          "transferSize": 2964468,
+          "encodedBodySize": 2964168,
+          "decodedBodySize": 2964168
+        },
+        {
+          "name": "/assets/room-06-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2075.5999999940395,
+          "responseEnd": 2232.0999999940395,
+          "duration": 156.5,
+          "transferSize": 2872284,
+          "encodedBodySize": 2871984,
+          "decodedBodySize": 2871984
+        },
+        {
+          "name": "/assets/room-05-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2071.9000000059605,
+          "responseEnd": 2215.4000000059605,
+          "duration": 143.5,
+          "transferSize": 2472932,
+          "encodedBodySize": 2472632,
+          "decodedBodySize": 2472632
+        },
+        {
+          "name": "/assets/room-11-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2078.7999999821186,
+          "responseEnd": 2408.2999999821186,
+          "duration": 329.5,
+          "transferSize": 2424540,
+          "encodedBodySize": 2424240,
+          "decodedBodySize": 2424240
+        },
+        {
+          "name": "/assets/room-12-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2079.0999999940395,
+          "responseEnd": 2442,
+          "duration": 362.90000000596046,
+          "transferSize": 2142396,
+          "encodedBodySize": 2142096,
+          "decodedBodySize": 2142096
+        },
+        {
+          "name": "/assets/room-09-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2077.699999988079,
+          "responseEnd": 2282.4000000059605,
+          "duration": 204.7000000178814,
+          "transferSize": 1975032,
+          "encodedBodySize": 1974732,
+          "decodedBodySize": 1974732
+        },
+        {
+          "name": "/assets/index-CQlzBfyk.js",
+          "initiatorType": "script",
+          "startTime": 107.2999999821186,
+          "responseEnd": 233,
+          "duration": 125.7000000178814,
+          "transferSize": 412153,
+          "encodedBodySize": 411853,
+          "decodedBodySize": 1479033
+        },
+        {
+          "name": "/assets/room-01-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 1720.4000000059605,
+          "responseEnd": 1731.9000000059605,
+          "duration": 11.5,
+          "transferSize": 1140844,
+          "encodedBodySize": 1140544,
+          "decodedBodySize": 1140544
+        },
+        {
+          "name": "/assets/room-02-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2069.5999999940395,
+          "responseEnd": 2135.699999988079,
+          "duration": 66.09999999403954,
+          "transferSize": 1053184,
+          "encodedBodySize": 1052884,
+          "decodedBodySize": 1052884
+        },
+        {
+          "name": "/assets/room-08-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2077,
+          "responseEnd": 2192.5999999940395,
+          "duration": 115.59999999403954,
+          "transferSize": 815092,
+          "encodedBodySize": 814792,
+          "decodedBodySize": 814792
+        },
+        {
+          "name": "/assets/furniture/bookshelf.glb",
+          "initiatorType": "fetch",
+          "startTime": 43856.69999998808,
+          "responseEnd": 43888.5,
+          "duration": 31.80000001192093,
+          "transferSize": 529940,
+          "encodedBodySize": 529640,
+          "decodedBodySize": 529640
+        },
+        {
+          "name": "/assets/furniture/armchair.glb",
+          "initiatorType": "fetch",
+          "startTime": 43854.79999998212,
+          "responseEnd": 43877.79999998212,
+          "duration": 23,
+          "transferSize": 409604,
+          "encodedBodySize": 409304,
+          "decodedBodySize": 409304
+        }
+      ],
+      "slowest": [
+        {
+          "name": "/assets/room-12-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2079.0999999940395,
+          "responseEnd": 2442,
+          "duration": 362.90000000596046,
+          "transferSize": 2142396,
+          "encodedBodySize": 2142096,
+          "decodedBodySize": 2142096
+        },
+        {
+          "name": "/assets/room-11-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2078.7999999821186,
+          "responseEnd": 2408.2999999821186,
+          "duration": 329.5,
+          "transferSize": 2424540,
+          "encodedBodySize": 2424240,
+          "decodedBodySize": 2424240
+        },
+        {
+          "name": "/assets/room-10-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2078.199999988079,
+          "responseEnd": 2404.0999999940395,
+          "duration": 325.90000000596046,
+          "transferSize": 2964468,
+          "encodedBodySize": 2964168,
+          "decodedBodySize": 2964168
+        },
+        {
+          "name": "/assets/props/display-kiosk.glb",
+          "initiatorType": "fetch",
+          "startTime": 2090.199999988079,
+          "responseEnd": 2348.5,
+          "duration": 258.30000001192093,
+          "transferSize": 168432,
+          "encodedBodySize": 168132,
+          "decodedBodySize": 168132
+        },
+        {
+          "name": "/assets/props/presentation-podium.glb",
+          "initiatorType": "fetch",
+          "startTime": 2089.7999999821186,
+          "responseEnd": 2342.7999999821186,
+          "duration": 253,
+          "transferSize": 158108,
+          "encodedBodySize": 157808,
+          "decodedBodySize": 157808
+        },
+        {
+          "name": "/assets/props/two-seat-sofa.glb",
+          "initiatorType": "fetch",
+          "startTime": 2089.2999999821186,
+          "responseEnd": 2340.199999988079,
+          "duration": 250.90000000596046,
+          "transferSize": 175912,
+          "encodedBodySize": 175612,
+          "decodedBodySize": 175612
+        },
+        {
+          "name": "/assets/props/round-meeting-table.glb",
+          "initiatorType": "fetch",
+          "startTime": 2088.9000000059605,
+          "responseEnd": 2334.5,
+          "duration": 245.59999999403954,
+          "transferSize": 178404,
+          "encodedBodySize": 178104,
+          "decodedBodySize": 178104
+        },
+        {
+          "name": "/assets/props/office-chair.glb",
+          "initiatorType": "fetch",
+          "startTime": 2088.4000000059605,
+          "responseEnd": 2329.7999999821186,
+          "duration": 241.39999997615814,
+          "transferSize": 184404,
+          "encodedBodySize": 184104,
+          "decodedBodySize": 184104
+        },
+        {
+          "name": "/assets/props/workstation-desk.glb",
+          "initiatorType": "fetch",
+          "startTime": 2087.7999999821186,
+          "responseEnd": 2326.7999999821186,
+          "duration": 239,
+          "transferSize": 167440,
+          "encodedBodySize": 167140,
+          "decodedBodySize": 167140
+        },
+        {
+          "name": "/assets/room-07-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2076.5,
+          "responseEnd": 2304.0999999940395,
+          "duration": 227.59999999403954,
+          "transferSize": 4724292,
+          "encodedBodySize": 4723992,
+          "decodedBodySize": 4723992
+        },
+        {
+          "name": "/assets/props/shelving-unit.glb",
+          "initiatorType": "fetch",
+          "startTime": 2087.2999999821186,
+          "responseEnd": 2311.5,
+          "duration": 224.2000000178814,
+          "transferSize": 173872,
+          "encodedBodySize": 173572,
+          "decodedBodySize": 173572
+        },
+        {
+          "name": "/assets/props/floor-lamp.glb",
+          "initiatorType": "fetch",
+          "startTime": 2080.699999988079,
+          "responseEnd": 2294.9000000059605,
+          "duration": 214.2000000178814,
+          "transferSize": 121748,
+          "encodedBodySize": 121448,
+          "decodedBodySize": 121448
+        },
+        {
+          "name": "/assets/props/potted-plant.glb",
+          "initiatorType": "fetch",
+          "startTime": 2086.2999999821186,
+          "responseEnd": 2300.5,
+          "duration": 214.2000000178814,
+          "transferSize": 189368,
+          "encodedBodySize": 189068,
+          "decodedBodySize": 189068
+        },
+        {
+          "name": "/assets/room-04-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2071.2999999821186,
+          "responseEnd": 2285.0999999940395,
+          "duration": 213.80000001192093,
+          "transferSize": 4304736,
+          "encodedBodySize": 4304436,
+          "decodedBodySize": 4304436
+        },
+        {
+          "name": "/assets/room-09-hero.glb",
+          "initiatorType": "fetch",
+          "startTime": 2077.699999988079,
+          "responseEnd": 2282.4000000059605,
+          "duration": 204.7000000178814,
+          "transferSize": 1975032,
+          "encodedBodySize": 1974732,
+          "decodedBodySize": 1974732
+        }
+      ],
+      "totalsMb": {
+        "transfer": 35.13,
+        "encoded": 35.12,
+        "decoded": 36.14
+      }
+    }
+  },
+  "memory": {
+    "atRenderReady": {
+      "Timestamp": 204890.724185,
+      "Documents": 2,
+      "Frames": 2,
+      "JSEventListeners": 514,
+      "Nodes": 327,
+      "LayoutCount": 37,
+      "RecalcStyleCount": 308,
+      "LayoutDuration": 0.050525,
+      "RecalcStyleDuration": 0.056839,
+      "ScriptDuration": 43.514816,
+      "TaskDuration": 45.695072,
+      "JSHeapUsedSize": 20976920,
+      "JSHeapTotalSize": 30945280
+    },
+    "afterRun": {
+      "Timestamp": 204941.165041,
+      "Documents": 2,
+      "Frames": 2,
+      "JSEventListeners": 483,
+      "Nodes": 326,
+      "LayoutCount": 203,
+      "RecalcStyleCount": 2081,
+      "LayoutDuration": 0.097397,
+      "RecalcStyleDuration": 0.417041,
+      "ScriptDuration": 79.47076,
+      "TaskDuration": 83.67129,
+      "JSHeapUsedSize": 36636924,
+      "JSHeapTotalSize": 70791168
+    },
+    "delta": {
+      "JSHeapUsedSize": 15660004,
+      "JSHeapTotalSize": 39845888,
+      "Nodes": -1
+    }
+  },
   "idle": {
-    "frames": 143,
-    "avgFps": 57.5,
-    "minFps": 3.4,
-    "p50ms": 14,
-    "p95ms": 20.8,
-    "p99ms": 69.5,
-    "worstMs": 291.3,
-    "below60": 30,
-    "below30": 2
+    "frames": 320,
+    "avgFps": 106,
+    "minFps": 70.4,
+    "p50ms": 7,
+    "p95ms": 14,
+    "p99ms": 14.1,
+    "worstMs": 14.2,
+    "below60": 0,
+    "below30": 0
   },
   "sequentialNav": {
-    "frames": 598,
-    "avgFps": 43.8,
-    "minFps": 1.5,
-    "p50ms": 14,
-    "p95ms": 27.9,
-    "p99ms": 339.2,
-    "worstMs": 658.8,
-    "below60": 223,
-    "below30": 28
+    "frames": 1316,
+    "avgFps": 63,
+    "minFps": 0.6,
+    "p50ms": 7.2,
+    "p95ms": 20.8,
+    "p99ms": 48.6,
+    "worstMs": 1665.1,
+    "below60": 93,
+    "below30": 22
   },
   "violentSwipe": {
-    "frames": 349,
-    "avgFps": 46.3,
-    "minFps": 1,
-    "p50ms": 14.1,
-    "p95ms": 28,
-    "p99ms": 117.9,
-    "worstMs": 985,
-    "below60": 148,
-    "below30": 16
-  }
+    "frames": 126,
+    "avgFps": 35.2,
+    "minFps": 0.5,
+    "p50ms": 13.9,
+    "p95ms": 20.9,
+    "p99ms": 41.6,
+    "worstMs": 1997.9,
+    "below60": 13,
+    "below30": 4
+  },
+  "longFrames": {
+    "sequentialNav": [
+      {
+        "dt": 9622,
+        "atMs": 9653,
+        "afterMark": "seq-up-1"
+      },
+      {
+        "dt": 1665.1,
+        "atMs": 22618.8,
+        "afterMark": "seq-down-2"
+      },
+      {
+        "dt": 1325.1,
+        "atMs": 18518.9,
+        "afterMark": "seq-up-5"
+      },
+      {
+        "dt": 1137.6,
+        "atMs": 10839.1,
+        "afterMark": "seq-up-2"
+      },
+      {
+        "dt": 901.8,
+        "atMs": 19420.7,
+        "afterMark": "seq-up-5"
+      },
+      {
+        "dt": 631.7,
+        "atMs": 12733.4,
+        "afterMark": "seq-up-3"
+      },
+      {
+        "dt": 319.3,
+        "atMs": 11158.4,
+        "afterMark": "seq-up-2"
+      },
+      {
+        "dt": 215.2,
+        "atMs": 19663.8,
+        "afterMark": "seq-down-1"
+      },
+      {
+        "dt": 97,
+        "atMs": 11255.4,
+        "afterMark": "seq-up-2"
+      },
+      {
+        "dt": 83.3,
+        "atMs": 12067.1,
+        "afterMark": "seq-up-3"
+      }
+    ],
+    "violentSwipe": [
+      {
+        "dt": 7173.2,
+        "atMs": 10751.3,
+        "afterMark": "violent-24"
+      },
+      {
+        "dt": 1997.9,
+        "atMs": 3578.1,
+        "afterMark": "violent-24"
+      }
+    ]
+  },
+  "longTasks": {
+    "sequentialNav": [
+      {
+        "duration": 9594,
+        "atMs": 60.4,
+        "name": "self",
+        "afterMark": "seq-up-1"
+      },
+      {
+        "duration": 1162,
+        "atMs": 17195.1,
+        "name": "self",
+        "afterMark": "seq-up-5"
+      },
+      {
+        "duration": 1123,
+        "atMs": 9717.7,
+        "name": "self",
+        "afterMark": "seq-up-2"
+      },
+      {
+        "duration": 903,
+        "atMs": 18520.9,
+        "name": "self",
+        "afterMark": "seq-up-5"
+      },
+      {
+        "duration": 316,
+        "atMs": 10842.5,
+        "name": "self",
+        "afterMark": "seq-up-2"
+      }
+    ],
+    "violentSwipe": [
+      {
+        "duration": 7176,
+        "atMs": 3579.4,
+        "name": "self",
+        "afterMark": "violent-24"
+      }
+    ]
+  },
+  "visibility": {
+    "sequentialNav": [],
+    "violentSwipe": []
+  },
+  "thresholds": {
+    "sequentialP95Ms": 33.3,
+    "sequentialP99Ms": 80,
+    "sequentialWorstMs": 160,
+    "violentWorstMs": 250
+  },
+  "failures": [
+    "sequentialNav.worstMs 1665.1 > 160",
+    "violentSwipe.worstMs 1997.9 > 250"
+  ]
 }

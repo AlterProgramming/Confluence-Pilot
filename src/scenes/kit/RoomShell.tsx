@@ -43,10 +43,8 @@ export function RoomShell({
   ceilingOn = true,
 }: ShellProps) {
   const floorMat = usePbr(floor, floorRepeat, floorRoughness != null ? { roughness: floorRoughness } : undefined);
-  const wallMat = usePbr(wall, wallRepeat, wallColor ? { color: wallColor } : undefined);
-  const ceilMat = usePbr(ceiling, [4, 3], { color: ceilingColor });
-  wallMat.side = DoubleSide;
-  ceilMat.side = DoubleSide;
+  const wallMat = usePbr(wall, wallRepeat, { ...(wallColor ? { color: wallColor } : {}), side: DoubleSide });
+  const ceilMat = usePbr(ceiling, [4, 3], { color: ceilingColor, side: DoubleSide });
 
   const topY = floorY + height;
 

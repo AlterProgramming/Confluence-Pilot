@@ -257,7 +257,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-05-city-model.glb"
+        "/assets/room-05-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -316,7 +316,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-06-survey-rover.glb"
+        "/assets/room-06-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -375,7 +375,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-07-secure-vault.glb"
+        "/assets/room-07-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -434,7 +434,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-08-delivery-drone.glb"
+        "/assets/room-08-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -493,7 +493,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-09-satellite-terminal.glb"
+        "/assets/room-09-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -552,7 +552,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-10-coldchain-unit.glb"
+        "/assets/room-10-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -611,7 +611,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-11-fintech-vault.glb"
+        "/assets/room-11-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {
@@ -670,7 +670,7 @@
       "wideScreenshot": "",
       "secondaryScreenshot": "",
       "signatureAssets": [
-        "/assets/room-12-mainstreet-terminal.glb"
+        "/assets/room-12-hero.glb"
       ],
       "assetInspectionScreenshots": [],
       "manualChecks": {

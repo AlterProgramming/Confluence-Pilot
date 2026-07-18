@@ -15,6 +15,7 @@ Subcommands:
   add-heroes                 enqueue a hero job for every room concept still
                              lacking public/assets/room-NN-hero.glb
   add <id> <input> <output>  enqueue one custom job
+  queue-hf-down              stage GPU-down jobs in a temporary HF queue
   list                       show queue status
   run [opts]                 process pending jobs serially
        --max-minutes N       wall-clock budget for this run (default 8)
@@ -34,6 +35,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 QDIR = ROOT / "scripts" / "queue"
 QFILE = QDIR / "jobs.json"
+HF_QFILE = QDIR / "huggingface_jobs.json"
 GEN = ROOT / "scripts" / "generate_3d.sh"
 RAW_DIR = ROOT / "scripts" / "_opt"
 GT = ["npx", "--yes", "@gltf-transform/cli"]
@@ -41,6 +43,7 @@ GT = ["npx", "--yes", "@gltf-transform/cli"]
 # login PATH prefers a broken npx (`/mnt/c/.../npx` -> "node: not found"), which
 # silently failed every optimize. Git Bash finds the real Windows node/npx.
 GITBASH = "C:/Program Files/Git/bin/bash.exe"
+TRELLIS_RESOLUTIONS = [512, 1024, 1536]
 
 
 def now() -> str:
@@ -56,6 +59,17 @@ def load() -> dict:
 def save(q: dict) -> None:
     QDIR.mkdir(parents=True, exist_ok=True)
     QFILE.write_text(json.dumps(q, indent=2), encoding="utf-8")
+
+
+def load_hf_queue() -> dict:
+    if HF_QFILE.exists():
+        return json.loads(HF_QFILE.read_text(encoding="utf-8"))
+    return {"jobs": []}
+
+
+def save_hf_queue(q: dict) -> None:
+    QDIR.mkdir(parents=True, exist_ok=True)
+    HF_QFILE.write_text(json.dumps(q, indent=2), encoding="utf-8")
 
 
 def add_job(q: dict, job: dict) -> bool:
@@ -114,12 +128,106 @@ def generate(job, resolution) -> tuple:
     return raw_rel, None
 
 
+def resolution_ladder(job: dict) -> list[int]:
+    desired = int(job.get("desired_resolution") or job.get("resolution") or 512)
+    fallback = job.get("fallback_resolution")
+    ladder = [desired]
+    if fallback is not None:
+        ladder.append(int(fallback))
+    ladder.extend(TRELLIS_RESOLUTIONS)
+    deduped = []
+    for value in ladder:
+        if value in TRELLIS_RESOLUTIONS and value not in deduped:
+            deduped.append(value)
+    return sorted(deduped, reverse=True)
+
+
+def lower_resolution(job: dict, resolution: int) -> int | None:
+    """Return the next lower requested/safe generation resolution, if any."""
+    for candidate in resolution_ladder(job):
+        if candidate < resolution:
+            return candidate
+    return None
+
+
+def queue_huggingface_placeholder(job: dict, last_error: str, resolution: int) -> None:
+    """Stage a temporary HF fallback record without invoking network generation."""
+    hfq = load_hf_queue()
+    hf_id = f"hf-{job['id']}"
+    record = {
+        "id": hf_id,
+        "source_job_id": job["id"],
+        "type": job.get("type"),
+        "room": job.get("room"),
+        "input": job.get("input"),
+        "output": job.get("output"),
+        "model": "huggingface-placeholder",
+        "route": "hf-spaces-placeholder",
+        "status": "pending",
+        "desired_resolution": job.get("desired_resolution", job.get("resolution", resolution)),
+        "fallback_resolution": job.get("fallback_resolution", 256),
+        "requested_after_resolution": resolution,
+        "last_trellis_error": last_error,
+        "created": now(),
+        "updated": now(),
+    }
+    for index, existing in enumerate(hfq["jobs"]):
+        if existing.get("source_job_id") == job["id"] or existing.get("id") == hf_id:
+            record["created"] = existing.get("created", record["created"])
+            hfq["jobs"][index] = {**existing, **record}
+            save_hf_queue(hfq)
+            return
+    hfq["jobs"].append(record)
+    save_hf_queue(hfq)
+
+
 def optimize(raw_rel: str, out_rel: str) -> bool:
     (ROOT / out_rel).parent.mkdir(parents=True, exist_ok=True)
     sh(f'npx --yes @gltf-transform/cli optimize "{raw_rel}" "{out_rel}" '
        f'--compress meshopt --texture-compress webp --simplify true --simplify-error 0.006')
     (ROOT / raw_rel).unlink(missing_ok=True)
     return (ROOT / out_rel).exists()
+
+
+def is_done(job: dict) -> bool:
+    return job["status"] == "done" or (ROOT / job["output"]).exists()
+
+
+def is_trellis_actionable(job: dict) -> bool:
+    return (not is_done(job)) and job.get("status") in (None, "pending", "running")
+
+
+def queue_counts(q: dict) -> tuple[int, int, int]:
+    total = len(q["jobs"])
+    done = sum(1 for j in q["jobs"] if is_done(j))
+    remaining = sum(1 for j in q["jobs"] if is_trellis_actionable(j))
+    return done, remaining, total
+
+
+def format_duration(seconds: float | None) -> str:
+    if seconds is None:
+        return "unknown"
+    seconds = max(0, int(seconds))
+    hours, rem = divmod(seconds, 3600)
+    minutes, secs = divmod(rem, 60)
+    if hours:
+        return f"{hours}h {minutes}m"
+    if minutes:
+        return f"{minutes}m {secs}s"
+    return f"{secs}s"
+
+
+def watch_progress(start_done: int, current_done: int, remaining: int, started_at: float, deadline: float) -> str:
+    elapsed = time.time() - started_at
+    completed = current_done - start_done
+    eta = None
+    if completed > 0 and remaining > 0:
+        eta = remaining / (completed / elapsed)
+    return (
+        f"watch: progress done={current_done} remaining={remaining} "
+        f"completed_this_watch={completed} elapsed={format_duration(elapsed)} "
+        f"eta={format_duration(eta)} time_left={format_duration(deadline - time.time())}"
+    )
 
 
 def cmd_run(q, args):
@@ -131,6 +239,8 @@ def cmd_run(q, args):
             continue
         if (ROOT / job["output"]).exists():
             job["status"] = "done"; job["updated"] = now(); save(q); continue
+        if not is_trellis_actionable(job):
+            continue
         if time.time() > end:
             print("time budget reached; exiting (resume later)"); break
         if down_streak >= args.max_down:
@@ -141,7 +251,20 @@ def cmd_run(q, args):
         print(f"[{job['id']}] generating (attempt {job['attempts']}, res {res})...")
         raw, err = generate(job, res)
         if raw is None:
-            job["status"] = "pending"; job["last_error"] = err; job["updated"] = now(); save(q)
+            lower = lower_resolution(job, res) if err and err.startswith("gpu_down:") else None
+            if lower is not None:
+                job["resolution"] = lower
+                err = f"{err}; lowering next attempt to res {lower}"
+                job["status"] = "pending"
+            elif err and err.startswith("gpu_down:"):
+                queue_huggingface_placeholder(job, err, res)
+                job["status"] = "hf_pending"
+                job["fallback_route"] = "huggingface"
+                job["hf_queue"] = "scripts/queue/huggingface_jobs.json"
+                err = f"{err}; queued temporary Hugging Face fallback placeholder"
+            else:
+                job["status"] = "pending"
+            job["last_error"] = err; job["updated"] = now(); save(q)
             down_streak += 1
             print(f"  failed: {err}")
             time.sleep(args.delay)
@@ -157,19 +280,28 @@ def cmd_run(q, args):
             job["status"] = "failed"; job["last_error"] = "optimize failed"; job["updated"] = now(); save(q)
         time.sleep(args.delay)  # gentle spacing between jobs on the shared GPU
 
-    done = sum(1 for j in q["jobs"] if j["status"] == "done")
-    print(f"run complete: +{processed} this run; {done}/{len(q['jobs'])} total done")
+    done, _, total = queue_counts(q)
+    print(f"run complete: +{processed} this run; {done}/{total} total done")
 
 
 def cmd_watch(q, args):
     """Self-contained background worker: process passes, sleeping between them
-    while the GPU is unavailable, until the queue is empty or max-hours hit."""
-    deadline = time.time() + args.max_hours * 3600
+    while the GPU is unavailable, until no TRELLIS-actionable jobs remain or
+    max-hours hit."""
+    started_at = time.time()
+    deadline = started_at + args.max_hours * 3600
+    start_done, _, total = queue_counts(load())
+    print(
+        f"watch: starting total={total} already_done={start_done} "
+        f"max_runtime={format_duration(args.max_hours * 3600)}",
+        flush=True,
+    )
     while True:
         q = load()
-        remaining = [j for j in q["jobs"] if j["status"] != "done" and not (ROOT / j["output"]).exists()]
-        if not remaining:
-            print("watch: all jobs done — exiting")
+        done_count, remaining_count, _ = queue_counts(q)
+        print(watch_progress(start_done, done_count, remaining_count, started_at, deadline), flush=True)
+        if remaining_count == 0:
+            print("watch: no TRELLIS-actionable jobs remain - exiting")
             return
         if time.time() > deadline:
             print("watch: max-hours reached — exiting")
@@ -177,19 +309,20 @@ def cmd_watch(q, args):
         run_args = argparse.Namespace(max_minutes=args.pass_minutes, max_down=args.max_down, delay=args.delay, resolution=args.resolution)
         cmd_run(q, run_args)
         q = load()
-        remaining = [j for j in q["jobs"] if j["status"] != "done" and not (ROOT / j["output"]).exists()]
-        if not remaining:
-            print("watch: all jobs done — exiting")
+        done_count, remaining_count, _ = queue_counts(q)
+        print(watch_progress(start_done, done_count, remaining_count, started_at, deadline), flush=True)
+        if remaining_count == 0:
+            print("watch: no TRELLIS-actionable jobs remain - exiting")
             return
-        print(f"watch: {len(remaining)} pending; sleeping {args.idle_delay}s", flush=True)
+        print(f"watch: {remaining_count} pending; sleeping {format_duration(args.idle_delay)}", flush=True)
         time.sleep(args.idle_delay)
 
 
 def cmd_list(q, _args):
     for j in q["jobs"]:
         print(f"  {j['id']:12} {j['status']:8} attempts={j['attempts']:<2} {j.get('last_error') or ''}")
-    done = sum(1 for j in q["jobs"] if j["status"] == "done")
-    print(f"total: {done}/{len(q['jobs'])} done")
+    done, _, total = queue_counts(q)
+    print(f"total: {done}/{total} done")
 
 
 def cmd_reset(q, args):
@@ -200,11 +333,29 @@ def cmd_reset(q, args):
     cmd_list(q, args)
 
 
+def cmd_queue_hf_down(q, _args):
+    staged = 0
+    for job in q["jobs"]:
+        last_error = job.get("last_error") or ""
+        if is_done(job) or not last_error.startswith("gpu_down:"):
+            continue
+        queue_huggingface_placeholder(job, last_error, int(job.get("resolution") or 256))
+        job["status"] = "hf_pending"
+        job["fallback_route"] = "huggingface"
+        job["hf_queue"] = "scripts/queue/huggingface_jobs.json"
+        job["last_error"] = f"{last_error}; queued temporary Hugging Face fallback placeholder"
+        job["updated"] = now()
+        staged += 1
+    save(q)
+    print(f"queued {staged} GPU-down jobs to temporary Hugging Face placeholder queue")
+
+
 def main():
     p = argparse.ArgumentParser(description="Serial TRELLIS generation queue")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("add-heroes")
     a = sub.add_parser("add"); a.add_argument("id"); a.add_argument("input"); a.add_argument("output"); a.add_argument("--resolution", type=int)
+    sub.add_parser("queue-hf-down")
     sub.add_parser("list")
     r = sub.add_parser("run")
     r.add_argument("--max-minutes", type=float, default=8)
@@ -224,6 +375,7 @@ def main():
     q = load()
     {
         "add-heroes": cmd_add_heroes, "add": cmd_add, "list": cmd_list,
+        "queue-hf-down": cmd_queue_hf_down,
         "run": cmd_run, "watch": cmd_watch, "reset": cmd_reset,
     }[args.cmd](q, args)
 

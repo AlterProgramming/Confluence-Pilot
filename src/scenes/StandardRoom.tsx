@@ -34,18 +34,19 @@ export function StandardRoom({ room, active }: { room: RoomDefinition; active: b
   const cfg = sceneConfigs[room.id] ?? defaultConfig;
   const layout = cfg.layout ?? 'default';
   const low = useExperienceStore((s) => s.qualityTier) === 'low';
+  const shellProps = {
+    width: 16,
+    depth: 15,
+    height: 6.2,
+    floor: cfg.floor,
+    wall: cfg.wall,
+    ...(cfg.wallColor !== undefined ? { wallColor: cfg.wallColor } : {}),
+    ...(cfg.floorRepeat !== undefined ? { floorRepeat: cfg.floorRepeat } : {}),
+    ...(cfg.floorRoughness !== undefined ? { floorRoughness: cfg.floorRoughness } : {}),
+  };
   return (
     <group>
-      <RoomShell
-        width={16}
-        depth={15}
-        height={6.2}
-        floor={cfg.floor}
-        wall={cfg.wall}
-        wallColor={cfg.wallColor}
-        floorRepeat={cfg.floorRepeat}
-        floorRoughness={cfg.floorRoughness}
-      />
+      <RoomShell {...shellProps} />
       {cfg.ledWall && <LedWall url={cfg.ledWall} radius={8.2} arc={2.2} height={4.2} y={1.5} />}
       {cfg.glazing && !low && <Glazing side={cfg.glazing} x={7.6} width={11} />}
       <CeilingRig y={4.5} accent={room.color} />

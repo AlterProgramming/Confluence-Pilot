@@ -107,16 +107,16 @@ All 12 hero GLBs generated via free HF Spaces:
 | 02 | room-02-credential-stack.glb | 3.8 MB | 96.4k / 192k |
 | 03 | room-03-fabricator.glb | 4.6 MB | 117k / 234k |
 | 04 | room-04-building-node.glb | 3.8 MB | 97.6k / 195k |
-| 05 | room-05-city-model.glb | 2.7 MB | 68.2k / 136k |
-| 06 | room-06-survey-rover.glb | 3.1 MB | 80.6k / 161k |
-| 07 | room-07-secure-vault.glb | 4.4 MB | 112k / 223k |
-| 08 | room-08-delivery-drone.glb | 0.8 MB | 19.7k / 39k |
-| 09 | room-09-satellite-terminal.glb | 2.4 MB | 60.9k / 122k |
-| 10 | room-10-coldchain-unit.glb | 2.8 MB | 71.5k / 143k |
-| 11 | room-11-fintech-vault.glb | 2.6 MB | 67.7k / 135k |
-| 12 | room-12-mainstreet-terminal.glb | 2.3 MB | 57.6k / 115k |
+| 05 | room-05-hero.glb | 2.36 MB | pending |
+| 06 | room-06-hero.glb | 2.74 MB | pending |
+| 07 | room-07-hero.glb | 4.51 MB | pending |
+| 08 | room-08-hero.glb | 0.78 MB | pending |
+| 09 | room-09-hero.glb | 1.88 MB | pending |
+| 10 | room-10-hero.glb | 2.83 MB | pending |
+| 11 | room-11-hero.glb | 2.31 MB | pending |
+| 12 | room-12-hero.glb | 2.04 MB | pending |
 
-**Total: 34.3 MB.** All wired into `src/data/rooms.ts` (`assetUrl` + `assetTargetSize`).
+**Active hero total: 29.13 MB.** All wired into `src/data/rooms.ts` (`assetUrl` + `assetTargetSize`).
 
 > **Follow-up:** TripoSR meshes are dense (undecimated, ~100–230k faces). For web
 > delivery, decimate to ~30–40k faces and Draco-compress to hit the 1–2 MB target

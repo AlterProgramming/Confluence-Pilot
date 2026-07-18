@@ -13,8 +13,8 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffb08a',
     shape: 'sphere',
     architecture: 'gallery',
-    assetUrl: '/assets/room-01-kiosk.glb',
-    assetTargetSize: 3.4,
+    assetUrl: '/assets/room-01-hero.glb',
+    assetTargetSize: 4.4,
     assetMaterialTuning: {
       envMapIntensity: 0.28,
       emissiveIntensity: 0.32,
@@ -83,7 +83,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#b8ef9f',
     shape: 'icosahedron',
     architecture: 'neighborhood',
-    assetUrl: '/assets/room-05-city-model.glb',
+    assetUrl: '/assets/room-05-hero.glb',
     assetTargetSize: 4.0,
   },
   {
@@ -96,7 +96,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffe3a2',
     shape: 'cylinder',
     architecture: 'infrastructure',
-    assetUrl: '/assets/room-06-survey-rover.glb',
+    assetUrl: '/assets/room-06-hero.glb',
     assetTargetSize: 3.2,
   },
   {
@@ -109,7 +109,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#b9c0ff',
     shape: 'octahedron',
     architecture: 'vault',
-    assetUrl: '/assets/room-07-secure-vault.glb',
+    assetUrl: '/assets/room-07-hero.glb',
     assetTargetSize: 3.0,
   },
   {
@@ -122,7 +122,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#a6e2ff',
     shape: 'torus',
     architecture: 'hangar',
-    assetUrl: '/assets/room-08-delivery-drone.glb',
+    assetUrl: '/assets/room-08-hero.glb',
     assetTargetSize: 2.6,
   },
   {
@@ -135,7 +135,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#d2c5ff',
     shape: 'sphere',
     architecture: 'communications',
-    assetUrl: '/assets/room-09-satellite-terminal.glb',
+    assetUrl: '/assets/room-09-hero.glb',
     assetTargetSize: 3.2,
   },
   {
@@ -148,7 +148,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#cbea9a',
     shape: 'icosahedron',
     architecture: 'cold-chain',
-    assetUrl: '/assets/room-10-coldchain-unit.glb',
+    assetUrl: '/assets/room-10-hero.glb',
     assetTargetSize: 3.4,
   },
   {
@@ -161,7 +161,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#f7b4d2',
     shape: 'cylinder',
     architecture: 'fintech',
-    assetUrl: '/assets/room-11-fintech-vault.glb',
+    assetUrl: '/assets/room-11-hero.glb',
     assetTargetSize: 3.0,
   },
   {
@@ -174,7 +174,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffc0a8',
     shape: 'box',
     architecture: 'main-street',
-    assetUrl: '/assets/room-12-mainstreet-terminal.glb',
+    assetUrl: '/assets/room-12-hero.glb',
     assetTargetSize: 3.2,
   },
 ];
@@ -208,3 +208,7 @@ export const rooms: RoomDefinition[] = roomSeed.map((room, index) => {
     target: [view.target[0], y + view.target[1], view.target[2]],
   };
 });
+
+export function getRoom(index: number): RoomDefinition {
+  return rooms[index] ?? rooms[0]!;
+}

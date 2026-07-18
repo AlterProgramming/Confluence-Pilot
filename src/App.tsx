@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ExperienceCanvas } from './components/ExperienceCanvas';
 import { Hud } from './components/Hud';
 import { InputController } from './components/InputController';
+import { PerformanceTelemetry } from './components/PerformanceTelemetry';
 import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
 import { useExperienceStore } from './state/useExperienceStore';
@@ -30,6 +31,7 @@ export default function App() {
       <ExperienceCanvas />
       <InputController />
       <SoundController />
+      <PerformanceTelemetry />
       <ValidationBridge />
       <Hud />
     </main>

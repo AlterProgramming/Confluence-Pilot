@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { BackSide, RepeatWrapping, SRGBColorSpace } from 'three';
@@ -22,7 +22,7 @@ export function LedWall({
   y?: number;
 }) {
   const tex = useTexture(url);
-  useMemo(() => {
+  useEffect(() => {
     tex.wrapS = RepeatWrapping;
     tex.wrapT = RepeatWrapping;
     tex.repeat.x = -1; // un-mirror for the BackSide (inner) face

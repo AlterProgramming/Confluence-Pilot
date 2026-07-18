@@ -1,6 +1,5 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Object3D, type Group, type InstancedMesh } from 'three';
+import { Object3D, type InstancedMesh } from 'three';
 import type { RoomDefinition } from '../types/room';
 
 type Vec3 = [number, number, number];
@@ -116,7 +115,7 @@ function LivingBuilding({ room, active }: { room: RoomDefinition; active: boolea
 
 function Neighborhood({ room, active }: { room: RoomDefinition; active: boolean }) {
   const houses = useMemo<Transform[]>(()=>Array.from({length:24},(_,i)=>{const h=.48+(i*7%5)*.08;return{position:[(i%6-2.5)*.62,-.88+h/2,(Math.floor(i/6)-1.5)*.72] as Vec3,scale:[.78,h,.82] as Vec3}}),[]);
-  const roofs = useMemo<Transform[]>(()=>houses.map((h,i)=>({position:[h.position[0],h.position[1]+.35,h.position[2]],rotation:[0,0,Math.PI/4],scale:[.55,.55,.72]})),[houses]);
+  const roofs = useMemo<Transform[]>(()=>houses.map((h)=>({position:[h.position[0],h.position[1]+.35,h.position[2]],rotation:[0,0,Math.PI/4],scale:[.55,.55,.72]})),[houses]);
   const desks = useMemo<Desk[]>(()=>[[-4.15,-.86,1.65],[4.15,-.86,1.65],[-4.15,-.86,-.65],[4.15,-.86,-.65]].map(position=>({position:position as Vec3,scale:.72})),[]);
   const trees = useMemo<Transform[]>(()=>Array.from({length:16},(_,i)=>({position:[(i%2?1:-1)*(2.05+i%3*.24),-.45,-1.4+Math.floor(i/2)*.36] as Vec3})),[]);
   return <group><mesh position={[0,-.92,.25]}><boxGeometry args={[6.4,.16,4.8]}/><meshStandardMaterial color="#161c17"/></mesh><Boxes transforms={houses} size={[.48,.58,.5]} color="#d7d4c8" emissive={room.color} emissiveIntensity={active?.06:.01}/><Boxes transforms={roofs} size={[.46,.46,.58]} color="#38413b"/><Cylinders transforms={trees} size={[.05,.5,8]} color="#72563a"/><Cylinders transforms={trees.map(t=>({...t,position:[t.position[0],t.position[1]+.45,t.position[2]],scale:[1.8,.8,1.8]}))} size={[.16,.24,8]} color="#4f8d55"/><Workstations items={desks} accent={room.color} secondary={room.secondaryColor}/></group>;

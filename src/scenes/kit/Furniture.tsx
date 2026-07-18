@@ -52,7 +52,7 @@ function Monitor({ position, rotationY, secondary }: { position: [number, number
 }
 
 /** Rows of real desks + task chairs + glowing monitors (workbench rooms). */
-export function Workstations({ accent, secondary, rows = 2, perRow = 3 }: { accent: string; secondary: string; rows?: number; perRow?: number }) {
+export function Workstations({ secondary, rows = 2, perRow = 3 }: { accent: string; secondary: string; rows?: number; perRow?: number }) {
   const spots = useMemo(() => {
     const out: { x: number; z: number }[] = [];
     for (let r = 0; r < rows; r += 1) for (let i = 0; i < perRow; i += 1) {

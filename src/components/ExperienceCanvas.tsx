@@ -25,8 +25,12 @@ import { PostEffects } from './PostEffects';
 import { RoomStack } from './RoomStack';
 import { TransitionShaft } from './TransitionShaft';
 
+const renderMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('render') === '1';
+
 function AdaptiveQuality({ children }: { children: React.ReactNode }) {
   const setQualityTier = useExperienceStore((state) => state.setQualityTier);
+
+  if (renderMode) return children;
 
   return (
     <PerformanceMonitor
@@ -44,7 +48,7 @@ function AdaptiveQuality({ children }: { children: React.ReactNode }) {
 export function ExperienceCanvas() {
   return (
     <Canvas
-      dpr={[0.55, 1.2]}
+      dpr={renderMode ? [0.5, 0.65] : [0.55, 1.2]}
       gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
       camera={{ fov: 43, near: 0.1, far: 280, position: [0, 1.8, 12.4] }}
       performance={{ min: 0.35, debounce: 200 }}
@@ -62,11 +66,11 @@ export function ExperienceCanvas() {
         <Suspense fallback={null}>
           <RoomStack />
         </Suspense>
-        <TransitionShaft />
+        {!renderMode && <TransitionShaft />}
         <GlobalParticles />
         <CameraDirector />
         <PostEffects />
-        <Preload all />
+        {renderMode && <Preload all />}
       </AdaptiveQuality>
     </Canvas>
   );

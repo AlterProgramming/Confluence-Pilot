@@ -8,11 +8,15 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
+    "lint": "eslint src vite.config.ts",
     "evidence:room01": "node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 1 /assets/room-01-kiosk.glb",
     "evidence:rooms02-12": "node scripts/capture_rooms_02_12.mjs http://127.0.0.1:4173",
+    "audio:generate": "node scripts/generate_audio.mjs",
+    "audio:generate:sfx": "node scripts/generate_audio.mjs --skip-music sfx",
     "validate:rooms": "node scripts/validate_rooms.mjs",
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
-    "validate": "npm run typecheck && npm run validate:rooms"
+    "assets:inventory": "node scripts/asset_inventory.mjs",
+    "validate": "npm run typecheck && npm run lint && npm run validate:rooms"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -26,9 +30,18 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.29.7",
+    "@babel/preset-react": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
+    "@eslint/js": "^9.39.5",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.5.0",
+    "puppeteer-core": "^25.3.0",
     "typescript": "^7.0.2",
     "vite": "^8.1.5"
   }
