@@ -3,6 +3,8 @@ import { rooms } from '../data/rooms';
 import { startAudio } from '../lib/audioEngine';
 import { useExperienceStore } from '../state/useExperienceStore';
 
+const HEAVY_HERO_ROOMS = new Set(['03', '04']);
+
 export function Hud() {
   const started = useExperienceStore((state) => state.started);
   const start = useExperienceStore((state) => state.start);
@@ -23,6 +25,7 @@ export function Hud() {
   const displayIndex = isTransitioning && transitionProgress > 0.52 ? requestedRoom : activeRoom;
   const room = rooms[displayIndex];
   const destination = rooms[requestedRoom];
+  const usesHeroLod = qualityTier !== 'high' && HEAVY_HERO_ROOMS.has(room.id);
 
   const enter = () => {
     if (soundEnabled) startAudio();
@@ -65,7 +68,7 @@ export function Hud() {
         <p>{room.description}</p>
         <div className="room-meta">
           <span>{String(displayIndex + 1).padStart(2, '0')} / {rooms.length}</span>
-          <span>{room.assetUrl ? 'Generated GLB active' : 'GLB hero slot ready'}</span>
+          <span>{usesHeroLod ? 'Performance hero LOD active' : room.assetUrl ? 'Generated GLB active' : 'GLB hero slot ready'}</span>
           <span>Authored particle volume: {room.architecture}</span>
           <span>Adaptive quality: {qualityTier}</span>
         </div>
