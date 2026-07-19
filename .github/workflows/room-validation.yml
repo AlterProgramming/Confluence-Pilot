@@ -54,11 +54,11 @@ jobs:
       matrix:
         include:
           - { id: '01', number: 1, asset: '/assets/room-01-kiosk.glb' }
-          - { id: '02', number: 2, asset: '/assets/room-02-credential-stack.glb' }
+          - { id: '02', number: 2, asset: '/assets/room-02-semantic.glb' }
           - { id: '03', number: 3, asset: '/assets/room-03-fabricator.glb' }
           - { id: '04', number: 4, asset: '/assets/room-04-building-node.glb' }
           - { id: '05', number: 5, asset: '/assets/room-05-city-model.glb' }
-          - { id: '06', number: 6, asset: '/assets/room-06-survey-rover.glb' }
+          - { id: '06', number: 6, asset: '/assets/room-06-semantic.glb' }
           - { id: '07', number: 7, asset: '/assets/room-07-secure-vault.glb' }
           - { id: '08', number: 8, asset: '/assets/room-08-delivery-drone.glb' }
           - { id: '09', number: 9, asset: '/assets/room-09-satellite-terminal.glb' }
