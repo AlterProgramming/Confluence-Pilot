@@ -31,8 +31,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate room manifests and types
-        run: npm run validate
+      - name: Generate semantic heroes
+        run: npm run generate:semantic-heroes
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Validate room manifests
+        run: npm run validate:rooms
+
+      - name: Validate hero camera contract
+        run: npm run validate:hero-camera
 
       - name: Build production bundle
         run: npm run build
