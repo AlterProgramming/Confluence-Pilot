@@ -78,7 +78,7 @@ async function openRoomPage(browser, view = 'canonical') {
     view,
   });
   const startedAt = Date.now();
-  await page.goto(`${BASE_URL}/?${query}`, { waitUntil: 'networkidle2', timeout: 90_000 });
+  await page.goto(`${BASE_URL}/?${query}`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
   await page.waitForFunction(
     (expectedRoomId) => {
       const state = window.__CONFLUENCE_VALIDATION__;
