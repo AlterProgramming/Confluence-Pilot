@@ -19,7 +19,7 @@
     "generate:semantic-heroes": "node scripts/generate_semantic_heroes.mjs",
     "validate:rooms": "node scripts/validate_rooms.mjs",
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
-    "validate:hero-camera": "node scripts/validate_hero_singularity.mjs",
+    "validate:hero-camera": "node scripts/validate_hero_camera.mjs",
     "assets:inventory": "node scripts/asset_inventory.mjs",
     "validate": "npm run generate:semantic-heroes && npm run typecheck && npm run lint && npm run validate:rooms && npm run validate:hero-camera"
   },
