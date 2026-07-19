@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "heroCameraRooms": ["02", "04", "06"],
+  "cameraContract": {
+    "phases": ["acquiring", "tracking", "locked"],
+    "trackingLayers": {
+      "02": 7,
+      "04": 8,
+      "06": 9
+    },
+    "requiresProgressiveResolution": true,
+    "requiresAngularLock": true,
+    "requiresRendererStateRestoration": true
+  },
+  "suppressedWallAssets": [
+    "/assets/screens/room-02-wall.webp",
+    "/assets/screens/room-04-wall.webp",
+    "/assets/screens/room-06-wall.webp"
+  ],
+  "sourceHeroes": {
+    "02": {
+      "asset": "/assets/room-02-semantic.glb",
+      "expectedRoot": "room_02_single_credential_terminal",
+      "expectedPresentation": "single"
+    },
+    "06": {
+      "asset": "/assets/room-06-semantic.glb",
+      "expectedRoot": "room_06_single_survey_rover",
+      "expectedPresentation": "single"
+    }
+  }
+}
