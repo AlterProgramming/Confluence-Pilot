@@ -230,7 +230,7 @@ if (!executablePath) {
 
 const browser = await puppeteer.launch({
   executablePath,
-  headless: 'new',
+  headless: true,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
