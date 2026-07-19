@@ -3,11 +3,13 @@ import { useAnimations, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Box3, Mesh, MeshStandardMaterial, Vector3, type Group, type Material } from 'three';
 import type { AssetMaterialTuning, RoomDefinition } from '../types/room';
+import { enableHeroCameraLayer, registerHeroCameraTarget } from './heroCameraRegistry';
 
 type RoomAssetProps = Pick<
   RoomDefinition,
   'assetUrl' | 'assetScale' | 'assetPosition' | 'assetRotation' | 'assetTargetSize' | 'assetMaterialTuning'
 > & {
+  roomId: string;
   fallback: ReactNode;
   active?: boolean;
 };
@@ -97,6 +99,7 @@ function prepareAssetTemplate(url: string, scene: Group, materialTuning?: AssetM
 }
 
 function LoadedRoomAsset({
+  roomId,
   url,
   scale,
   position,
@@ -105,6 +108,7 @@ function LoadedRoomAsset({
   materialTuning,
   active,
 }: {
+  roomId: string;
   url: string;
   scale: number;
   position: [number, number, number];
@@ -127,6 +131,18 @@ function LoadedRoomAsset({
   }, [materialTuning, scale, scene, targetSize, url]);
 
   useEffect(() => {
+    const anchor = groupRef.current;
+    if (!anchor) return undefined;
+    const layer = enableHeroCameraLayer(normalized.instance, roomId);
+    return registerHeroCameraTarget(roomId, {
+      anchor,
+      subject: normalized.instance,
+      targetSize: targetSize * scale,
+      layer,
+    });
+  }, [normalized.instance, roomId, scale, targetSize]);
+
+  useEffect(() => {
     const firstAction = names[0] ? actions[names[0]] : undefined;
     firstAction?.reset().fadeIn(0.25).play();
     return () => {
@@ -137,8 +153,7 @@ function LoadedRoomAsset({
   // Gentle idle motion (slow turn + hover) so the centrepiece feels alive.
   // Skipped when the GLB ships its own animation.
   useFrame(({ clock }) => {
-    if (!active) return;
-    if (names.length > 0) return;
+    if (!active || names.length > 0) return;
     const t = clock.getElapsedTime();
     const inst = normalized.instance;
     inst.rotation.y = t * 0.16;
@@ -179,6 +194,7 @@ export function RoomAssetPreparer({
 }
 
 export function RoomAsset({
+  roomId,
   assetUrl,
   assetScale = 1,
   assetPosition = [0, 0.25, 0],
@@ -190,6 +206,7 @@ export function RoomAsset({
 }: RoomAssetProps) {
   if (!assetUrl) return fallback;
   const loadedProps = {
+    roomId,
     url: assetUrl,
     scale: assetScale,
     position: assetPosition,
