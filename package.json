@@ -4,7 +4,9 @@
   "version": "0.4.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run generate:semantic-heroes",
     "dev": "vite",
+    "prebuild": "npm run generate:semantic-heroes",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
@@ -14,10 +16,12 @@
     "evidence:rooms02-12": "node scripts/capture_rooms_02_12.mjs http://127.0.0.1:4173",
     "audio:generate": "node scripts/generate_audio.mjs",
     "audio:generate:sfx": "node scripts/generate_audio.mjs --skip-music sfx",
+    "generate:semantic-heroes": "node scripts/generate_semantic_heroes.mjs",
     "validate:rooms": "node scripts/validate_rooms.mjs",
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
+    "validate:hero-camera": "node scripts/validate_hero_singularity.mjs",
     "assets:inventory": "node scripts/asset_inventory.mjs",
-    "validate": "npm run typecheck && npm run lint && npm run validate:rooms"
+    "validate": "npm run generate:semantic-heroes && npm run typecheck && npm run lint && npm run validate:rooms && npm run validate:hero-camera"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
