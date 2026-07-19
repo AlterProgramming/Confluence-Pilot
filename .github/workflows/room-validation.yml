@@ -57,8 +57,56 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  hero-camera:
+  browser-smoke:
     needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
+      - name: Start diagnostic preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4175 > /tmp/confluence-browser-smoke-preview.log 2>&1 &
+          echo $! > /tmp/confluence-browser-smoke-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4175/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/confluence-browser-smoke-preview.log
+          exit 1
+
+      - name: Prove browser runtime readiness
+        run: node scripts/smoke_room_runtime.mjs http://127.0.0.1:4175
+
+      - name: Upload browser smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-evidence
+          path: validation/browser-smoke
+          if-no-files-found: error
+          retention-days: 14
+
+  hero-camera:
+    needs: [validate, browser-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -106,7 +154,7 @@ jobs:
           retention-days: 14
 
   evidence:
-    needs: validate
+    needs: [validate, browser-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
