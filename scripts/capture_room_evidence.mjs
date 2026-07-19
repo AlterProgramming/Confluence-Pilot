@@ -28,15 +28,8 @@ async function loadPuppeteer() {
   }
 }
 
-function findChrome(puppeteer) {
+function findChrome() {
   if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
-  try {
-    const bundled = puppeteer.executablePath?.();
-    if (bundled && existsSync(bundled)) return bundled;
-  } catch {
-    // Fall through to common system paths.
-  }
-
   const candidates = [
     'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
@@ -223,7 +216,7 @@ async function captureTraversal(browser) {
 }
 
 const puppeteer = await loadPuppeteer();
-const executablePath = findChrome(puppeteer);
+const executablePath = findChrome();
 if (!executablePath) {
   throw new Error('No Chrome or Chromium executable was found for room evidence capture.');
 }
