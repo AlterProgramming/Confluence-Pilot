@@ -91,7 +91,7 @@ try {
     );
 
     const phaseScreenshots = new Set();
-    const deadline = Date.now() + 25_000;
+    const deadline = Date.now() + 45_000;
     let locked = null;
     while (Date.now() < deadline) {
       const snapshot = await page.evaluate(() => window.__CONFLUENCE_HERO_CAMERA__ ?? null);
