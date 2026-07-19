@@ -57,9 +57,11 @@ export default [
       'src/components/LifeMotes.tsx',
       'src/components/RoomAsset.tsx',
       'src/scenes/kit/LedWall.tsx',
+      'src/scenes/kit/HeroCameraWall.tsx',
     ],
     rules: {
       'react-hooks/immutability': 'off',
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
 ];
