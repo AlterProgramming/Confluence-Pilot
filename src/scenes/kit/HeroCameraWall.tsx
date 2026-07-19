@@ -28,6 +28,7 @@ type HeroCameraSnapshot = {
   updateRate: number;
   framesRendered: number;
   captureLayer: number;
+  stableTrackingFrames: number;
 };
 
 declare global {
@@ -65,7 +66,7 @@ const PHASE_COLOR: Record<HeroCameraPhase, string> = {
 const TRACKING_RESPONSE = 7.5;
 const TRACKING_THRESHOLD = MathUtils.degToRad(8);
 const LOCK_THRESHOLD = MathUtils.degToRad(2.2);
-const LOCK_HOLD_SECONDS = 0.7;
+const LOCK_RENDER_SAMPLES = 3;
 const INITIAL_ANGULAR_OFFSET = MathUtils.degToRad(38);
 
 function shortestAngle(from: number, to: number) {
@@ -96,7 +97,7 @@ export function HeroCameraWall({
   const [phase, setPhase] = useState<HeroCameraPhase>('acquiring');
   const phaseRef = useRef<HeroCameraPhase>('acquiring');
   const trackedYaw = useRef(0);
-  const lockTime = useRef(0);
+  const stableTrackingFrames = useRef(0);
   const renderAccumulator = useRef(0);
   const framesRendered = useRef(0);
   const lastSubject = useRef<object | null>(null);
@@ -139,7 +140,7 @@ export function HeroCameraWall({
   useEffect(() => {
     phaseRef.current = 'acquiring';
     setPhase('acquiring');
-    lockTime.current = 0;
+    stableTrackingFrames.current = 0;
     renderAccumulator.current = 0;
     framesRendered.current = 0;
     lastSubject.current = null;
@@ -166,25 +167,25 @@ export function HeroCameraWall({
     if (lastSubject.current !== target.subject) {
       lastSubject.current = target.subject;
       trackedYaw.current = desiredYaw - INITIAL_ANGULAR_OFFSET;
-      lockTime.current = 0;
+      stableTrackingFrames.current = 0;
       phaseRef.current = 'acquiring';
       setPhase('acquiring');
     }
 
     const angularError = shortestAngle(trackedYaw.current, desiredYaw);
-    const response = 1 - Math.exp(-TRACKING_RESPONSE * Math.min(delta, 0.1));
+    // Use the real elapsed frame time. On a slow renderer, clamping delta lets
+    // the continuously rotating hero outrun the camera forever.
+    const response = 1 - Math.exp(-TRACKING_RESPONSE * Math.max(0, delta));
     trackedYaw.current += angularError * response;
     const remainingError = Math.abs(shortestAngle(trackedYaw.current, desiredYaw));
 
-    if (remainingError <= LOCK_THRESHOLD) lockTime.current += delta;
-    else lockTime.current = 0;
-
+    if (remainingError > TRACKING_THRESHOLD) stableTrackingFrames.current = 0;
     const nextPhase: HeroCameraPhase =
       remainingError > TRACKING_THRESHOLD
         ? 'acquiring'
-        : lockTime.current < LOCK_HOLD_SECONDS
-          ? 'tracking'
-          : 'locked';
+        : stableTrackingFrames.current >= LOCK_RENDER_SAMPLES
+          ? 'locked'
+          : 'tracking';
 
     if (phaseRef.current !== nextPhase) {
       phaseRef.current = nextPhase;
@@ -193,13 +194,12 @@ export function HeroCameraWall({
 
     const profile = PROFILES[qualityTier][nextPhase];
     if (currentSize.current[0] !== profile.width || currentSize.current[1] !== profile.height) {
-      renderTarget.setSize(profile.width, profile.height);
-      captureCamera.aspect = profile.width / profile.height;
-      captureCamera.updateProjectionMatrix();
       const filter = nextPhase === 'acquiring' ? NearestFilter : LinearFilter;
       renderTarget.texture.minFilter = filter;
       renderTarget.texture.magFilter = filter;
-      renderTarget.texture.needsUpdate = true;
+      renderTarget.setSize(profile.width, profile.height);
+      captureCamera.aspect = profile.width / profile.height;
+      captureCamera.updateProjectionMatrix();
       currentSize.current = [profile.width, profile.height];
     }
 
@@ -257,6 +257,11 @@ export function HeroCameraWall({
     scene.fog = previousFog;
 
     framesRendered.current += 1;
+    if (nextPhase === 'tracking') {
+      if (remainingError <= LOCK_THRESHOLD) stableTrackingFrames.current += 1;
+      else stableTrackingFrames.current = 0;
+    }
+
     window.__CONFLUENCE_HERO_CAMERA__ = {
       roomId,
       phase: nextPhase,
@@ -265,6 +270,7 @@ export function HeroCameraWall({
       updateRate: profile.fps,
       framesRendered: framesRendered.current,
       captureLayer: target.layer,
+      stableTrackingFrames: stableTrackingFrames.current,
     };
   });
 
