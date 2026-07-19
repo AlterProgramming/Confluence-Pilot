@@ -67,6 +67,7 @@ const TRACKING_RESPONSE = 7.5;
 const TRACKING_THRESHOLD = MathUtils.degToRad(8);
 const LOCK_THRESHOLD = MathUtils.degToRad(2.2);
 const LOCK_RENDER_SAMPLES = 3;
+const ACQUISITION_RENDER_SAMPLES = 1;
 const INITIAL_ANGULAR_OFFSET = MathUtils.degToRad(38);
 
 function shortestAngle(from: number, to: number) {
@@ -97,6 +98,7 @@ export function HeroCameraWall({
   const [phase, setPhase] = useState<HeroCameraPhase>('acquiring');
   const phaseRef = useRef<HeroCameraPhase>('acquiring');
   const trackedYaw = useRef(0);
+  const acquisitionFrames = useRef(0);
   const stableTrackingFrames = useRef(0);
   const renderAccumulator = useRef(0);
   const framesRendered = useRef(0);
@@ -140,6 +142,7 @@ export function HeroCameraWall({
   useEffect(() => {
     phaseRef.current = 'acquiring';
     setPhase('acquiring');
+    acquisitionFrames.current = 0;
     stableTrackingFrames.current = 0;
     renderAccumulator.current = 0;
     framesRendered.current = 0;
@@ -167,21 +170,25 @@ export function HeroCameraWall({
     if (lastSubject.current !== target.subject) {
       lastSubject.current = target.subject;
       trackedYaw.current = desiredYaw - INITIAL_ANGULAR_OFFSET;
+      acquisitionFrames.current = 0;
       stableTrackingFrames.current = 0;
       phaseRef.current = 'acquiring';
       setPhase('acquiring');
     }
 
+    const initialAcquisition = acquisitionFrames.current < ACQUISITION_RENDER_SAMPLES;
     const angularError = shortestAngle(trackedYaw.current, desiredYaw);
-    // Use the real elapsed frame time. On a slow renderer, clamping delta lets
-    // the continuously rotating hero outrun the camera forever.
-    const response = 1 - Math.exp(-TRACKING_RESPONSE * Math.max(0, delta));
-    trackedYaw.current += angularError * response;
+    if (!initialAcquisition) {
+      // Use the real elapsed frame time. On a slow renderer, clamping delta lets
+      // the continuously rotating hero outrun the camera forever.
+      const response = 1 - Math.exp(-TRACKING_RESPONSE * Math.max(0, delta));
+      trackedYaw.current += angularError * response;
+    }
     const remainingError = Math.abs(shortestAngle(trackedYaw.current, desiredYaw));
 
     if (remainingError > TRACKING_THRESHOLD) stableTrackingFrames.current = 0;
     const nextPhase: HeroCameraPhase =
-      remainingError > TRACKING_THRESHOLD
+      initialAcquisition || remainingError > TRACKING_THRESHOLD
         ? 'acquiring'
         : stableTrackingFrames.current >= LOCK_RENDER_SAMPLES
           ? 'locked'
@@ -257,7 +264,10 @@ export function HeroCameraWall({
     scene.fog = previousFog;
 
     framesRendered.current += 1;
-    if (nextPhase === 'tracking') {
+    if (nextPhase === 'acquiring') {
+      acquisitionFrames.current += 1;
+      stableTrackingFrames.current = 0;
+    } else if (nextPhase === 'tracking') {
       if (remainingError <= LOCK_THRESHOLD) stableTrackingFrames.current += 1;
       else stableTrackingFrames.current = 0;
     }
