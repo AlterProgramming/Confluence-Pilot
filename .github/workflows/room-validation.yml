@@ -154,7 +154,7 @@ jobs:
           retention-days: 14
 
   evidence:
-    needs: [validate, browser-smoke]
+    needs: [validate, browser-smoke, hero-camera]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -206,7 +206,18 @@ jobs:
           exit 1
 
       - name: Capture Room ${{ matrix.id }} validation evidence
-        run: node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 ${{ matrix.number }} ${{ matrix.asset }}
+        shell: bash
+        run: |
+          set +e
+          mkdir -p validation/evidence/room-${{ matrix.id }}
+          node scripts/capture_room_evidence.mjs \
+            http://127.0.0.1:4173 \
+            ${{ matrix.number }} \
+            ${{ matrix.asset }} \
+            > validation/evidence/room-${{ matrix.id }}/runner.log 2>&1
+          status=$?
+          cat validation/evidence/room-${{ matrix.id }}/runner.log
+          exit $status
 
       - name: Upload Room ${{ matrix.id }} evidence
         if: always()
