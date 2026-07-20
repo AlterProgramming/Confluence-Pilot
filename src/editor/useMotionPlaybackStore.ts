@@ -27,8 +27,14 @@ export const useMotionPlaybackStore = create<MotionPlaybackState>((set) => ({
     previewEnabled: false,
   }),
   setPlayhead: (playheadSeconds) => set({ playheadSeconds: Math.max(0, playheadSeconds) }),
-  setPlaying: (playing) => set({ playing, previewEnabled: playing || undefined }),
-  setPreviewEnabled: (previewEnabled) => set({ previewEnabled, playing: previewEnabled ? undefined : false }),
+  setPlaying: (playing) => set((state) => ({
+    playing,
+    previewEnabled: playing ? true : state.previewEnabled,
+  })),
+  setPreviewEnabled: (previewEnabled) => set((state) => ({
+    previewEnabled,
+    playing: previewEnabled ? state.playing : false,
+  })),
   setPlaybackRate: (playbackRate) => set({ playbackRate: Math.max(0.1, Math.min(4, playbackRate)) }),
   resetPlayback: () => set({
     activeTrackId: null,
