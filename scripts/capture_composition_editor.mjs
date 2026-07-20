@@ -31,7 +31,7 @@ const browser = await puppeteer.launch({
 });
 
 const report = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   generatedAt: new Date().toISOString(),
   passed: false,
   fatalError: null,
@@ -42,6 +42,11 @@ const report = {
   pageErrors: [],
 };
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const near = (left, right, tolerance = 0.02) => Math.abs(left - right) <= tolerance;
+const sameTuple = (left, right, tolerance = 0.0001) => Array.isArray(left)
+  && Array.isArray(right)
+  && left.length === right.length
+  && left.every((value, index) => near(value, right[index], tolerance));
 
 try {
   const page = await browser.newPage();
@@ -71,7 +76,7 @@ try {
       input.dispatchEvent(new Event('change', { bubbles: true }));
       input.blur();
     }, value);
-    await delay(220);
+    await delay(240);
   };
   const composeInstance = async (id, values) => {
     await selectInstance(id);
@@ -86,6 +91,7 @@ try {
     else await page.screenshot({ path: destination, captureBeyondViewport: false });
     report.screenshots.push(name);
   };
+  const find = (snapshot, id) => snapshot.instances.find((instance) => instance.id === id);
 
   await page.goto(`${baseUrl}/?editor=1&capture=1&scene=room-02`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
   await page.waitForFunction(() => window.__CONFLUENCE_EDITOR__?.ready === true && window.__CONFLUENCE_EDITOR__?.sceneId === 'room-02', { timeout: 90_000 });
@@ -93,48 +99,126 @@ try {
   await delay(4200);
 
   const initialState = await state();
-  report.states.push({ name: 'room-02-initial', value: initialState });
-  await writeScreenshot('room-02-editor-before.png');
+  report.states.push({ name: 'room-02-assembly-initial', value: initialState });
+  await writeScreenshot('room-02-assembly-before.png');
   const viewport = await page.$('[data-testid="composition-viewport"]');
-  await writeScreenshot('room-02-viewport-before.png', viewport);
+  await writeScreenshot('room-02-assembly-viewport-before.png', viewport);
+
+  const laptopId = 'room-02-laptop-front-left';
+  const parentId = 'room-02-bench-front-left';
+  await selectInstance(laptopId);
+  await page.waitForSelector('[data-testid="selected-attachment-status"]', { visible: true, timeout: 20_000 });
+  await writeScreenshot('room-02-laptop-selected.png');
+
+  const clampCountBeforeLaptop = initialState.boundaryClampCount;
+  await setAxis('position', 0, 99);
+  await page.waitForFunction(
+    (previous) => window.__CONFLUENCE_EDITOR__?.boundaryClampCount > previous,
+    { timeout: 20_000 },
+    clampCountBeforeLaptop,
+  );
+  const laptopClampedState = await state();
+  report.states.push({ name: 'laptop-tabletop-clamped', value: laptopClampedState });
+  await writeScreenshot('room-02-laptop-tabletop-clamp.png');
+
+  await composeInstance(laptopId, { x: 0.31, z: 0.07, rotationY: 22 });
+  const laptopPlacedState = await state();
+  const laptopBeforeParentMove = find(laptopPlacedState, laptopId);
+  report.states.push({ name: 'laptop-repositioned-locally', value: laptopPlacedState });
+  await writeScreenshot('room-02-laptop-repositioned.png');
+
+  await composeInstance(parentId, { x: -3.25, z: 3.25, rotationY: 165 });
+  const parentMovedState = await state();
+  const laptopAfterParentMove = find(parentMovedState, laptopId);
+  report.states.push({ name: 'parent-moved-with-laptop', value: parentMovedState });
+
+  await selectInstance('room-02-coaching-table');
+  const beforeAddedLaptopCount = parentMovedState.instanceCount;
+  await page.waitForSelector('[data-asset-id="academy-laptop"]', { visible: true, timeout: 20_000 });
+  await page.$eval('[data-asset-id="academy-laptop"]', (element) => {
+    element.scrollIntoView({ block: 'center' });
+    element.click();
+  });
+  await page.waitForFunction(
+    (previous) => window.__CONFLUENCE_EDITOR__?.instanceCount === previous + 1,
+    { timeout: 20_000 },
+    beforeAddedLaptopCount,
+  );
+  const addedLaptopState = await state();
+  const addedLaptop = find(addedLaptopState, addedLaptopState.selectedId);
+  report.states.push({ name: 'laptop-added-to-selected-table', value: addedLaptopState });
+  await composeInstance(addedLaptop.id, { x: 0.52, z: -0.25, rotationY: -28 });
+  const piledState = await state();
+  const finalAddedLaptop = find(piledState, addedLaptop.id);
+  await writeScreenshot('room-02-multi-surface-assembly.png');
+  await writeScreenshot('room-02-multi-surface-viewport.png', viewport);
 
   await selectInstance('room-02-credential-stack');
+  const clampBeforeRoomTest = piledState.boundaryClampCount;
   await setAxis('position', 0, 99);
-  await page.waitForFunction(() => window.__CONFLUENCE_EDITOR__?.boundaryClampCount >= 1, { timeout: 20_000 });
-  const clampedState = await state();
-  report.states.push({ name: 'boundary-clamped', value: clampedState });
-  await writeScreenshot('room-02-boundary-clamp.png');
-
+  await page.waitForFunction(
+    (previous) => window.__CONFLUENCE_EDITOR__?.boundaryClampCount > previous,
+    { timeout: 20_000 },
+    clampBeforeRoomTest,
+  );
+  const roomClampedState = await state();
   await composeInstance('room-02-credential-stack', { x: 5.55, z: -4.55, rotationY: -90 });
-  await composeInstance('room-02-coaching-table', { x: -4.2, z: 2.75, rotationY: 30 });
-  await composeInstance('room-02-hero', { x: 0, z: -0.65, rotationY: 30 });
-  await composeInstance('room-02-bench-front-left', { x: -3.25, z: 3.25, rotationY: 165 });
-  await composeInstance('room-02-bench-front-right', { x: 3.25, z: 3.25, rotationY: 195 });
-  await page.click('[data-tool="rotate"]');
-  await page.waitForFunction(() => window.__CONFLUENCE_EDITOR__?.transformMode === 'rotate', { timeout: 20_000 });
   await page.click('[data-testid="save-composition"]');
   await page.waitForFunction(() => window.__CONFLUENCE_EDITOR__?.dirty === false, { timeout: 20_000 });
-  await delay(1800);
+  await delay(1200);
 
-  const composedState = await state();
-  report.states.push({ name: 'room-02-composed', value: composedState });
-  await writeScreenshot('room-02-editor-after.png');
-  await writeScreenshot('room-02-viewport-after.png', viewport);
+  const finalState = await state();
+  report.states.push({ name: 'room-02-assembly-final', value: finalState });
+  await writeScreenshot('room-02-assembly-after.png');
+  await writeScreenshot('room-02-assembly-viewport-after.png', viewport);
 
-  const find = (snapshot, id) => snapshot.instances.find((instance) => instance.id === id);
-  const clampedCredential = find(clampedState, 'room-02-credential-stack');
-  const finalCredential = find(composedState, 'room-02-credential-stack');
-  const finalTable = find(composedState, 'room-02-coaching-table');
-  const finalHero = find(composedState, 'room-02-hero');
+  const initialLaptops = initialState.instances.filter((instance) => instance.assetId === 'academy-laptop');
+  const clampedLaptop = find(laptopClampedState, laptopId);
+  const finalLaptop = find(finalState, laptopId);
+  const finalParent = find(finalState, parentId);
+  const finalCredential = find(finalState, 'room-02-credential-stack');
+  const clampedCredential = find(roomClampedState, 'room-02-credential-stack');
   report.checks = {
     exactRoomDimensions: JSON.stringify(initialState?.dimensions) === JSON.stringify([15.2, 13.8, 5.7]),
-    initialObjectsLoaded: initialState?.instanceCount === 9,
-    initialObjectsInside: initialState?.boundaryClampCount === 0,
-    outOfBoundsAttemptClamped: Boolean(clampedCredential?.transform?.position?.[0] < 7.6 && clampedState?.boundaryClampCount >= 1),
-    credentialRecomposed: Boolean(Math.abs(finalCredential?.transform?.position?.[0] - 5.55) < 0.02 && Math.abs(finalCredential?.transform?.position?.[2] + 4.55) < 0.02),
-    coachingTableRecomposed: Boolean(Math.abs(finalTable?.transform?.position?.[0] + 4.2) < 0.02 && Math.abs(finalTable?.transform?.position?.[2] - 2.75) < 0.02),
-    heroReoriented: Boolean(Math.abs(finalHero?.transform?.rotation?.[1] - Math.PI / 6) < 0.02),
-    saved: composedState?.dirty === false,
+    assemblyObjectCount: initialState?.instanceCount === 15,
+    sixLaptopChildrenLoaded: initialLaptops.length === 6
+      && initialLaptops.every((instance) => instance.parentId && instance.surfaceId === 'tabletop'),
+    hierarchyCountsCorrect: initialState?.rootCount === 9 && initialState?.attachedCount === 6,
+    laptopSelectableAsDistinctObject: initialState.instances.some((instance) => instance.id === laptopId && instance.parentId === parentId),
+    laptopTabletopBoundaryClamped: Boolean(
+      clampedLaptop
+      && Math.abs(clampedLaptop.transform.position[0]) < 0.55
+      && near(clampedLaptop.transform.position[1], 0.86)
+      && laptopClampedState.boundaryClampCount > clampCountBeforeLaptop,
+    ),
+    laptopMovedLocally: Boolean(
+      finalLaptop
+      && near(finalLaptop.transform.position[0], 0.31)
+      && near(finalLaptop.transform.position[2], 0.07)
+      && near(finalLaptop.transform.rotation[1], MathUtilsRadians(22)),
+    ),
+    parentMovePreservedChildLocalTransform: Boolean(
+      laptopBeforeParentMove
+      && laptopAfterParentMove
+      && sameTuple(laptopBeforeParentMove.transform.position, laptopAfterParentMove.transform.position)
+      && sameTuple(laptopBeforeParentMove.transform.rotation, laptopAfterParentMove.transform.rotation),
+    ),
+    parentRecomposedWithChild: Boolean(finalParent && near(finalParent.transform.position[0], -3.25) && near(finalParent.transform.position[2], 3.25)),
+    libraryLaptopAttachedToSelectedHost: Boolean(
+      addedLaptop
+      && addedLaptop.assetId === 'academy-laptop'
+      && addedLaptop.parentId === 'room-02-coaching-table'
+      && addedLaptop.surfaceId === 'round-top',
+    ),
+    addedLaptopMovedOnRoundTable: Boolean(
+      finalAddedLaptop
+      && near(finalAddedLaptop.transform.position[0], 0.52)
+      && near(finalAddedLaptop.transform.position[2], -0.25),
+    ),
+    roomBoundaryStillClamped: Boolean(clampedCredential?.transform?.position?.[0] < 7.6 && roomClampedState.boundaryClampCount > clampBeforeRoomTest),
+    credentialRecomposed: Boolean(finalCredential && near(finalCredential.transform.position[0], 5.55) && near(finalCredential.transform.position[2], -4.55)),
+    finalHierarchyPersisted: finalState?.attachedCount === 7 && finalState?.instanceCount === 16,
+    saved: finalState?.dirty === false,
   };
   report.passed = Object.values(report.checks).every(Boolean) && report.consoleErrors.length === 0 && report.pageErrors.length === 0;
 } catch (error) {
@@ -142,6 +226,10 @@ try {
 } finally {
   await browser.close();
   writeFileSync(path.join(outputDirectory, 'runtime.json'), `${JSON.stringify(report, null, 2)}\n`);
+}
+
+function MathUtilsRadians(degrees) {
+  return degrees * Math.PI / 180;
 }
 
 if (!report.passed) process.exitCode = 1;
