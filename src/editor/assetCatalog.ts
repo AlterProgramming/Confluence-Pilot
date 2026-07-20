@@ -4,36 +4,42 @@ import type { AssetCatalogItem } from './types';
 const primitives: AssetCatalogItem[] = [
   {
     id: 'primitive-box', label: 'Block', category: 'primitive', kind: 'primitive', primitive: 'box',
-    footprint: [1, 1, 1], floorAnchored: true, accent: '#78a9ff',
-    description: 'One-meter architectural block for spacing and collision studies.',
+    footprint: [1, 1, 1], floorAnchored: true, attachable: true, accent: '#78a9ff',
+    description: 'One-meter architectural block for spacing, stacking, and collision studies.',
   },
   {
     id: 'primitive-cylinder', label: 'Pedestal', category: 'primitive', kind: 'primitive', primitive: 'cylinder',
-    footprint: [1.44, 1, 1.44], floorAnchored: true, accent: '#f2b84b',
+    footprint: [1.44, 1, 1.44], floorAnchored: true, attachable: true, accent: '#f2b84b',
     description: 'Neutral cylindrical pedestal for hero and furniture placement.',
   },
   {
     id: 'primitive-sphere', label: 'Sphere', category: 'primitive', kind: 'primitive', primitive: 'sphere',
-    footprint: [1.2, 1.2, 1.2], floorAnchored: true, accent: '#65d6bd',
+    footprint: [1.2, 1.2, 1.2], floorAnchored: true, attachable: true, accent: '#65d6bd',
     description: 'Reference volume for clearance and lighting composition.',
   },
   {
     id: 'primitive-cone', label: 'Marker', category: 'primitive', kind: 'primitive', primitive: 'cone',
-    footprint: [1.24, 1.2, 1.24], floorAnchored: true, accent: '#ff7b62',
+    footprint: [1.24, 1.2, 1.24], floorAnchored: true, attachable: true, accent: '#ff7b62',
     description: 'Directional marker useful for orientation and camera blocking.',
   },
   {
     id: 'primitive-torus', label: 'Ring', category: 'primitive', kind: 'primitive', primitive: 'torus',
-    footprint: [1.66, 0.36, 1.66], floorAnchored: true, accent: '#bd8cff',
+    footprint: [1.66, 0.36, 1.66], floorAnchored: true, attachable: true, accent: '#bd8cff',
     description: 'Circular reference object for rotation and radial composition.',
   },
 ];
 
 const roomFixtures: AssetCatalogItem[] = [
   {
-    id: 'academy-workbench', label: 'Academy workbench', category: 'room-fixture', kind: 'primitive', primitive: 'workbench',
-    footprint: [1.8, 1.35, 0.85], floorAnchored: true, accent: '#ff7139',
-    description: 'Desk, legs, and credential monitor used by Room 02.',
+    id: 'academy-workbench', label: 'Academy workbench', category: 'room-fixture', kind: 'primitive', primitive: 'workbench-table',
+    footprint: [1.8, 0.84, 0.85], floorAnchored: true, accent: '#ff7139',
+    attachmentSurfaces: [{ id: 'tabletop', label: 'Tabletop', position: [0, 0.86, 0], size: [1.58, 0.68] }],
+    description: 'Room 02 desk and legs with a declared tabletop attachment surface.',
+  },
+  {
+    id: 'academy-laptop', label: 'Academy laptop', category: 'room-fixture', kind: 'primitive', primitive: 'laptop',
+    footprint: [0.72, 0.46, 0.48], floorAnchored: true, attachable: true, accent: '#ff7139',
+    description: 'Independently editable laptop that can attach to a workbench or another declared surface.',
   },
   {
     id: 'academy-credential-stack', label: 'Credential display', category: 'room-fixture', kind: 'primitive', primitive: 'credential-stack',
@@ -43,7 +49,8 @@ const roomFixtures: AssetCatalogItem[] = [
   {
     id: 'academy-coaching-table', label: 'Coaching table', category: 'room-fixture', kind: 'primitive', primitive: 'coaching-table',
     footprint: [3.5, 1.2, 3.2], floorAnchored: true, accent: '#ff7139',
-    description: 'Round coaching table with three learner stools.',
+    attachmentSurfaces: [{ id: 'round-top', label: 'Round tabletop', position: [0, 1.14, 0], size: [2.18, 2.18] }],
+    description: 'Round coaching table with three learner stools and an editable top surface.',
   },
 ];
 
