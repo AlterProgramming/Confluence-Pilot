@@ -1,17 +1,20 @@
 import { Suspense, useMemo, useRef, useState } from 'react';
 import { Grid, OrbitControls, TransformControls, useGLTF } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { ACESFilmicToneMapping, Box3, Group, MathUtils, Vector3 } from 'three';
 import { getCatalogAsset } from './assetCatalog';
+import { sampleMotionTrack, sortedWaypoints, trackDuration } from './motionPath';
 import { constrainPlacedAssetTransform } from './placementBounds';
 import type {
   AssetCatalogItem,
   AssetTransform,
   DesignProposition,
+  MotionTrack,
   PlacedAsset,
   PrimitiveKind,
   SceneBounds,
 } from './types';
+import { useMotionPlaybackStore } from './useMotionPlaybackStore';
 import { usePlacementEditorStore } from './usePlacementEditorStore';
 
 function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accent: string }) {
@@ -20,6 +23,18 @@ function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accen
   if (primitive === 'cylinder') return <mesh castShadow receiveShadow position={[0, 0.5, 0]}><cylinderGeometry args={[0.6, 0.72, 1, 32]} />{surface}</mesh>;
   if (primitive === 'cone') return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><coneGeometry args={[0.62, 1.2, 28]} />{surface}</mesh>;
   if (primitive === 'torus') return <mesh castShadow receiveShadow position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.65, 0.18, 18, 48]} />{surface}</mesh>;
+  if (primitive === 'character-proxy') {
+    return (
+      <group name="motion-character-proxy">
+        <mesh castShadow position={[0, 1.55, 0]}><sphereGeometry args={[0.22, 24, 18]} /><meshStandardMaterial color="#d6a978" roughness={0.62} /></mesh>
+        <mesh castShadow position={[0, 1.05, 0]}><cylinderGeometry args={[0.25, 0.3, 0.72, 20]} /><meshStandardMaterial color={accent} roughness={0.58} /></mesh>
+        {[-0.16, 0.16].map((x) => <mesh key={`leg-${x}`} castShadow position={[x, 0.42, 0]}><boxGeometry args={[0.16, 0.72, 0.2]} /><meshStandardMaterial color="#303742" roughness={0.62} /></mesh>)}
+        {[-0.34, 0.34].map((x) => <mesh key={`arm-${x}`} castShadow position={[x, 1.08, 0]} rotation={[0, 0, x < 0 ? -0.16 : 0.16]}><boxGeometry args={[0.13, 0.68, 0.16]} /><meshStandardMaterial color={accent} roughness={0.58} /></mesh>)}
+        <mesh position={[0, 1.18, 0.3]} rotation={[Math.PI / 2, 0, 0]}><coneGeometry args={[0.11, 0.32, 16]} /><meshStandardMaterial color="#fff4b5" emissive={accent} emissiveIntensity={0.45} toneMapped={false} /></mesh>
+        <mesh receiveShadow position={[0, 0.035, 0]}><cylinderGeometry args={[0.34, 0.34, 0.035, 28]} /><meshStandardMaterial color="#171b21" transparent opacity={0.72} /></mesh>
+      </group>
+    );
+  }
   if (primitive === 'workbench-table') {
     return (
       <group>
@@ -127,6 +142,7 @@ function PlacedObject({
   onTransforming: (active: boolean) => void;
 }) {
   const groupRef = useRef<Group>(null);
+  const motionApplied = useRef(false);
   const selectedId = usePlacementEditorStore((state) => state.selectedId);
   const transformMode = usePlacementEditorStore((state) => state.transformMode);
   const snapEnabled = usePlacementEditorStore((state) => state.snapEnabled);
@@ -134,6 +150,9 @@ function PlacedObject({
   const rotationSnapDegrees = usePlacementEditorStore((state) => state.rotationSnapDegrees);
   const scaleSnap = usePlacementEditorStore((state) => state.scaleSnap);
   const bounds = usePlacementEditorStore((state) => state.document.bounds);
+  const motionTracks = usePlacementEditorStore((state) => state.document.motionTracks ?? []);
+  const activeTrackId = useMotionPlaybackStore((state) => state.activeTrackId);
+  const previewEnabled = useMotionPlaybackStore((state) => state.previewEnabled);
   const select = usePlacementEditorStore((state) => state.select);
   const updateTransform = usePlacementEditorStore((state) => state.updateTransform);
   const asset = getCatalogAsset(instance.assetId);
@@ -141,6 +160,30 @@ function PlacedObject({
   const parentAsset = parent ? getCatalogAsset(parent.assetId) : undefined;
   const children = instances.filter((candidate) => candidate.parentId === instance.id);
   const selected = instance.id === selectedId;
+  const activeTrack = motionTracks.find((track) => track.id === activeTrackId && track.targetId === instance.id);
+
+  useFrame(() => {
+    const object = groupRef.current;
+    if (!object) return;
+    const playback = useMotionPlaybackStore.getState();
+    const liveTrack = (usePlacementEditorStore.getState().document.motionTracks ?? [])
+      .find((track) => track.id === playback.activeTrackId && track.targetId === instance.id);
+    if (liveTrack && playback.previewEnabled) {
+      const sampled = sampleMotionTrack(liveTrack, playback.playheadSeconds);
+      if (sampled) {
+        object.position.set(...sampled.position);
+        object.rotation.set(...sampled.rotation);
+        object.scale.set(...instance.transform.scale);
+        motionApplied.current = true;
+      }
+    } else if (motionApplied.current) {
+      object.position.set(...instance.transform.position);
+      object.rotation.set(...instance.transform.rotation);
+      object.scale.set(...instance.transform.scale);
+      motionApplied.current = false;
+    }
+  });
+
   if (!instance.visible) return null;
 
   const readTransform = (): AssetTransform | null => {
@@ -186,7 +229,7 @@ function PlacedObject({
       ))}
     </group>
   );
-  if (!selected || instance.locked) return object;
+  if (!selected || instance.locked || (activeTrack && previewEnabled)) return object;
   return (
     <TransformControls
       mode={transformMode}
@@ -222,7 +265,7 @@ function Room02Envelope({ bounds, accent }: { bounds: SceneBounds; accent: strin
       <group position={[bounds.min[0] - 0.03, centerY, 0]}>
         {[-4.8, -1.6, 1.6, 4.8].map((z) => <mesh key={z} position={[0, 0, z]}><boxGeometry args={[0.08, height - 0.28, 3.0]} /><meshPhysicalMaterial color="#b9d5e8" transparent opacity={0.18} roughness={0.18} transmission={0.3} /></mesh>)}
       </group>
-      <mesh position={[0, centerY, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial color={accent} wireframe transparent opacity={0.1} depthWrite={false} /></mesh>
+      <mesh position={[0, centerY, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial color={accent} wireframe transparent opacity={0.13} depthWrite={false} /></mesh>
     </group>
   );
 }
@@ -272,9 +315,72 @@ function PropositionOverlay({ proposition }: { proposition: DesignProposition })
   );
 }
 
+function MotionPathOverlay({ track }: { track: MotionTrack }) {
+  const playheadSeconds = useMotionPlaybackStore((state) => state.playheadSeconds);
+  const previewEnabled = useMotionPlaybackStore((state) => state.previewEnabled);
+  const waypoints = sortedWaypoints(track);
+  const segments = waypoints.slice(1).map((end, index) => {
+    const start = waypoints[index]!;
+    const dx = end.position[0] - start.position[0];
+    const dz = end.position[2] - start.position[2];
+    return {
+      id: `${start.id}-${end.id}`,
+      length: Math.hypot(dx, dz),
+      midpoint: [(start.position[0] + end.position[0]) / 2, 0.065, (start.position[2] + end.position[2]) / 2] as [number, number, number],
+      angle: -Math.atan2(dz, dx),
+    };
+  });
+  const sampled = previewEnabled ? sampleMotionTrack(track, playheadSeconds) : null;
+  return (
+    <group name={`motion-path-${track.id}`}>
+      {segments.map((segment) => (
+        <mesh key={segment.id} position={segment.midpoint} rotation={[0, segment.angle, 0]}>
+          <boxGeometry args={[segment.length, 0.045, 0.14]} />
+          <meshBasicMaterial color="#f5d36f" transparent opacity={0.9} depthWrite={false} />
+        </mesh>
+      ))}
+      {waypoints.map((waypoint, index) => (
+        <group key={waypoint.id} position={[waypoint.position[0], 0.09, waypoint.position[2]]}>
+          <mesh><cylinderGeometry args={[0.24, 0.24, 0.08, 24]} /><meshBasicMaterial color={index === 0 ? '#7ee0ac' : index === waypoints.length - 1 ? '#ff9c7d' : '#f5d36f'} /></mesh>
+          <mesh position={[0, 0.31, 0]}><coneGeometry args={[0.1, 0.38, 16]} /><meshBasicMaterial color="#fff3ae" /></mesh>
+        </group>
+      ))}
+      {sampled && (
+        <mesh position={[sampled.position[0], 0.12, sampled.position[2]]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.34, 0.07, 12, 36]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.95} depthWrite={false} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+function MotionClock() {
+  useFrame((_, delta) => {
+    const playback = useMotionPlaybackStore.getState();
+    if (!playback.playing || !playback.activeTrackId) return;
+    const track = (usePlacementEditorStore.getState().document.motionTracks ?? [])
+      .find((candidate) => candidate.id === playback.activeTrackId);
+    if (!track) {
+      playback.resetPlayback();
+      return;
+    }
+    const duration = trackDuration(track);
+    const next = playback.playheadSeconds + delta * playback.playbackRate;
+    if (next >= duration) {
+      if (track.loop) playback.setPlayhead(next % duration);
+      else useMotionPlaybackStore.setState({ playheadSeconds: duration, playing: false, previewEnabled: true });
+      return;
+    }
+    playback.setPlayhead(next);
+  });
+  return null;
+}
+
 function EditorScene() {
   const document = usePlacementEditorStore((state) => state.document);
   const select = usePlacementEditorStore((state) => state.select);
+  const activeTrackId = useMotionPlaybackStore((state) => state.activeTrackId);
   const [transforming, setTransforming] = useState(false);
   const bounds = document.bounds;
   const proposition = document.proposition;
@@ -283,6 +389,7 @@ function EditorScene() {
   const roomDepth = bounds ? bounds.max[2] - bounds.min[2] : 80;
   const knownIds = new Set(document.instances.map((instance) => instance.id));
   const roots = document.instances.filter((instance) => !instance.parentId || !knownIds.has(instance.parentId));
+  const activeTrack = (document.motionTracks ?? []).find((track) => track.id === activeTrackId);
   return (
     <>
       <color attach="background" args={[bounds ? '#1b1714' : '#11151d']} />
@@ -293,6 +400,8 @@ function EditorScene() {
       <directionalLight position={[-10, 7, -5]} intensity={1.0} color="#9ec4ff" />
       {bounds && <Room02Envelope bounds={bounds} accent={accent} />}
       {proposition && <PropositionOverlay proposition={proposition} />}
+      {activeTrack && <MotionPathOverlay track={activeTrack} />}
+      <MotionClock />
       <Grid
         args={[roomWidth, roomDepth]}
         position={[0, bounds ? 0.006 : -0.002, 0]}
