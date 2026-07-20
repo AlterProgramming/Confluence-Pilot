@@ -8,6 +8,8 @@ import { ValidationBridge } from './components/ValidationBridge';
 import { PlacementAssemblyTools } from './editor/PlacementAssemblyTools';
 import { PlacementEditor } from './editor/PlacementEditor';
 import { PlacementHistoryControls } from './editor/PlacementHistoryControls';
+import { PropositionBrief } from './editor/PropositionBrief';
+import { PropositionSceneLoader } from './editor/PropositionSceneLoader';
 import './editor/assembly.css';
 import { useExperienceStore } from './state/useExperienceStore';
 
@@ -45,6 +47,8 @@ function ExperienceApp() {
 function EditorApp() {
   return (
     <>
+      <PropositionSceneLoader />
+      <PropositionBrief />
       <PlacementEditor />
       <PlacementHistoryControls />
       <PlacementAssemblyTools />
