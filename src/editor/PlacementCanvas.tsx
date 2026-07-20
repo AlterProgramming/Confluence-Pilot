@@ -3,8 +3,14 @@ import { Grid, OrbitControls, TransformControls, useGLTF } from '@react-three/dr
 import { Canvas } from '@react-three/fiber';
 import { ACESFilmicToneMapping, Box3, Group, MathUtils, Vector3 } from 'three';
 import { getCatalogAsset } from './assetCatalog';
-import { constrainAssetTransform } from './placementBounds';
-import type { AssetCatalogItem, AssetTransform, PlacedAsset, PrimitiveKind, SceneBounds } from './types';
+import { constrainPlacedAssetTransform } from './placementBounds';
+import type {
+  AssetCatalogItem,
+  AssetTransform,
+  PlacedAsset,
+  PrimitiveKind,
+  SceneBounds,
+} from './types';
 import { usePlacementEditorStore } from './usePlacementEditorStore';
 
 function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accent: string }) {
@@ -13,12 +19,47 @@ function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accen
   if (primitive === 'cylinder') return <mesh castShadow receiveShadow position={[0, 0.5, 0]}><cylinderGeometry args={[0.6, 0.72, 1, 32]} />{surface}</mesh>;
   if (primitive === 'cone') return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><coneGeometry args={[0.62, 1.2, 28]} />{surface}</mesh>;
   if (primitive === 'torus') return <mesh castShadow receiveShadow position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.65, 0.18, 18, 48]} />{surface}</mesh>;
-  if (primitive === 'workbench') {
+  if (primitive === 'workbench-table') {
     return (
       <group>
-        <mesh castShadow receiveShadow position={[0, 0.78, 0]}><boxGeometry args={[1.8, 0.12, 0.85]} /><meshStandardMaterial color="#292d35" metalness={0.34} roughness={0.48} /></mesh>
-        {[-0.7, 0.7].map((x) => <mesh key={x} castShadow position={[x, 0.38, 0]}><boxGeometry args={[0.1, 0.76, 0.6]} /><meshStandardMaterial color="#171a20" metalness={0.45} roughness={0.4} /></mesh>)}
-        <mesh castShadow position={[0, 1.12, -0.24]}><boxGeometry args={[1.05, 0.56, 0.05]} /><meshStandardMaterial color="#ffd29e" emissive={accent} emissiveIntensity={0.72} toneMapped={false} /></mesh>
+        <mesh castShadow receiveShadow position={[0, 0.78, 0]}>
+          <boxGeometry args={[1.8, 0.12, 0.85]} />
+          <meshStandardMaterial color="#292d35" metalness={0.34} roughness={0.48} />
+        </mesh>
+        {[-0.7, 0.7].map((x) => (
+          <mesh key={x} castShadow position={[x, 0.38, 0]}>
+            <boxGeometry args={[0.1, 0.76, 0.6]} />
+            <meshStandardMaterial color="#171a20" metalness={0.45} roughness={0.4} />
+          </mesh>
+        ))}
+        <mesh position={[0, 0.848, 0]} receiveShadow>
+          <boxGeometry args={[1.58, 0.016, 0.68]} />
+          <meshStandardMaterial color="#3a4049" metalness={0.22} roughness={0.44} />
+        </mesh>
+      </group>
+    );
+  }
+  if (primitive === 'laptop') {
+    return (
+      <group name="editable-laptop">
+        <mesh castShadow receiveShadow position={[0, 0.035, 0.04]}>
+          <boxGeometry args={[0.72, 0.07, 0.48]} />
+          <meshStandardMaterial color="#252a31" metalness={0.42} roughness={0.36} />
+        </mesh>
+        <mesh position={[0, 0.076, 0.04]}>
+          <boxGeometry args={[0.62, 0.012, 0.36]} />
+          <meshStandardMaterial color="#9c9386" metalness={0.2} roughness={0.52} />
+        </mesh>
+        <group position={[0, 0.09, -0.19]} rotation={[-0.2, 0, 0]}>
+          <mesh castShadow position={[0, 0.2, 0]}>
+            <boxGeometry args={[0.7, 0.4, 0.045]} />
+            <meshStandardMaterial color="#20252c" metalness={0.38} roughness={0.34} />
+          </mesh>
+          <mesh position={[0, 0.2, 0.026]}>
+            <boxGeometry args={[0.62, 0.32, 0.012]} />
+            <meshStandardMaterial color="#ffd29e" emissive={accent} emissiveIntensity={0.62} toneMapped={false} />
+          </mesh>
+        </group>
       </group>
     );
   }
@@ -75,7 +116,15 @@ function AssetContents({ asset }: { asset: AssetCatalogItem }) {
   return <PrimitiveAsset primitive={asset.primitive ?? 'box'} accent={asset.accent} />;
 }
 
-function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onTransforming: (active: boolean) => void }) {
+function PlacedObject({
+  instance,
+  instances,
+  onTransforming,
+}: {
+  instance: PlacedAsset;
+  instances: PlacedAsset[];
+  onTransforming: (active: boolean) => void;
+}) {
   const groupRef = useRef<Group>(null);
   const selectedId = usePlacementEditorStore((state) => state.selectedId);
   const transformMode = usePlacementEditorStore((state) => state.transformMode);
@@ -87,6 +136,9 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
   const select = usePlacementEditorStore((state) => state.select);
   const updateTransform = usePlacementEditorStore((state) => state.updateTransform);
   const asset = getCatalogAsset(instance.assetId);
+  const parent = instance.parentId ? instances.find((candidate) => candidate.id === instance.parentId) : undefined;
+  const parentAsset = parent ? getCatalogAsset(parent.assetId) : undefined;
+  const children = instances.filter((candidate) => candidate.parentId === instance.id);
   const selected = instance.id === selectedId;
   if (!instance.visible) return null;
 
@@ -99,11 +151,11 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
       scale: [object.scale.x, object.scale.y, object.scale.z],
     };
   };
-  const keepInsideRoom = () => {
+  const keepInsideAllowedSpace = () => {
     const object = groupRef.current;
     const transform = readTransform();
     if (!object || !transform || instance.locked) return;
-    const constrained = constrainAssetTransform(instance, transform, bounds, asset).transform;
+    const constrained = constrainPlacedAssetTransform(instance, transform, bounds, asset, parentAsset).transform;
     object.position.set(...constrained.position);
     object.rotation.set(...constrained.rotation);
     object.scale.set(...constrained.scale);
@@ -114,10 +166,23 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
     updateTransform(instance.id, transform);
   };
   const object = (
-    <group ref={groupRef} name={`placed-${instance.id}`} position={instance.transform.position} rotation={instance.transform.rotation} scale={instance.transform.scale} onPointerDown={(event) => { event.stopPropagation(); select(instance.id); }}>
+    <group
+      ref={groupRef}
+      name={`placed-${instance.id}`}
+      position={instance.transform.position}
+      rotation={instance.transform.rotation}
+      scale={instance.transform.scale}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+        select(instance.id);
+      }}
+    >
       <Suspense fallback={<mesh castShadow position={[0, 0.5, 0]}><boxGeometry args={[1, 1, 1]} /><meshStandardMaterial color={asset.accent} wireframe /></mesh>}>
         <AssetContents asset={asset} />
       </Suspense>
+      {children.map((child) => (
+        <PlacedObject key={child.id} instance={child} instances={instances} onTransforming={onTransforming} />
+      ))}
     </group>
   );
   if (!selected || instance.locked) return object;
@@ -127,9 +192,13 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
       translationSnap={snapEnabled ? translationSnap : null}
       rotationSnap={snapEnabled ? MathUtils.degToRad(rotationSnapDegrees) : null}
       scaleSnap={snapEnabled ? scaleSnap : null}
-      onObjectChange={keepInsideRoom}
+      onObjectChange={keepInsideAllowedSpace}
       onMouseDown={() => onTransforming(true)}
-      onMouseUp={() => { keepInsideRoom(); commitTransform(); onTransforming(false); }}
+      onMouseUp={() => {
+        keepInsideAllowedSpace();
+        commitTransform();
+        onTransforming(false);
+      }}
     >
       {object}
     </TransformControls>
@@ -164,6 +233,8 @@ function EditorScene() {
   const bounds = document.bounds;
   const roomWidth = bounds ? bounds.max[0] - bounds.min[0] : 80;
   const roomDepth = bounds ? bounds.max[2] - bounds.min[2] : 80;
+  const knownIds = new Set(document.instances.map((instance) => instance.id));
+  const roots = document.instances.filter((instance) => !instance.parentId || !knownIds.has(instance.parentId));
   return (
     <>
       <color attach="background" args={[bounds ? '#1b1714' : '#11151d']} />
@@ -188,7 +259,9 @@ function EditorScene() {
       />
       <axesHelper args={[4]} />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} onPointerDown={(event) => { event.stopPropagation(); select(null); }}><planeGeometry args={[roomWidth, roomDepth]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} /></mesh>
-      {document.instances.map((instance) => <PlacedObject key={instance.id} instance={instance} onTransforming={setTransforming} />)}
+      {roots.map((instance) => (
+        <PlacedObject key={instance.id} instance={instance} instances={document.instances} onTransforming={setTransforming} />
+      ))}
       <OrbitControls makeDefault enabled={!transforming} target={bounds ? [0, 1.35, -0.5] : [0, 1, 0]} minDistance={3} maxDistance={bounds ? 28 : 42} maxPolarAngle={Math.PI / 2 - 0.03} enableDamping dampingFactor={0.08} />
     </>
   );
