@@ -9,18 +9,10 @@ import { usePlacementEditorStore } from './usePlacementEditorStore';
 
 function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accent: string }) {
   const surface = <meshStandardMaterial color={accent} roughness={0.56} metalness={0.12} />;
-  if (primitive === 'sphere') {
-    return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><sphereGeometry args={[0.6, 32, 24]} />{surface}</mesh>;
-  }
-  if (primitive === 'cylinder') {
-    return <mesh castShadow receiveShadow position={[0, 0.5, 0]}><cylinderGeometry args={[0.6, 0.72, 1, 32]} />{surface}</mesh>;
-  }
-  if (primitive === 'cone') {
-    return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><coneGeometry args={[0.62, 1.2, 28]} />{surface}</mesh>;
-  }
-  if (primitive === 'torus') {
-    return <mesh castShadow receiveShadow position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.65, 0.18, 18, 48]} />{surface}</mesh>;
-  }
+  if (primitive === 'sphere') return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><sphereGeometry args={[0.6, 32, 24]} />{surface}</mesh>;
+  if (primitive === 'cylinder') return <mesh castShadow receiveShadow position={[0, 0.5, 0]}><cylinderGeometry args={[0.6, 0.72, 1, 32]} />{surface}</mesh>;
+  if (primitive === 'cone') return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><coneGeometry args={[0.62, 1.2, 28]} />{surface}</mesh>;
+  if (primitive === 'torus') return <mesh castShadow receiveShadow position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.65, 0.18, 18, 48]} />{surface}</mesh>;
   if (primitive === 'workbench') {
     return (
       <group>
@@ -48,9 +40,7 @@ function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accen
       <group>
         <mesh castShadow receiveShadow position={[0, 0.72, 0]}><cylinderGeometry args={[1.25, 1.4, 0.72, 28]} /><meshStandardMaterial color="#654f42" roughness={0.76} /></mesh>
         <mesh position={[0, 1.1, 0]}><cylinderGeometry args={[1.2, 1.2, 0.06, 32]} /><meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.18} /></mesh>
-        {[-0.9, 0, 0.9].map((x, index) => (
-          <mesh key={x} castShadow position={[x, 0.36, 1.05 - Math.abs(index - 1) * 0.18]}><cylinderGeometry args={[0.24, 0.3, 0.72, 16]} /><meshStandardMaterial color="#3b4148" metalness={0.18} roughness={0.55} /></mesh>
-        ))}
+        {[-0.9, 0, 0.9].map((x, index) => <mesh key={x} castShadow position={[x, 0.36, 1.05 - Math.abs(index - 1) * 0.18]}><cylinderGeometry args={[0.24, 0.3, 0.72, 16]} /><meshStandardMaterial color="#3b4148" metalness={0.18} roughness={0.55} /></mesh>)}
       </group>
     );
   }
@@ -77,7 +67,6 @@ function GltfAsset({ asset }: { asset: AssetCatalogItem }) {
       centerOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
   }, [asset.targetSize, gltf.scene]);
-
   return <group scale={normalizedScale} position={centerOffset}><primitive object={scene} /></group>;
 }
 
@@ -99,7 +88,6 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
   const updateTransform = usePlacementEditorStore((state) => state.updateTransform);
   const asset = getCatalogAsset(instance.assetId);
   const selected = instance.id === selectedId;
-
   if (!instance.visible) return null;
 
   const readTransform = (): AssetTransform | null => {
@@ -111,7 +99,6 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
       scale: [object.scale.x, object.scale.y, object.scale.z],
     };
   };
-
   const keepInsideRoom = () => {
     const object = groupRef.current;
     const transform = readTransform();
@@ -121,33 +108,19 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
     object.rotation.set(...constrained.rotation);
     object.scale.set(...constrained.scale);
   };
-
   const commitTransform = () => {
     const transform = readTransform();
     if (!transform || instance.locked) return;
     updateTransform(instance.id, transform);
   };
-
   const object = (
-    <group
-      ref={groupRef}
-      name={`placed-${instance.id}`}
-      position={instance.transform.position}
-      rotation={instance.transform.rotation}
-      scale={instance.transform.scale}
-      onPointerDown={(event) => {
-        event.stopPropagation();
-        select(instance.id);
-      }}
-    >
+    <group ref={groupRef} name={`placed-${instance.id}`} position={instance.transform.position} rotation={instance.transform.rotation} scale={instance.transform.scale} onPointerDown={(event) => { event.stopPropagation(); select(instance.id); }}>
       <Suspense fallback={<mesh castShadow position={[0, 0.5, 0]}><boxGeometry args={[1, 1, 1]} /><meshStandardMaterial color={asset.accent} wireframe /></mesh>}>
         <AssetContents asset={asset} />
       </Suspense>
     </group>
   );
-
   if (!selected || instance.locked) return object;
-
   return (
     <TransformControls
       mode={transformMode}
@@ -156,11 +129,7 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
       scaleSnap={snapEnabled ? scaleSnap : null}
       onObjectChange={keepInsideRoom}
       onMouseDown={() => onTransforming(true)}
-      onMouseUp={() => {
-        keepInsideRoom();
-        commitTransform();
-        onTransforming(false);
-      }}
+      onMouseUp={() => { keepInsideRoom(); commitTransform(); onTransforming(false); }}
     >
       {object}
     </TransformControls>
@@ -175,40 +144,15 @@ function Room02Envelope({ bounds }: { bounds: SceneBounds }) {
   const backZ = bounds.min[2];
   return (
     <group name="room-02-editor-envelope">
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, bounds.min[1] - 0.012, 0]}>
-        <planeGeometry args={[width, depth]} />
-        <meshStandardMaterial color="#8a755e" roughness={0.78} />
-      </mesh>
-      <mesh receiveShadow position={[0, centerY, backZ - 0.08]}>
-        <boxGeometry args={[width, height, 0.16]} />
-        <meshStandardMaterial color="#d8cdbd" roughness={0.82} />
-      </mesh>
-      <mesh position={[0, 2.45, backZ + 0.025]}>
-        <boxGeometry args={[10.8, 3.65, 0.12]} />
-        <meshStandardMaterial color="#161b22" emissive="#ff7139" emissiveIntensity={0.08} roughness={0.38} />
-      </mesh>
-      {[-3.4, 0, 3.4].map((x, index) => (
-        <mesh key={x} position={[x, 2.45, backZ + 0.1]}>
-          <boxGeometry args={[2.65, 2.55, 0.04]} />
-          <meshStandardMaterial color={index === 1 ? '#ff7139' : '#ffd29e'} emissive="#ff7139" emissiveIntensity={0.12} />
-        </mesh>
-      ))}
-      <mesh receiveShadow position={[bounds.max[0] + 0.08, centerY, 0]}>
-        <boxGeometry args={[0.16, height, depth]} />
-        <meshStandardMaterial color="#d8cdbd" roughness={0.82} transparent opacity={0.82} />
-      </mesh>
+      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, bounds.min[1] - 0.012, 0]}><planeGeometry args={[width, depth]} /><meshStandardMaterial color="#8a755e" roughness={0.78} /></mesh>
+      <mesh receiveShadow position={[0, centerY, backZ - 0.08]}><boxGeometry args={[width, height, 0.16]} /><meshStandardMaterial color="#d8cdbd" roughness={0.82} /></mesh>
+      <mesh position={[0, 2.45, backZ + 0.025]}><boxGeometry args={[10.8, 3.65, 0.12]} /><meshStandardMaterial color="#161b22" emissive="#ff7139" emissiveIntensity={0.08} roughness={0.38} /></mesh>
+      {[-3.4, 0, 3.4].map((x, index) => <mesh key={x} position={[x, 2.45, backZ + 0.1]}><boxGeometry args={[2.65, 2.55, 0.04]} /><meshStandardMaterial color={index === 1 ? '#ff7139' : '#ffd29e'} emissive="#ff7139" emissiveIntensity={0.12} /></mesh>)}
+      <mesh receiveShadow position={[bounds.max[0] + 0.08, centerY, 0]}><boxGeometry args={[0.16, height, depth]} /><meshStandardMaterial color="#d8cdbd" roughness={0.82} transparent opacity={0.82} /></mesh>
       <group position={[bounds.min[0] - 0.03, centerY, 0]}>
-        {[-4.8, -1.6, 1.6, 4.8].map((z) => (
-          <mesh key={z} position={[0, 0, z]}>
-            <boxGeometry args={[0.08, height - 0.28, 3.0]} />
-            <meshPhysicalMaterial color="#b9d5e8" transparent opacity={0.18} roughness={0.18} transmission={0.3} />
-          </mesh>
-        ))}
+        {[-4.8, -1.6, 1.6, 4.8].map((z) => <mesh key={z} position={[0, 0, z]}><boxGeometry args={[0.08, height - 0.28, 3.0]} /><meshPhysicalMaterial color="#b9d5e8" transparent opacity={0.18} roughness={0.18} transmission={0.3} /></mesh>)}
       </group>
-      <mesh position={[0, centerY, 0]}>
-        <boxGeometry args={[width, height, depth]} />
-        <meshBasicMaterial color="#ff9a66" wireframe transparent opacity={0.13} depthWrite={false} />
-      </mesh>
+      <mesh position={[0, centerY, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial color="#ff9a66" wireframe transparent opacity={0.13} depthWrite={false} /></mesh>
     </group>
   );
 }
@@ -220,7 +164,6 @@ function EditorScene() {
   const bounds = document.bounds;
   const roomWidth = bounds ? bounds.max[0] - bounds.min[0] : 80;
   const roomDepth = bounds ? bounds.max[2] - bounds.min[2] : 80;
-
   return (
     <>
       <color attach="background" args={[bounds ? '#1b1714' : '#11151d']} />
@@ -229,7 +172,6 @@ function EditorScene() {
       <hemisphereLight args={['#fff2df', '#171a20', 1.3]} />
       <directionalLight castShadow position={[8, 14, 10]} intensity={2.5} shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
       <directionalLight position={[-10, 7, -5]} intensity={1.0} color="#9ec4ff" />
-
       {bounds && document.sceneId === 'room-02' && <Room02Envelope bounds={bounds} />}
       <Grid
         args={[roomWidth, roomDepth]}
@@ -245,23 +187,9 @@ function EditorScene() {
         infiniteGrid={!bounds}
       />
       <axesHelper args={[4]} />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} onPointerDown={(event) => { event.stopPropagation(); select(null); }}>
-        <planeGeometry args={[roomWidth, roomDepth]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} onPointerDown={(event) => { event.stopPropagation(); select(null); }}><planeGeometry args={[roomWidth, roomDepth]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} /></mesh>
       {document.instances.map((instance) => <PlacedObject key={instance.id} instance={instance} onTransforming={setTransforming} />)}
-
-      <OrbitControls
-        makeDefault
-        enabled={!transforming}
-        target={bounds ? [0, 1.35, -0.5] : [0, 1, 0]}
-        minDistance={3}
-        maxDistance={bounds ? 28 : 42}
-        maxPolarAngle={Math.PI / 2 - 0.03}
-        enableDamping
-        dampingFactor={0.08}
-      />
+      <OrbitControls makeDefault enabled={!transforming} target={bounds ? [0, 1.35, -0.5] : [0, 1, 0]} minDistance={3} maxDistance={bounds ? 28 : 42} maxPolarAngle={Math.PI / 2 - 0.03} enableDamping dampingFactor={0.08} />
     </>
   );
 }
@@ -270,7 +198,7 @@ export function PlacementCanvas() {
   const document = usePlacementEditorStore((state) => state.document);
   const clampCount = usePlacementEditorStore((state) => state.boundaryClampCount);
   const bounds = document.bounds;
-  const dimensions = bounds
+  const dimensions: [number, number, number] | null = bounds
     ? [bounds.max[0] - bounds.min[0], bounds.max[2] - bounds.min[2], bounds.max[1] - bounds.min[1]]
     : null;
   return (
@@ -284,9 +212,7 @@ export function PlacementCanvas() {
       >
         <EditorScene />
       </Canvas>
-      <div className="viewport-origin-label" aria-hidden="true">
-        <span className="axis-x">X</span><span className="axis-y">Y</span><span className="axis-z">Z</span><strong>Origin 0, 0, 0</strong>
-      </div>
+      <div className="viewport-origin-label" aria-hidden="true"><span className="axis-x">X</span><span className="axis-y">Y</span><span className="axis-z">Z</span><strong>Origin 0, 0, 0</strong></div>
       {dimensions && (
         <div className="viewport-boundary-label" data-testid="room-boundary-status">
           <strong>Room envelope active</strong>
