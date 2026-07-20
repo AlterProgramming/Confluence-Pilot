@@ -41,11 +41,12 @@ function workbenchAssembly(
   rotationY: number,
   laptopOffset: Vector3Tuple = [0, 0.86, -0.03],
   laptopRotationY = 0,
+  laptopId = `${id}-laptop`,
 ): PlacedAsset[] {
   return [
     placed(id, 'academy-workbench', label, position, [0, rotationY, 0]),
     placed(
-      `${id}-laptop`,
+      laptopId,
       'academy-laptop',
       `${label} · laptop`,
       laptopOffset,
@@ -90,12 +91,12 @@ const room02: CompositionDocument = {
   bounds: room02Bounds,
   instances: [
     placed('room-02-hero', 'room-02', 'Credential Lab Hero', [0, 0, -0.55]),
-    ...workbenchAssembly('room-02-bench-front-left', 'Front workbench · left', [-2.55, 0, 2.1], Math.PI, [-0.24, 0.86, -0.02], 0.12),
-    ...workbenchAssembly('room-02-bench-front-center', 'Front workbench · center', [0, 0, 2.1], Math.PI, [0, 0.86, -0.04]),
-    ...workbenchAssembly('room-02-bench-front-right', 'Front workbench · right', [2.55, 0, 2.1], Math.PI, [0.24, 0.86, -0.02], -0.12),
-    ...workbenchAssembly('room-02-bench-rear-left', 'Rear workbench · left', [-2.55, 0, -0.05], Math.PI, [0.18, 0.86, 0], -0.08),
-    ...workbenchAssembly('room-02-bench-rear-center', 'Rear workbench · center', [0, 0, -0.05], Math.PI, [-0.12, 0.86, 0.02], 0.06),
-    ...workbenchAssembly('room-02-bench-rear-right', 'Rear workbench · right', [2.55, 0, -0.05], Math.PI, [0.08, 0.86, -0.04], -0.04),
+    ...workbenchAssembly('room-02-bench-front-left', 'Front workbench · left', [-2.55, 0, 2.1], Math.PI, [-0.24, 0.86, -0.02], 0.12, 'room-02-laptop-front-left'),
+    ...workbenchAssembly('room-02-bench-front-center', 'Front workbench · center', [0, 0, 2.1], Math.PI, [0, 0.86, -0.04], 0, 'room-02-laptop-front-center'),
+    ...workbenchAssembly('room-02-bench-front-right', 'Front workbench · right', [2.55, 0, 2.1], Math.PI, [0.24, 0.86, -0.02], -0.12, 'room-02-laptop-front-right'),
+    ...workbenchAssembly('room-02-bench-rear-left', 'Rear workbench · left', [-2.55, 0, -0.05], Math.PI, [0.18, 0.86, 0], -0.08, 'room-02-laptop-rear-left'),
+    ...workbenchAssembly('room-02-bench-rear-center', 'Rear workbench · center', [0, 0, -0.05], Math.PI, [-0.12, 0.86, 0.02], 0.06, 'room-02-laptop-rear-center'),
+    ...workbenchAssembly('room-02-bench-rear-right', 'Rear workbench · right', [2.55, 0, -0.05], Math.PI, [0.08, 0.86, -0.04], -0.04, 'room-02-laptop-rear-right'),
     placed('room-02-credential-stack', 'academy-credential-stack', 'Credential display stack', [5.15, 0, -2.4], [0, -0.32, 0]),
     placed('room-02-coaching-table', 'academy-coaching-table', 'Coaching table', [-5.1, 0, -1.4], [0, 0.35, 0]),
   ],
