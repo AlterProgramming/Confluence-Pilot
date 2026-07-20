@@ -217,13 +217,17 @@ export function MotionAuthoringPanel() {
                   <article key={waypoint.id} className={Math.abs(playheadSeconds - waypoint.timeSeconds) < 0.06 ? 'active' : ''}>
                     <button type="button" className="waypoint-index" onClick={() => { setPreviewEnabled(true); setPlayhead(waypoint.timeSeconds); }}>{index + 1}</button>
                     <label><span>Time</span><input type="number" min={0} step={0.1} value={waypoint.timeSeconds} onChange={(event) => updateMotionWaypoint(activeTrack.id, waypoint.id, { timeSeconds: Number(event.target.value) })} /></label>
-                    {(['X', 'Y', 'Z'] as const).map((axis, axisIndex) => (
-                      <label key={axis}><span>{axis}</span><input type="number" step={0.05} value={Number(waypoint.position[axisIndex].toFixed(3))} onChange={(event) => {
-                        const position = [...waypoint.position] as [number, number, number];
-                        position[axisIndex] = Number(event.target.value);
-                        updateMotionWaypoint(activeTrack.id, waypoint.id, { position });
-                      }} /></label>
-                    ))}
+                    {(['X', 'Y', 'Z'] as const).map((axis, axisIndex) => {
+                      const tupleIndex = axisIndex as 0 | 1 | 2;
+                      const coordinate = waypoint.position[tupleIndex] ?? 0;
+                      return (
+                        <label key={axis}><span>{axis}</span><input type="number" step={0.05} value={Number(coordinate.toFixed(3))} onChange={(event) => {
+                          const position = [...waypoint.position] as [number, number, number];
+                          position[tupleIndex] = Number(event.target.value);
+                          updateMotionWaypoint(activeTrack.id, waypoint.id, { position });
+                        }} /></label>
+                      );
+                    })}
                     <button type="button" className="waypoint-delete" disabled={waypoints.length <= 1} onClick={() => removeMotionWaypoint(activeTrack.id, waypoint.id)}>×</button>
                   </article>
                 ))}
