@@ -6,6 +6,7 @@ import { PerformanceTelemetry } from './components/PerformanceTelemetry';
 import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
 import { PlacementEditor } from './editor/PlacementEditor';
+import './editor/assembly.css';
 import { useExperienceStore } from './state/useExperienceStore';
 
 function ExperienceApp() {
