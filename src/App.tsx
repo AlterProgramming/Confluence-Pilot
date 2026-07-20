@@ -6,6 +6,7 @@ import { PerformanceTelemetry } from './components/PerformanceTelemetry';
 import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
 import { PlacementEditor } from './editor/PlacementEditor';
+import { PlacementHistoryControls } from './editor/PlacementHistoryControls';
 import './editor/assembly.css';
 import { useExperienceStore } from './state/useExperienceStore';
 
@@ -40,8 +41,17 @@ function ExperienceApp() {
   );
 }
 
+function EditorApp() {
+  return (
+    <>
+      <PlacementEditor />
+      <PlacementHistoryControls />
+    </>
+  );
+}
+
 export default function App() {
   const params = new URLSearchParams(window.location.search);
   const editorMode = params.get('editor') === '1' || window.location.pathname.replace(/\/$/, '').endsWith('/editor');
-  return editorMode ? <PlacementEditor /> : <ExperienceApp />;
+  return editorMode ? <EditorApp /> : <ExperienceApp />;
 }
