@@ -13,7 +13,12 @@ export type PrimitiveKind =
   | 'credential-stack'
   | 'coaching-table';
 
-export type SceneTemplateId = 'sandbox' | 'room-02';
+export type SceneTemplateId =
+  | 'sandbox'
+  | 'room-02'
+  | 'room-02-academy-axis'
+  | 'room-02-credential-gallery'
+  | 'room-02-learning-forum';
 
 export interface SceneBounds {
   min: Vector3Tuple;
@@ -63,6 +68,36 @@ export interface PlacedAsset {
   updatedAt: number;
 }
 
+export interface DesignZone {
+  id: string;
+  label: string;
+  intent: string;
+  center: [number, number];
+  size: [number, number];
+  rotation: number;
+  accent: string;
+}
+
+export interface DesignProposition {
+  id: 'academy-axis' | 'credential-gallery' | 'learning-forum';
+  title: string;
+  thesis: string;
+  experientialPromise: string;
+  signatureMove: string;
+  hierarchy: string[];
+  adoptedQualities: string[];
+  rejectedQualities: string[];
+  tradeoffs: string[];
+  accent: string;
+  camera: {
+    position: Vector3Tuple;
+    target: Vector3Tuple;
+  };
+  zones: DesignZone[];
+  circulation: Vector3Tuple[];
+  focalPoint: Vector3Tuple;
+}
+
 export interface CompositionDocument {
   schemaVersion: 2;
   id: string;
@@ -72,5 +107,6 @@ export interface CompositionDocument {
   gridUnit: number;
   bounds: SceneBounds | null;
   instances: PlacedAsset[];
+  proposition?: DesignProposition;
   updatedAt: number;
 }
