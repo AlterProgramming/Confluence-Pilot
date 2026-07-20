@@ -11,7 +11,8 @@ export type PrimitiveKind =
   | 'workbench-table'
   | 'laptop'
   | 'credential-stack'
-  | 'coaching-table';
+  | 'coaching-table'
+  | 'character-proxy';
 
 export type SceneTemplateId =
   | 'sandbox'
@@ -69,6 +70,26 @@ export interface PlacedAsset {
   updatedAt: number;
 }
 
+export type MotionInterpolation = 'linear' | 'smooth';
+
+export interface MotionWaypoint {
+  id: string;
+  timeSeconds: number;
+  position: Vector3Tuple;
+  rotation: Vector3Tuple;
+}
+
+export interface MotionTrack {
+  id: string;
+  targetId: string;
+  name: string;
+  durationSeconds: number;
+  loop: boolean;
+  orientToPath: boolean;
+  interpolation: MotionInterpolation;
+  waypoints: MotionWaypoint[];
+}
+
 export interface DesignZone {
   id: string;
   label: string;
@@ -109,5 +130,6 @@ export interface CompositionDocument {
   bounds: SceneBounds | null;
   instances: PlacedAsset[];
   proposition?: DesignProposition | undefined;
+  motionTracks?: MotionTrack[] | undefined;
   updatedAt: number;
 }
