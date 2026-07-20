@@ -7,6 +7,7 @@ import { constrainPlacedAssetTransform } from './placementBounds';
 import type {
   AssetCatalogItem,
   AssetTransform,
+  DesignProposition,
   PlacedAsset,
   PrimitiveKind,
   SceneBounds,
@@ -205,7 +206,7 @@ function PlacedObject({
   );
 }
 
-function Room02Envelope({ bounds }: { bounds: SceneBounds }) {
+function Room02Envelope({ bounds, accent }: { bounds: SceneBounds; accent: string }) {
   const width = bounds.max[0] - bounds.min[0];
   const height = bounds.max[1] - bounds.min[1];
   const depth = bounds.max[2] - bounds.min[2];
@@ -215,13 +216,58 @@ function Room02Envelope({ bounds }: { bounds: SceneBounds }) {
     <group name="room-02-editor-envelope">
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, bounds.min[1] - 0.012, 0]}><planeGeometry args={[width, depth]} /><meshStandardMaterial color="#8a755e" roughness={0.78} /></mesh>
       <mesh receiveShadow position={[0, centerY, backZ - 0.08]}><boxGeometry args={[width, height, 0.16]} /><meshStandardMaterial color="#d8cdbd" roughness={0.82} /></mesh>
-      <mesh position={[0, 2.45, backZ + 0.025]}><boxGeometry args={[10.8, 3.65, 0.12]} /><meshStandardMaterial color="#161b22" emissive="#ff7139" emissiveIntensity={0.08} roughness={0.38} /></mesh>
-      {[-3.4, 0, 3.4].map((x, index) => <mesh key={x} position={[x, 2.45, backZ + 0.1]}><boxGeometry args={[2.65, 2.55, 0.04]} /><meshStandardMaterial color={index === 1 ? '#ff7139' : '#ffd29e'} emissive="#ff7139" emissiveIntensity={0.12} /></mesh>)}
+      <mesh position={[0, 2.45, backZ + 0.025]}><boxGeometry args={[10.8, 3.65, 0.12]} /><meshStandardMaterial color="#161b22" emissive={accent} emissiveIntensity={0.08} roughness={0.38} /></mesh>
+      {[-3.4, 0, 3.4].map((x, index) => <mesh key={x} position={[x, 2.45, backZ + 0.1]}><boxGeometry args={[2.65, 2.55, 0.04]} /><meshStandardMaterial color={index === 1 ? accent : '#ffd29e'} emissive={accent} emissiveIntensity={0.12} /></mesh>)}
       <mesh receiveShadow position={[bounds.max[0] + 0.08, centerY, 0]}><boxGeometry args={[0.16, height, depth]} /><meshStandardMaterial color="#d8cdbd" roughness={0.82} transparent opacity={0.82} /></mesh>
       <group position={[bounds.min[0] - 0.03, centerY, 0]}>
         {[-4.8, -1.6, 1.6, 4.8].map((z) => <mesh key={z} position={[0, 0, z]}><boxGeometry args={[0.08, height - 0.28, 3.0]} /><meshPhysicalMaterial color="#b9d5e8" transparent opacity={0.18} roughness={0.18} transmission={0.3} /></mesh>)}
       </group>
-      <mesh position={[0, centerY, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial color="#ff9a66" wireframe transparent opacity={0.13} depthWrite={false} /></mesh>
+      <mesh position={[0, centerY, 0]}><boxGeometry args={[width, height, depth]} /><meshBasicMaterial color={accent} wireframe transparent opacity={0.1} depthWrite={false} /></mesh>
+    </group>
+  );
+}
+
+function PropositionOverlay({ proposition }: { proposition: DesignProposition }) {
+  const circulationSegments = proposition.circulation.slice(1).map((end, index) => {
+    const start = proposition.circulation[index]!;
+    const dx = end[0] - start[0];
+    const dz = end[2] - start[2];
+    return {
+      id: `${index}-${index + 1}`,
+      length: Math.hypot(dx, dz),
+      midpoint: [(start[0] + end[0]) / 2, 0.035, (start[2] + end[2]) / 2] as [number, number, number],
+      angle: -Math.atan2(dz, dx),
+    };
+  });
+
+  return (
+    <group name={`proposition-${proposition.id}`}>
+      {proposition.zones.map((zone) => (
+        <group key={zone.id} position={[zone.center[0], 0.016, zone.center[1]]} rotation={[0, zone.rotation, 0]}>
+          <mesh receiveShadow>
+            <boxGeometry args={[zone.size[0], 0.018, zone.size[1]]} />
+            <meshBasicMaterial color={zone.accent} transparent opacity={0.12} depthWrite={false} />
+          </mesh>
+          <mesh position={[0, 0.012, 0]}>
+            <boxGeometry args={[zone.size[0], 0.022, zone.size[1]]} />
+            <meshBasicMaterial color={zone.accent} wireframe transparent opacity={0.42} depthWrite={false} />
+          </mesh>
+        </group>
+      ))}
+      {circulationSegments.map((segment) => (
+        <mesh key={segment.id} position={segment.midpoint} rotation={[0, segment.angle, 0]}>
+          <boxGeometry args={[segment.length, 0.024, 0.1]} />
+          <meshBasicMaterial color={proposition.accent} transparent opacity={0.72} depthWrite={false} />
+        </mesh>
+      ))}
+      <mesh position={proposition.focalPoint} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.62, 0.075, 12, 48]} />
+        <meshBasicMaterial color={proposition.accent} transparent opacity={0.9} depthWrite={false} />
+      </mesh>
+      <mesh position={[proposition.focalPoint[0], 0.38, proposition.focalPoint[2]]}>
+        <coneGeometry args={[0.12, 0.52, 18]} />
+        <meshBasicMaterial color={proposition.accent} transparent opacity={0.85} />
+      </mesh>
     </group>
   );
 }
@@ -231,6 +277,8 @@ function EditorScene() {
   const select = usePlacementEditorStore((state) => state.select);
   const [transforming, setTransforming] = useState(false);
   const bounds = document.bounds;
+  const proposition = document.proposition;
+  const accent = proposition?.accent ?? '#ff7139';
   const roomWidth = bounds ? bounds.max[0] - bounds.min[0] : 80;
   const roomDepth = bounds ? bounds.max[2] - bounds.min[2] : 80;
   const knownIds = new Set(document.instances.map((instance) => instance.id));
@@ -243,7 +291,8 @@ function EditorScene() {
       <hemisphereLight args={['#fff2df', '#171a20', 1.3]} />
       <directionalLight castShadow position={[8, 14, 10]} intensity={2.5} shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
       <directionalLight position={[-10, 7, -5]} intensity={1.0} color="#9ec4ff" />
-      {bounds && document.sceneId === 'room-02' && <Room02Envelope bounds={bounds} />}
+      {bounds && <Room02Envelope bounds={bounds} accent={accent} />}
+      {proposition && <PropositionOverlay proposition={proposition} />}
       <Grid
         args={[roomWidth, roomDepth]}
         position={[0, bounds ? 0.006 : -0.002, 0]}
@@ -262,7 +311,16 @@ function EditorScene() {
       {roots.map((instance) => (
         <PlacedObject key={instance.id} instance={instance} instances={document.instances} onTransforming={setTransforming} />
       ))}
-      <OrbitControls makeDefault enabled={!transforming} target={bounds ? [0, 1.35, -0.5] : [0, 1, 0]} minDistance={3} maxDistance={bounds ? 28 : 42} maxPolarAngle={Math.PI / 2 - 0.03} enableDamping dampingFactor={0.08} />
+      <OrbitControls
+        makeDefault
+        enabled={!transforming}
+        target={proposition?.camera.target ?? (bounds ? [0, 1.35, -0.5] : [0, 1, 0])}
+        minDistance={3}
+        maxDistance={bounds ? 28 : 42}
+        maxPolarAngle={Math.PI / 2 - 0.03}
+        enableDamping
+        dampingFactor={0.08}
+      />
     </>
   );
 }
@@ -271,21 +329,35 @@ export function PlacementCanvas() {
   const document = usePlacementEditorStore((state) => state.document);
   const clampCount = usePlacementEditorStore((state) => state.boundaryClampCount);
   const bounds = document.bounds;
+  const proposition = document.proposition;
   const dimensions: [number, number, number] | null = bounds
     ? [bounds.max[0] - bounds.min[0], bounds.max[2] - bounds.min[2], bounds.max[1] - bounds.min[1]]
     : null;
   return (
     <div className="composition-viewport" data-testid="composition-viewport">
       <Canvas
+        key={document.sceneId}
         shadows
         dpr={[0.75, 1.25]}
-        camera={{ fov: 46, near: 0.05, far: 160, position: bounds ? [11.5, 8.5, 14.5] : [10, 8, 13] }}
+        camera={{
+          fov: 46,
+          near: 0.05,
+          far: 160,
+          position: proposition?.camera.position ?? (bounds ? [11.5, 8.5, 14.5] : [10, 8, 13]),
+        }}
         gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
         onCreated={({ gl }) => { gl.toneMapping = ACESFilmicToneMapping; gl.toneMappingExposure = 1.08; }}
       >
         <EditorScene />
       </Canvas>
       <div className="viewport-origin-label" aria-hidden="true"><span className="axis-x">X</span><span className="axis-y">Y</span><span className="axis-z">Z</span><strong>Origin 0, 0, 0</strong></div>
+      {proposition && (
+        <div className="viewport-proposition-label" style={{ '--proposition-accent': proposition.accent } as React.CSSProperties}>
+          <strong>{proposition.title}</strong>
+          <span>{proposition.zones.length} functional zones · {proposition.circulation.length} circulation points</span>
+          <small>Focal hierarchy and zone overlays active</small>
+        </div>
+      )}
       {dimensions && (
         <div className="viewport-boundary-label" data-testid="room-boundary-status">
           <strong>Room envelope active</strong>
