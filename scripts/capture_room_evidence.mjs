@@ -2,6 +2,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import puppeteer from 'puppeteer-core';
 
 const BASE_URL = process.argv[2] || 'http://127.0.0.1:4173';
 const parsedRoomNumber = Number.parseInt(process.argv[3] || '1', 10);
@@ -14,39 +15,18 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
 
 mkdirSync(evidenceDir, { recursive: true });
 
-async function loadPuppeteer() {
-  try {
-    return (await import('puppeteer')).default;
-  } catch (primaryError) {
-    try {
-      return (await import('puppeteer-core')).default;
-    } catch {
-      throw new Error(
-        `Puppeteer is required for evidence capture. Install it with "npm install --no-save puppeteer". ${primaryError}`,
-      );
-    }
-  }
-}
-
-function findChrome(puppeteer) {
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
-  try {
-    const bundled = puppeteer.executablePath?.();
-    if (bundled && existsSync(bundled)) return bundled;
-  } catch {
-    // Fall through to common system paths.
-  }
-
+function findChrome() {
   const candidates = [
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    process.env.PUPPETEER_EXECUTABLE_PATH,
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
     '/usr/bin/chromium',
     '/usr/bin/chromium-browser',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  ];
-  return candidates.find(existsSync);
+  ].filter(Boolean);
+  return candidates.find((candidate) => existsSync(candidate));
 }
 
 function attachDiagnostics(page) {
@@ -78,7 +58,8 @@ async function openRoomPage(browser, view = 'canonical') {
     view,
   });
   const startedAt = Date.now();
-  await page.goto(`${BASE_URL}/?${query}`, { waitUntil: 'networkidle2', timeout: 90_000 });
+  await page.goto(`${BASE_URL}/?${query}`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+  await page.waitForSelector('canvas', { timeout: 90_000 });
   await page.waitForFunction(
     (expectedRoomId) => {
       const state = window.__CONFLUENCE_VALIDATION__;
@@ -132,7 +113,7 @@ async function captureAssetInspection(browser) {
   const diagnostics = attachDiagnostics(page);
   const url = `${BASE_URL}/_glbviewer.html?src=${encodeURIComponent(assetUrl)}`;
   try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 90_000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90_000 });
     await page.waitForFunction(() => window.__ready === true, { timeout: 90_000 });
     await delay(500);
     const viewerError = await page.evaluate(() => window.__err || null);
@@ -222,29 +203,33 @@ async function captureTraversal(browser) {
   }
 }
 
-const puppeteer = await loadPuppeteer();
-const executablePath = findChrome(puppeteer);
+const executablePath = findChrome();
 if (!executablePath) {
+  writeFileSync(
+    path.join(evidenceDir, 'fatal.json'),
+    `${JSON.stringify({ roomId, phase: 'browser-discovery', error: 'No Chrome or Chromium executable found.' }, null, 2)}\n`,
+  );
   throw new Error('No Chrome or Chromium executable was found for room evidence capture.');
 }
 
-const browser = await puppeteer.launch({
-  executablePath,
-  headless: 'new',
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--use-gl=angle',
-    '--use-angle=swiftshader',
-    '--enable-unsafe-swiftshader',
-    '--ignore-gpu-blocklist',
-    '--enable-webgl',
-  ],
-});
-
+let browser;
 let exitCode = 0;
 try {
+  browser = await puppeteer.launch({
+    executablePath,
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+      '--enable-unsafe-swiftshader',
+      '--ignore-gpu-blocklist',
+      '--enable-webgl',
+    ],
+  });
+
   const canonical = await captureScene(browser, 'canonical', 'canonical.png');
   const secondary = await captureScene(browser, 'secondary', 'secondary.png');
   const assetInspection = await captureAssetInspection(browser);
@@ -295,8 +280,16 @@ try {
   if (consoleErrors.length || pageErrors.length) {
     console.error(`  browser errors: ${consoleErrors.length + pageErrors.length}`);
   }
+} catch (error) {
+  exitCode = 1;
+  const message = error instanceof Error ? `${error.name}: ${error.message}\n${error.stack ?? ''}` : String(error);
+  writeFileSync(
+    path.join(evidenceDir, 'fatal.json'),
+    `${JSON.stringify({ roomId, assetUrl, error: message, capturedAt: new Date().toISOString() }, null, 2)}\n`,
+  );
+  console.error(message);
 } finally {
-  await browser.close();
+  await browser?.close();
 }
 
 process.exitCode = exitCode;
