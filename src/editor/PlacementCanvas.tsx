@@ -110,9 +110,9 @@ function PlacedObject({ instance, onTransforming }: { instance: PlacedAsset; onT
   return (
     <TransformControls
       mode={transformMode}
-      translationSnap={snapEnabled ? translationSnap : undefined}
-      rotationSnap={snapEnabled ? MathUtils.degToRad(rotationSnapDegrees) : undefined}
-      scaleSnap={snapEnabled ? scaleSnap : undefined}
+      translationSnap={snapEnabled ? translationSnap : null}
+      rotationSnap={snapEnabled ? MathUtils.degToRad(rotationSnapDegrees) : null}
+      scaleSnap={snapEnabled ? scaleSnap : null}
       onMouseDown={() => onTransforming(true)}
       onMouseUp={() => {
         commitTransform();
