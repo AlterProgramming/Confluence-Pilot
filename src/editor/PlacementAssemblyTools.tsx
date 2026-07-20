@@ -128,8 +128,17 @@ function commitTransforms(updates: Map<string, PlacedAsset['transform']>, clampC
   return true;
 }
 
+function fullSurfaceCell(surface: AttachmentSurface): AttachmentSurface {
+  return {
+    id: `${surface.id}-full`,
+    label: `${surface.label} full area`,
+    position: [...surface.position] as Vector3Tuple,
+    size: [...surface.size] as [number, number],
+  };
+}
+
 function rectangularCells(surface: AttachmentSurface, count: number) {
-  if (count <= 1) return [{ position: surface.position, size: surface.size } satisfies AttachmentSurface];
+  if (count <= 1) return [fullSurfaceCell(surface)];
   const aspect = surface.size[0] / Math.max(surface.size[1], 0.001);
   const columns = Math.max(1, Math.ceil(Math.sqrt(count * aspect)));
   const rows = Math.max(1, Math.ceil(count / columns));
@@ -152,7 +161,7 @@ function rectangularCells(surface: AttachmentSurface, count: number) {
 }
 
 function radialCells(surface: AttachmentSurface, count: number) {
-  if (count <= 1) return [{ position: surface.position, size: surface.size } satisfies AttachmentSurface];
+  if (count <= 1) return [fullSurfaceCell(surface)];
   const radius = Math.max(0, Math.min(surface.size[0], surface.size[1]) * 0.27);
   const cellSize = Math.max(0.45, Math.min(surface.size[0], surface.size[1]) * 0.42);
   return Array.from({ length: count }, (_, index) => {
@@ -170,7 +179,7 @@ function radialCells(surface: AttachmentSurface, count: number) {
   });
 }
 
-function packHostSurface(host: PlacedAsset, surface: AttachmentSurface, children: PlacedAsset[]) {
+function packSurface(surface: AttachmentSurface, children: PlacedAsset[]) {
   const round = /round/i.test(surface.label) || /round/i.test(surface.id);
   const cells = round ? radialCells(surface, children.length) : rectangularCells(surface, children.length);
   const updates = new Map<string, PlacedAsset['transform']>();
@@ -187,7 +196,7 @@ function packHostSurface(host: PlacedAsset, surface: AttachmentSurface, children
   return commitTransforms(updates, clampCount);
 }
 
-function centerSelectedItem(selected: PlacedAsset, host: PlacedAsset, surface: AttachmentSurface) {
+function centerSelectedItem(selected: PlacedAsset, surface: AttachmentSurface) {
   const result = constrainAssetToSurface(
     { ...selected.transform, position: [...surface.position] as Vector3Tuple },
     getCatalogAsset(selected.assetId),
@@ -221,7 +230,7 @@ export function PlacementAssemblyTools() {
           type="button"
           data-testid="pack-selected-surface"
           disabled={!host || !surface || children.length === 0}
-          onClick={() => { if (host && surface) packHostSurface(host, surface, children); }}
+          onClick={() => { if (surface) packSurface(surface, children); }}
           title="Distribute every child into a non-overlapping surface layout"
         >
           <span>▦</span><strong>Pack surface</strong><small>Distribute attached items</small>
@@ -230,7 +239,7 @@ export function PlacementAssemblyTools() {
           type="button"
           data-testid="center-selected-on-surface"
           disabled={!selected?.parentId || !host || !surface}
-          onClick={() => { if (selected?.parentId && host && surface) centerSelectedItem(selected, host, surface); }}
+          onClick={() => { if (selected?.parentId && surface) centerSelectedItem(selected, surface); }}
           title="Center the selected child on its current surface"
         >
           <span>⌾</span><strong>Center item</strong><small>Reset local placement</small>
