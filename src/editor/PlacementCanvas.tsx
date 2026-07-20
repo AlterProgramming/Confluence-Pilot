@@ -17,6 +17,8 @@ import type {
 import { useMotionPlaybackStore } from './useMotionPlaybackStore';
 import { usePlacementEditorStore } from './usePlacementEditorStore';
 
+const EMPTY_MOTION_TRACKS: MotionTrack[] = [];
+
 function PrimitiveAsset({ primitive, accent }: { primitive: PrimitiveKind; accent: string }) {
   const surface = <meshStandardMaterial color={accent} roughness={0.56} metalness={0.12} />;
   if (primitive === 'sphere') return <mesh castShadow receiveShadow position={[0, 0.6, 0]}><sphereGeometry args={[0.6, 32, 24]} />{surface}</mesh>;
@@ -150,7 +152,7 @@ function PlacedObject({
   const rotationSnapDegrees = usePlacementEditorStore((state) => state.rotationSnapDegrees);
   const scaleSnap = usePlacementEditorStore((state) => state.scaleSnap);
   const bounds = usePlacementEditorStore((state) => state.document.bounds);
-  const motionTracks = usePlacementEditorStore((state) => state.document.motionTracks ?? []);
+  const motionTracks = usePlacementEditorStore((state) => state.document.motionTracks);
   const activeTrackId = useMotionPlaybackStore((state) => state.activeTrackId);
   const previewEnabled = useMotionPlaybackStore((state) => state.previewEnabled);
   const select = usePlacementEditorStore((state) => state.select);
@@ -160,13 +162,13 @@ function PlacedObject({
   const parentAsset = parent ? getCatalogAsset(parent.assetId) : undefined;
   const children = instances.filter((candidate) => candidate.parentId === instance.id);
   const selected = instance.id === selectedId;
-  const activeTrack = motionTracks.find((track) => track.id === activeTrackId && track.targetId === instance.id);
+  const activeTrack = (motionTracks ?? EMPTY_MOTION_TRACKS).find((track) => track.id === activeTrackId && track.targetId === instance.id);
 
   useFrame(() => {
     const object = groupRef.current;
     if (!object) return;
     const playback = useMotionPlaybackStore.getState();
-    const liveTrack = (usePlacementEditorStore.getState().document.motionTracks ?? [])
+    const liveTrack = (usePlacementEditorStore.getState().document.motionTracks ?? EMPTY_MOTION_TRACKS)
       .find((track) => track.id === playback.activeTrackId && track.targetId === instance.id);
     if (liveTrack && playback.previewEnabled) {
       const sampled = sampleMotionTrack(liveTrack, playback.playheadSeconds);
@@ -359,7 +361,7 @@ function MotionClock() {
   useFrame((_, delta) => {
     const playback = useMotionPlaybackStore.getState();
     if (!playback.playing || !playback.activeTrackId) return;
-    const track = (usePlacementEditorStore.getState().document.motionTracks ?? [])
+    const track = (usePlacementEditorStore.getState().document.motionTracks ?? EMPTY_MOTION_TRACKS)
       .find((candidate) => candidate.id === playback.activeTrackId);
     if (!track) {
       playback.resetPlayback();
@@ -389,7 +391,7 @@ function EditorScene() {
   const roomDepth = bounds ? bounds.max[2] - bounds.min[2] : 80;
   const knownIds = new Set(document.instances.map((instance) => instance.id));
   const roots = document.instances.filter((instance) => !instance.parentId || !knownIds.has(instance.parentId));
-  const activeTrack = (document.motionTracks ?? []).find((track) => track.id === activeTrackId);
+  const activeTrack = (document.motionTracks ?? EMPTY_MOTION_TRACKS).find((track) => track.id === activeTrackId);
   return (
     <>
       <color attach="background" args={[bounds ? '#1b1714' : '#11151d']} />
