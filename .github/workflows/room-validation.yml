@@ -20,9 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
-      room-matrix: ${{ steps.room-matrix.outputs.matrix }}
-      full-evidence: ${{ steps.scope.outputs.full_evidence }}
-      changed-files: ${{ steps.scope.outputs.changed_files }}
+      room_matrix: ${{ steps.room-matrix.outputs.matrix }}
+      full_evidence: ${{ steps.scope.outputs.full_evidence }}
+      changed_files: ${{ steps.scope.outputs.changed_files }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -110,7 +110,7 @@ jobs:
   browser-smoke:
     name: Shared browser smoke
     needs: validate
-    if: needs.validate.outputs.full-evidence == 'true'
+    if: needs.validate.outputs.full_evidence == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -169,7 +169,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 4
-      matrix: ${{ fromJSON(needs.validate.outputs.room-matrix) }}
+      matrix: ${{ fromJSON(needs.validate.outputs.room_matrix) }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -235,7 +235,7 @@ jobs:
             echo '| Shared browser smoke | `${{ needs.browser-smoke.result }}` |'
             echo '| Twelve-room evidence | `${{ needs.evidence.result }}` |'
             echo
-            if [[ '${{ needs.validate.outputs.full-evidence }}' != 'true' ]]; then
+            if [[ '${{ needs.validate.outputs.full_evidence }}' != 'true' ]]; then
               echo 'Full runtime evidence was intentionally deferred because this is a draft PR and the latest commit did not alter production-room or validation infrastructure.'
             else
               echo 'Full runtime evidence was requested. A failed evidence result is a real blocking gate; a skipped result means the shared smoke gate did not pass.'
