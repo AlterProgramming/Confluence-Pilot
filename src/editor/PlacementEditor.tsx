@@ -44,7 +44,9 @@ function AxisFields({
   return (
     <div className="axis-field-grid">
       {labels.map((label, axis) => {
-        const shown = rotation ? MathUtils.radToDeg(values[axis]) : values[axis];
+        const axisIndex = axis as 0 | 1 | 2;
+        const rawValue = values[axisIndex] ?? 0;
+        const shown = rotation ? MathUtils.radToDeg(rawValue) : rawValue;
         return (
           <label key={label} className={`axis-field axis-field-${label.toLowerCase()}`}>
             <span>{label}</span>
@@ -55,7 +57,7 @@ function AxisFields({
               disabled={disabled}
               onChange={(event) => {
                 const next = Number(event.target.value);
-                updateSelectedAxis(kind, axis as 0 | 1 | 2, rotation ? MathUtils.degToRad(next) : next);
+                updateSelectedAxis(kind, axisIndex, rotation ? MathUtils.degToRad(next) : next);
               }}
             />
           </label>
