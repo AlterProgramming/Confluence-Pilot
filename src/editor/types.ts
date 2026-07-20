@@ -2,16 +2,34 @@ export type Vector3Tuple = [number, number, number];
 
 export type TransformMode = 'translate' | 'rotate' | 'scale';
 
-export type PrimitiveKind = 'box' | 'sphere' | 'cylinder' | 'cone' | 'torus';
+export type PrimitiveKind =
+  | 'box'
+  | 'sphere'
+  | 'cylinder'
+  | 'cone'
+  | 'torus'
+  | 'workbench'
+  | 'credential-stack'
+  | 'coaching-table';
+
+export type SceneTemplateId = 'sandbox' | 'room-02';
+
+export interface SceneBounds {
+  min: Vector3Tuple;
+  max: Vector3Tuple;
+  safeInset: number;
+}
 
 export interface AssetCatalogItem {
   id: string;
   label: string;
-  category: 'primitive' | 'room-hero';
+  category: 'primitive' | 'room-hero' | 'room-fixture';
   kind: 'primitive' | 'gltf';
   primitive?: PrimitiveKind;
   url?: string;
   targetSize?: number;
+  footprint: Vector3Tuple;
+  floorAnchored: boolean;
   accent: string;
   description: string;
 }
@@ -34,11 +52,13 @@ export interface PlacedAsset {
 }
 
 export interface CompositionDocument {
-  schemaVersion: 1;
+  schemaVersion: 2;
   id: string;
+  sceneId: SceneTemplateId;
   name: string;
   units: 'meters';
   gridUnit: number;
+  bounds: SceneBounds | null;
   instances: PlacedAsset[];
   updatedAt: number;
 }
