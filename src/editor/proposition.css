@@ -91,6 +91,40 @@
   border-top: 1px solid rgba(255, 255, 255, 0.065);
 }
 
+.viewport-proposition-label {
+  --proposition-accent: #ff7a3d;
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  display: grid;
+  gap: 0.15rem;
+  min-width: 16rem;
+  max-width: 23rem;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid color-mix(in srgb, var(--proposition-accent) 48%, transparent);
+  border-left: 3px solid var(--proposition-accent);
+  border-radius: 0.58rem;
+  background: rgba(10, 13, 18, 0.82);
+  box-shadow: 0 0.75rem 2.3rem rgba(0, 0, 0, 0.28);
+  color: #f4f7fa;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+}
+
+.viewport-proposition-label strong {
+  font-size: 0.8rem;
+}
+
+.viewport-proposition-label span,
+.viewport-proposition-label small {
+  color: #b8c2ce;
+  font-size: 0.66rem;
+}
+
+.viewport-proposition-label small {
+  color: color-mix(in srgb, var(--proposition-accent) 76%, #ffffff);
+}
+
 .composition-editor-shell:has(.proposition-brief) .composition-workspace {
   min-height: 0;
 }
@@ -114,5 +148,10 @@
   .proposition-promise,
   .proposition-hierarchy {
     display: none;
+  }
+
+  .viewport-proposition-label {
+    max-width: calc(100% - 2rem);
+    min-width: 0;
   }
 }
