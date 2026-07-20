@@ -27,6 +27,11 @@ const primitives: AssetCatalogItem[] = [
     footprint: [1.66, 0.36, 1.66], floorAnchored: true, attachable: true, accent: '#bd8cff',
     description: 'Circular reference object for rotation and radial composition.',
   },
+  {
+    id: 'character-proxy', label: 'Character proxy', category: 'primitive', kind: 'primitive', primitive: 'character-proxy',
+    footprint: [0.72, 1.78, 0.72], floorAnchored: true, accent: '#f5d36f',
+    description: 'Human-scale proxy with a visible forward direction for path, timing, circulation, and staging studies.',
+  },
 ];
 
 const roomFixtures: AssetCatalogItem[] = [
