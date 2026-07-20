@@ -185,6 +185,34 @@ const learningForum: DesignProposition = {
   focalPoint: [0, 0.03, 0],
 };
 
+const achievementForum: DesignProposition = {
+  id: 'achievement-forum',
+  title: 'The Achievement Forum',
+  thesis: 'Organize collaboration as the social threshold to a clear learning-to-achievement spine.',
+  experientialPromise: 'A stakeholder should understand both how people gather and where their work is intended to lead.',
+  signatureMove: 'The entry path bends around a collaborative forum, then resolves into an axial demonstration and credential sequence.',
+  hierarchy: [
+    'Collaborative forum as the human center',
+    'Demonstration spine as shared orientation',
+    'Credential destination as visible outcome',
+    'Learning wings supporting both individual and group work',
+  ],
+  adoptedQualities: ['Forum-centered participation', 'Visible journey toward achievement', 'Clear shared orientation'],
+  rejectedQualities: ['Unresolved furniture ring', 'Empty ceremonial promenade', 'Rigid lecture-only rows'],
+  tradeoffs: ['The hybrid is richer but depends on disciplined hierarchy to avoid feeling over-programmed.', 'The central forum intentionally bends circulation instead of preserving a perfectly straight aisle.'],
+  accent: '#f2a64a',
+  camera: { position: [12.3, 8.8, 14.4], target: [0, 1.15, -0.8] },
+  zones: [
+    { id: 'social-threshold', label: 'Collaborative threshold', intent: 'The first spatial event is a visible place for coaching, critique, and shared planning.', center: [0, 2.0], size: [5.4, 4.7], rotation: 0, accent: '#82d49b' },
+    { id: 'left-learning-wing', label: 'Learning wing A', intent: 'An angled sequence of workstations that participates in the forum while retaining focus.', center: [-4.65, -0.2], size: [3.2, 8.8], rotation: -0.12, accent: '#f0b96d' },
+    { id: 'right-learning-wing', label: 'Learning wing B', intent: 'A balancing workstation wing oriented toward the shared demonstration spine.', center: [4.65, -0.2], size: [3.2, 8.8], rotation: 0.12, accent: '#f0b96d' },
+    { id: 'demonstration-spine', label: 'Demonstration spine', intent: 'A shared applied-learning moment that gathers attention without becoming a detached showcase.', center: [0, -2.75], size: [5.2, 3.0], rotation: 0, accent: '#72c8f0' },
+    { id: 'achievement-destination', label: 'Achievement destination', intent: 'Credentials terminate the room’s narrative as evidence of completed learning.', center: [0, -5.65], size: [5.2, 2.2], rotation: 0, accent: '#c6a4ff' },
+  ],
+  circulation: [[0, 0.025, 6.1], [-2.35, 0.025, 4.05], [-2.45, 0.025, 1.55], [0, 0.025, -0.55], [0, 0.025, -2.8], [0, 0.025, -5.6]],
+  focalPoint: [0, 0.03, -5.6],
+};
+
 const room02AcademyAxis: CompositionDocument = {
   schemaVersion: 2,
   id: 'room-02-proposition-academy-axis',
@@ -254,12 +282,36 @@ const room02LearningForum: CompositionDocument = {
   updatedAt: createdAt,
 };
 
+const room02AchievementForum: CompositionDocument = {
+  schemaVersion: 2,
+  id: 'room-02-proposition-achievement-forum',
+  sceneId: 'room-02-achievement-forum',
+  name: 'Room 02 · The Achievement Forum',
+  units: 'meters',
+  gridUnit: 0.25,
+  bounds: room02Bounds,
+  proposition: achievementForum,
+  instances: [
+    placed('achievement-hero', 'room-02', 'Applied demonstration', [0, 0, -2.75]),
+    ...workbenchAssembly('achievement-left-front', 'Learning wing A1', [-4.45, 0, 3.55], -2.25, [0.12, 0.86, -0.03], -0.06),
+    ...workbenchAssembly('achievement-left-middle', 'Learning wing A2', [-5.15, 0, 0.25], -1.68),
+    ...workbenchAssembly('achievement-left-rear', 'Learning wing A3', [-4.25, 0, -3.15], -1.18, [-0.1, 0.86, -0.02], 0.05),
+    ...workbenchAssembly('achievement-right-front', 'Learning wing B1', [4.45, 0, 3.55], 2.25, [-0.12, 0.86, -0.03], 0.06),
+    ...workbenchAssembly('achievement-right-middle', 'Learning wing B2', [5.15, 0, 0.25], 1.68),
+    ...workbenchAssembly('achievement-right-rear', 'Learning wing B3', [4.25, 0, -3.15], 1.18, [0.1, 0.86, -0.02], -0.05),
+    placed('achievement-credential-stack', 'academy-credential-stack', 'Achievement destination', [0, 0, -5.85]),
+    placed('achievement-coaching-table', 'academy-coaching-table', 'Collaborative forum', [0, 0, 1.65]),
+  ],
+  updatedAt: createdAt,
+};
+
 const templates: Record<SceneTemplateId, CompositionDocument> = {
   sandbox,
   'room-02': room02,
   'room-02-academy-axis': room02AcademyAxis,
   'room-02-credential-gallery': room02CredentialGallery,
   'room-02-learning-forum': room02LearningForum,
+  'room-02-achievement-forum': room02AchievementForum,
 };
 
 export const sceneTemplateOptions: Array<{ id: SceneTemplateId; label: string; group: 'workspace' | 'proposition' }> = [
@@ -268,6 +320,7 @@ export const sceneTemplateOptions: Array<{ id: SceneTemplateId; label: string; g
   { id: 'room-02-academy-axis', label: 'Proposition A · Academy Axis', group: 'proposition' },
   { id: 'room-02-credential-gallery', label: 'Proposition B · Credential Gallery', group: 'proposition' },
   { id: 'room-02-learning-forum', label: 'Proposition C · Learning Forum', group: 'proposition' },
+  { id: 'room-02-achievement-forum', label: 'Proposition D · Achievement Forum', group: 'proposition' },
 ];
 
 export function cloneCompositionDocument(document: CompositionDocument): CompositionDocument {
