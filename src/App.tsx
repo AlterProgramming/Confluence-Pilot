@@ -5,9 +5,10 @@ import { InputController } from './components/InputController';
 import { PerformanceTelemetry } from './components/PerformanceTelemetry';
 import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
+import { PlacementEditor } from './editor/PlacementEditor';
 import { useExperienceStore } from './state/useExperienceStore';
 
-export default function App() {
+function ExperienceApp() {
   const setReducedMotion = useExperienceStore((state) => state.setReducedMotion);
 
   useEffect(() => {
@@ -36,4 +37,10 @@ export default function App() {
       <Hud />
     </main>
   );
+}
+
+export default function App() {
+  const params = new URLSearchParams(window.location.search);
+  const editorMode = params.get('editor') === '1' || window.location.pathname.replace(/\/$/, '').endsWith('/editor');
+  return editorMode ? <PlacementEditor /> : <ExperienceApp />;
 }
