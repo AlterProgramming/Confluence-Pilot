@@ -5,6 +5,7 @@ import { InputController } from './components/InputController';
 import { PerformanceTelemetry } from './components/PerformanceTelemetry';
 import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
+import { PlacementAssemblyTools } from './editor/PlacementAssemblyTools';
 import { PlacementEditor } from './editor/PlacementEditor';
 import { PlacementHistoryControls } from './editor/PlacementHistoryControls';
 import './editor/assembly.css';
@@ -46,6 +47,7 @@ function EditorApp() {
     <>
       <PlacementEditor />
       <PlacementHistoryControls />
+      <PlacementAssemblyTools />
     </>
   );
 }
