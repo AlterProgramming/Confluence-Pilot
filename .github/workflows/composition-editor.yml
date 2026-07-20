@@ -6,6 +6,7 @@ on:
       - 'src/editor/**'
       - 'src/App.tsx'
       - 'scripts/capture_composition_editor.mjs'
+      - 'scripts/capture_editor_workflow_tools.mjs'
       - '.github/workflows/composition-editor.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -68,6 +69,9 @@ jobs:
 
       - name: Capture composition editor evidence
         run: node scripts/capture_composition_editor.mjs http://127.0.0.1:4178
+
+      - name: Validate history and surface workflows
+        run: node scripts/capture_editor_workflow_tools.mjs http://127.0.0.1:4178
 
       - name: Upload composition editor evidence
         if: always()
