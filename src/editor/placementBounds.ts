@@ -15,7 +15,7 @@ export type BoundaryResult = {
 };
 
 export function constrainAssetTransform(
-  instance: Pick<PlacedAsset, 'transform'>,
+  _instance: Pick<PlacedAsset, 'transform'>,
   proposed: AssetTransform,
   bounds: SceneBounds | null,
   asset: AssetCatalogItem,
