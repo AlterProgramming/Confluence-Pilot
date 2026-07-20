@@ -39,7 +39,7 @@ export interface AssetCatalogItem {
   footprint: Vector3Tuple;
   floorAnchored: boolean;
   attachable?: boolean;
-  attachmentSurfaces?: AttachmentSurface[];
+  attachmentSurfaces?: [AttachmentSurface, ...AttachmentSurface[]];
   accent: string;
   description: string;
 }
@@ -55,8 +55,8 @@ export interface PlacedAsset {
   assetId: string;
   name: string;
   transform: AssetTransform;
-  parentId?: string | null;
-  surfaceId?: string | null;
+  parentId?: string | null | undefined;
+  surfaceId?: string | null | undefined;
   visible: boolean;
   locked: boolean;
   createdAt: number;
