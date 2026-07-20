@@ -1,0 +1,84 @@
+.outliner-row.outliner-child {
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.hierarchy-branch {
+  flex: 0 0 auto;
+  color: rgba(255, 183, 136, 0.5);
+  font: 700 0.65rem/1 ui-monospace, monospace;
+}
+
+.attachment-inspector-status {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.6rem 0;
+  padding: 0.55rem 0.58rem;
+  border: 1px solid rgba(255, 164, 104, 0.28);
+  border-radius: 0.5rem;
+  background: rgba(255, 122, 69, 0.08);
+}
+
+.attachment-inspector-status > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.14rem;
+}
+
+.attachment-inspector-status strong {
+  overflow: hidden;
+  color: #ffd2b8;
+  font-size: 0.63rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-inspector-status span {
+  overflow: hidden;
+  color: var(--editor-muted);
+  font-size: 0.55rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-inspector-status button {
+  border: 1px solid rgba(255, 190, 150, 0.24);
+  border-radius: 0.4rem;
+  padding: 0.38rem 0.46rem;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  font-size: 0.57rem;
+}
+
+.attachment-inspector-status button:hover {
+  color: #fff;
+  border-color: rgba(255, 190, 150, 0.5);
+}
+
+.attachment-host-field {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.6rem 0;
+  color: var(--editor-muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.attachment-host-field select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid rgba(255, 164, 104, 0.24);
+  border-radius: 0.46rem;
+  padding: 0.48rem 0.5rem;
+  color: rgba(255, 255, 255, 0.82);
+  background: #151b25;
+  font-size: 0.64rem;
+}
+
+.attachment-host-field select:focus {
+  outline: 1px solid var(--editor-accent);
+  outline-offset: 1px;
+}
