@@ -28,7 +28,7 @@ export function constrainAssetTransform(
   if (!bounds) return { transform: original, clamped: false, footprint: tuple(asset.footprint) };
 
   const roomWidth = Math.max(EPSILON, bounds.max[0] - bounds.min[0] - bounds.safeInset * 2);
-  const roomHeight = Math.max(EPSILON, bounds.max[1] - bounds.min[1] - bounds.safeInset * 2);
+  const roomHeight = Math.max(EPSILON, bounds.max[1] - bounds.min[1] - bounds.safeInset);
   const roomDepth = Math.max(EPSILON, bounds.max[2] - bounds.min[2] - bounds.safeInset * 2);
   const scale: Vector3Tuple = [
     clamp(Math.abs(proposed.scale[0]), 0.05, roomWidth / Math.max(asset.footprint[0], EPSILON)),
@@ -59,7 +59,7 @@ export function constrainAssetTransform(
   const maxX = bounds.max[0] - bounds.safeInset - halfWidth;
   const minZ = bounds.min[2] + bounds.safeInset + halfDepth;
   const maxZ = bounds.max[2] - bounds.safeInset - halfDepth;
-  const minY = bounds.min[1] + (asset.floorAnchored ? 0 : height / 2) + bounds.safeInset;
+  const minY = asset.floorAnchored ? bounds.min[1] : bounds.min[1] + height / 2;
   const maxY = bounds.max[1] - (asset.floorAnchored ? height : height / 2) - bounds.safeInset;
 
   const position: Vector3Tuple = [
