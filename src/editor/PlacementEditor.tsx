@@ -4,7 +4,7 @@ import { assetCatalog, getCatalogAsset, preloadEditorAssetLibrary } from './asse
 import { transformWithinBounds } from './placementBounds';
 import { PlacementCanvas } from './PlacementCanvas';
 import { sceneTemplateOptions } from './sceneTemplates';
-import type { AssetTransform, CompositionDocument, SceneTemplateId, TransformMode } from './types';
+import type { AssetTransform, CompositionDocument, PlacedAsset, SceneTemplateId, TransformMode } from './types';
 import { usePlacementEditorStore } from './usePlacementEditorStore';
 import './editor.css';
 
@@ -90,7 +90,7 @@ function AssetLibrary() {
       </div>
       <label className="asset-search">
         <span>Search assets</span>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Hero, desk, marker…" />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Laptop, desk, hero…" />
       </label>
       <div className="category-tabs category-tabs-four" aria-label="Asset categories">
         {([
@@ -106,11 +106,11 @@ function AssetLibrary() {
         {filteredAssets.map((asset) => (
           <button key={asset.id} type="button" className="asset-card" data-asset-id={asset.id} onClick={() => addAsset(asset.id)}>
             <span className="asset-preview" style={{ '--asset-accent': asset.accent } as React.CSSProperties}>
-              <i>{asset.kind === 'gltf' ? asset.id.slice(-2) : asset.category === 'room-fixture' ? '▦' : '◆'}</i>
+              <i>{asset.primitive === 'laptop' ? '▱' : asset.kind === 'gltf' ? asset.id.slice(-2) : asset.category === 'room-fixture' ? '▦' : '◆'}</i>
             </span>
             <span className="asset-card-copy">
               <strong>{asset.label}</strong>
-              <small>{asset.category === 'room-hero' ? 'Existing GLB' : asset.category === 'room-fixture' ? 'Scene fixture' : 'Editor primitive'}</small>
+              <small>{asset.attachable ? 'Attachable item' : asset.attachmentSurfaces?.length ? 'Assembly host' : asset.category === 'room-hero' ? 'Existing GLB' : asset.category === 'room-fixture' ? 'Scene fixture' : 'Editor primitive'}</small>
             </span>
             <span className="asset-add">＋</span>
           </button>
@@ -120,23 +120,49 @@ function AssetLibrary() {
   );
 }
 
+function orderedHierarchy(instances: PlacedAsset[]) {
+  const knownIds = new Set(instances.map((instance) => instance.id));
+  const children = new Map<string, PlacedAsset[]>();
+  for (const instance of instances) {
+    if (instance.parentId && knownIds.has(instance.parentId)) {
+      children.set(instance.parentId, [...(children.get(instance.parentId) ?? []), instance]);
+    }
+  }
+  const ordered: Array<{ instance: PlacedAsset; depth: number }> = [];
+  const visit = (instance: PlacedAsset, depth: number) => {
+    ordered.push({ instance, depth });
+    for (const child of children.get(instance.id) ?? []) visit(child, depth + 1);
+  };
+  for (const instance of instances) {
+    if (!instance.parentId || !knownIds.has(instance.parentId)) visit(instance, 0);
+  }
+  return ordered;
+}
+
 function SceneOutliner() {
   const instances = usePlacementEditorStore((state) => state.document.instances);
   const selectedId = usePlacementEditorStore((state) => state.selectedId);
   const select = usePlacementEditorStore((state) => state.select);
   const toggleVisibility = usePlacementEditorStore((state) => state.toggleVisibility);
   const toggleLocked = usePlacementEditorStore((state) => state.toggleLocked);
+  const ordered = useMemo(() => orderedHierarchy(instances), [instances]);
   return (
     <section className="outliner-section">
       <div className="subpanel-heading"><h3>Composition objects</h3><span>{instances.length}</span></div>
       <div className="outliner-list">
-        {instances.map((instance) => {
+        {ordered.map(({ instance, depth }) => {
           const asset = getCatalogAsset(instance.assetId);
           return (
-            <div key={instance.id} data-instance-id={instance.id} className={`outliner-row ${selectedId === instance.id ? 'selected' : ''}`}>
-              <button type="button" className="outliner-select" onClick={() => select(instance.id)}>
+            <div
+              key={instance.id}
+              data-instance-id={instance.id}
+              data-parent-id={instance.parentId ?? ''}
+              className={`outliner-row ${selectedId === instance.id ? 'selected' : ''} ${depth ? 'outliner-child' : ''}`}
+            >
+              <button type="button" className="outliner-select" style={{ paddingLeft: `${0.38 + depth * 0.85}rem` }} onClick={() => select(instance.id)}>
+                {depth > 0 && <b className="hierarchy-branch">↳</b>}
                 <i style={{ background: asset.accent }} />
-                <span><strong>{instance.name}</strong><small>{asset.label}</small></span>
+                <span><strong>{instance.name}</strong><small>{instance.parentId ? `Attached · ${asset.label}` : asset.attachmentSurfaces?.length ? `Assembly · ${asset.label}` : asset.label}</small></span>
               </button>
               <button type="button" className={!instance.visible ? 'muted' : ''} title="Toggle visibility" onClick={() => toggleVisibility(instance.id)}>◉</button>
               <button type="button" className={instance.locked ? 'active' : ''} title="Toggle lock" onClick={() => toggleLocked(instance.id)}>{instance.locked ? '◆' : '◇'}</button>
@@ -152,11 +178,19 @@ function Inspector() {
   const document = usePlacementEditorStore((state) => state.document);
   const selectedId = usePlacementEditorStore((state) => state.selectedId);
   const renameSelected = usePlacementEditorStore((state) => state.renameSelected);
+  const attachSelectedTo = usePlacementEditorStore((state) => state.attachSelectedTo);
+  const detachSelected = usePlacementEditorStore((state) => state.detachSelected);
   const duplicateSelected = usePlacementEditorStore((state) => state.duplicateSelected);
   const removeSelected = usePlacementEditorStore((state) => state.removeSelected);
   const selected = document.instances.find((instance) => instance.id === selectedId) ?? null;
   const asset = selected ? getCatalogAsset(selected.assetId) : null;
-  const inside = selected && asset ? transformWithinBounds(selected, document.bounds, asset) : true;
+  const parent = selected?.parentId ? document.instances.find((instance) => instance.id === selected.parentId) : undefined;
+  const parentAsset = parent ? getCatalogAsset(parent.assetId) : undefined;
+  const surface = parentAsset?.attachmentSurfaces?.find((candidate) => candidate.id === selected?.surfaceId);
+  const inside = selected && asset ? transformWithinBounds(selected, document.bounds, asset, parentAsset) : true;
+  const hosts = selected && asset?.attachable && !selected.parentId
+    ? document.instances.filter((candidate) => candidate.id !== selected.id && getCatalogAsset(candidate.assetId).attachmentSurfaces?.length)
+    : [];
   return (
     <aside className="editor-panel inspector-panel" aria-label="Object inspector">
       <div className="panel-heading">
@@ -174,14 +208,35 @@ function Inspector() {
               <span style={{ background: asset?.accent }} />
               <div><strong>{asset?.label}</strong><small>{selected.locked ? 'Locked' : 'Editable'} · {selected.visible ? 'Visible' : 'Hidden'}</small></div>
             </div>
-            {document.bounds && (
-              <div className={`boundary-inspector-status ${inside ? 'inside' : 'outside'}`} data-testid="selected-boundary-status">
-                <strong>{inside ? 'Inside room envelope' : 'Boundary conflict'}</strong>
-                <span>Footprint-aware walls, floor, and ceiling</span>
+            {parent && (
+              <div className="attachment-inspector-status" data-testid="selected-attachment-status">
+                <div><strong>Attached to {parent.name}</strong><span>{surface?.label ?? selected.surfaceId ?? 'Surface'} · local coordinates</span></div>
+                <button type="button" data-testid="detach-selected" onClick={detachSelected}>Detach</button>
               </div>
             )}
-            <div className="transform-block"><div className="transform-label"><strong>Position</strong><span>meters</span></div><AxisFields kind="position" values={selected.transform.position} disabled={selected.locked} /></div>
-            <div className="transform-block"><div className="transform-label"><strong>Rotation</strong><span>degrees</span></div><AxisFields kind="rotation" values={selected.transform.rotation} rotation disabled={selected.locked} /></div>
+            {!parent && hosts.length > 0 && (
+              <label className="attachment-host-field">
+                <span>Attach to surface</span>
+                <select
+                  data-testid="attachment-host-select"
+                  value=""
+                  onChange={(event) => {
+                    if (event.target.value) attachSelectedTo(event.target.value);
+                  }}
+                >
+                  <option value="">Choose a host…</option>
+                  {hosts.map((host) => <option key={host.id} value={host.id}>{host.name}</option>)}
+                </select>
+              </label>
+            )}
+            {document.bounds && (
+              <div className={`boundary-inspector-status ${inside ? 'inside' : 'outside'}`} data-testid="selected-boundary-status">
+                <strong>{inside ? (parent ? 'Inside attachment surface' : 'Inside room envelope') : 'Boundary conflict'}</strong>
+                <span>{parent ? 'Rotation-aware tabletop footprint' : 'Footprint-aware walls, floor, and ceiling'}</span>
+              </div>
+            )}
+            <div className="transform-block"><div className="transform-label"><strong>Position</strong><span>{parent ? 'local meters' : 'meters'}</span></div><AxisFields kind="position" values={selected.transform.position} disabled={selected.locked} /></div>
+            <div className="transform-block"><div className="transform-label"><strong>Rotation</strong><span>{parent ? 'local degrees' : 'degrees'}</span></div><AxisFields kind="rotation" values={selected.transform.rotation} rotation disabled={selected.locked} /></div>
             <div className="transform-block"><div className="transform-label"><strong>Scale</strong><span>ratio</span></div><AxisFields kind="scale" values={selected.transform.scale} disabled={selected.locked} /></div>
             <div className="object-actions"><button type="button" onClick={duplicateSelected}>Duplicate</button><button type="button" className="danger" onClick={removeSelected}>Delete</button></div>
           </>
@@ -298,7 +353,15 @@ export function PlacementEditor() {
       bounds: document.bounds,
       dimensions,
       instanceCount: document.instances.length,
-      instances: document.instances.map((instance) => ({ id: instance.id, assetId: instance.assetId, transform: instance.transform })),
+      rootCount: document.instances.filter((instance) => !instance.parentId).length,
+      attachedCount: document.instances.filter((instance) => instance.parentId).length,
+      instances: document.instances.map((instance) => ({
+        id: instance.id,
+        assetId: instance.assetId,
+        parentId: instance.parentId ?? null,
+        surfaceId: instance.surfaceId ?? null,
+        transform: instance.transform,
+      })),
       selectedId,
       transformMode,
       boundaryClampCount,
@@ -327,7 +390,7 @@ export function PlacementEditor() {
       <div className="composition-workspace"><AssetLibrary /><PlacementCanvas /><Inspector /></div>
       <footer className="composition-statusbar">
         <div><span className={isDirty ? 'status-dot dirty' : 'status-dot'} />{isDirty ? 'Unsaved changes' : notice}</div>
-        <div className="status-metrics"><span>{document.name}</span><span>{document.instances.length} objects</span><span>Grid {document.gridUnit.toFixed(2)} m</span><span>{boundaryClampCount} clamps</span><span>{modeLabels[transformMode].label} mode</span><span>{formatTimestamp(lastSavedAt)}</span></div>
+        <div className="status-metrics"><span>{document.name}</span><span>{document.instances.length} objects</span><span>{document.instances.filter((instance) => instance.parentId).length} attached</span><span>Grid {document.gridUnit.toFixed(2)} m</span><span>{boundaryClampCount} clamps</span><span>{modeLabels[transformMode].label} mode</span><span>{formatTimestamp(lastSavedAt)}</span></div>
       </footer>
     </main>
   );
