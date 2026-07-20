@@ -107,6 +107,6 @@ export interface CompositionDocument {
   gridUnit: number;
   bounds: SceneBounds | null;
   instances: PlacedAsset[];
-  proposition?: DesignProposition;
+  proposition?: DesignProposition | undefined;
   updatedAt: number;
 }
