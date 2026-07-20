@@ -191,11 +191,13 @@ try {
       && near(clampedLaptop.transform.position[1], 0.86)
       && laptopClampedState.boundaryClampCount > clampCountBeforeLaptop,
     ),
-    laptopMovedLocally: Boolean(
+    laptopMovedLocallyWithRotationFit: Boolean(
       finalLaptop
       && near(finalLaptop.transform.position[0], 0.31)
-      && near(finalLaptop.transform.position[2], 0.07)
-      && near(finalLaptop.transform.rotation[1], MathUtilsRadians(22)),
+      && Math.abs(finalLaptop.transform.position[2]) < 0.05
+      && near(finalLaptop.transform.rotation[1], MathUtilsRadians(22))
+      && finalLaptop.transform.scale[0] < 1
+      && finalLaptop.transform.scale[0] > 0.9,
     ),
     parentMovePreservedChildLocalTransform: Boolean(
       laptopBeforeParentMove
