@@ -51,7 +51,12 @@ const sameTuple = (left, right, tolerance = 0.04) => Array.isArray(left)
 
 try {
   const page = await browser.newPage();
-  await page.evaluateOnNewDocument(() => localStorage.clear());
+  await page.evaluateOnNewDocument(() => {
+    if (!sessionStorage.getItem('__confluence_motion_test_initialized__')) {
+      localStorage.clear();
+      sessionStorage.setItem('__confluence_motion_test_initialized__', '1');
+    }
+  });
   await page.setViewport({ width: 1920, height: 1180, deviceScaleFactor: 1 });
   page.on('console', (message) => { if (message.type() === 'error') report.consoleErrors.push(message.text()); });
   page.on('pageerror', (error) => report.pageErrors.push(error.message));
