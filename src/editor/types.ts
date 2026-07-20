@@ -18,7 +18,8 @@ export type SceneTemplateId =
   | 'room-02'
   | 'room-02-academy-axis'
   | 'room-02-credential-gallery'
-  | 'room-02-learning-forum';
+  | 'room-02-learning-forum'
+  | 'room-02-achievement-forum';
 
 export interface SceneBounds {
   min: Vector3Tuple;
@@ -79,7 +80,7 @@ export interface DesignZone {
 }
 
 export interface DesignProposition {
-  id: 'academy-axis' | 'credential-gallery' | 'learning-forum';
+  id: 'academy-axis' | 'credential-gallery' | 'learning-forum' | 'achievement-forum';
   title: string;
   thesis: string;
   experientialPromise: string;
