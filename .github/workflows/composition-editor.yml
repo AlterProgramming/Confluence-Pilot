@@ -1,0 +1,72 @@
+name: Composition editor
+
+on:
+  pull_request:
+    paths:
+      - 'src/editor/**'
+      - 'src/App.tsx'
+      - 'scripts/capture_composition_editor.mjs'
+      - '.github/workflows/composition-editor.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches:
+      - 'agent/composition-editor'
+
+concurrency:
+  group: composition-editor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-editor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4178 > /tmp/confluence-composer-preview.log 2>&1 &
+          echo $! > /tmp/confluence-composer-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4178/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/confluence-composer-preview.log
+          exit 1
+
+      - name: Capture composition editor evidence
+        run: node scripts/capture_composition_editor.mjs http://127.0.0.1:4178
+
+      - name: Upload composition editor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: composition-editor-evidence
+          path: validation/composition-editor
+          if-no-files-found: error
+          retention-days: 14
