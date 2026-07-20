@@ -2,7 +2,7 @@
 
 ## Why this document exists
 
-The previous Room 02 model was technically navigable but insufficient as a stakeholder visualization. The purpose of this proposition set is not to generate decorative variants. It is to test different beliefs about what the room should be, then construct a deliberate synthesis from the strongest qualities.
+The previous Room 02 model was technically navigable but insufficient as a stakeholder visualization. The purpose of this proposition set is not to generate decorative variants. It is to test different beliefs about what the room should be, synthesize the strongest direction, and then test how people might occupy and move through it.
 
 The source reference imagery is treated as visual evidence, not ground truth. These propositions preserve useful qualities from that evidence while explicitly rejecting generic AI-lab conventions, decorative screens, and centerpiece objects without a functional role.
 
@@ -129,47 +129,65 @@ It is less efficient for lecture-style instruction. Its distributed circulation 
 
 ### Belief
 
-The strongest room is not a compromise among A, B, and C. It is a forum whose collaboration visibly leads somewhere.
+The room should put people together first, then make their progression toward applied work and visible achievement unmistakable.
 
 ### Spatial thesis
 
-A collaborative table forms the social threshold near the entrance. Circulation bends around that center, then resolves into a clear demonstration and credential spine. Six workstations form angled learning wings rather than rows or an unresolved ring.
+The collaborative table becomes a social threshold near the entrance. Six angled workstation assemblies create two learning wings. A bent circulation path passes the social center, resolves onto a shared demonstration spine, and terminates at credential evidence.
 
-### What it inherits deliberately
+### What it keeps
 
-- **From C:** a human, collaborative center that makes participation visible;
-- **From B:** an intelligible journey culminating in credential achievement;
-- **From A:** a shared direction and clear visual hierarchy.
+- the Learning Forum’s participatory human center;
+- the Credential Gallery’s visible journey toward achievement;
+- the Academy Axis’s directional clarity;
+- workstations oriented toward both shared demonstration and peer activity.
 
-### What it refuses to inherit
+### What it rejects
 
-- C’s loose and potentially unresolved furniture ring;
-- B’s large amount of ceremonial but inactive floor area;
-- A’s rigid lecture-first classroom character.
+- an unresolved furniture ring;
+- an empty ceremonial promenade;
+- a perfectly straight aisle that weakens the social center;
+- a hybrid assembled by merely adding every attractive feature.
 
 ### Intended stakeholder response
 
-> “I can see people gathering, working, demonstrating what they learned, and reaching a visible outcome. The room has both culture and purpose.”
+> “I understand where people gather, where they work, how they move through the room, and what achievement looks like at the end.”
 
 ### Risk
 
-The hybrid carries more program than any single-source proposition. It succeeds only if the architectural and lighting pass makes the collaborative threshold, demonstration spine, and achievement destination unmistakably hierarchical.
+The synthesis depends on disciplined hierarchy. The bent circulation must remain generous and intelligible once architecture, seating, and more occupants are added.
 
 ---
+
+## Recorded occupation and movement
+
+The construction document can now contain persistent motion tracks as well as static composition. A track identifies a scene object or character, a set of timed waypoints, interpolation, loop behavior, and whether the target faces the direction of travel.
+
+The first proof uses a human-scale character proxy moving through the Achievement Forum:
+
+1. enter at the front center;
+2. bend left around the collaborative threshold;
+3. pass through the social and learning overlap;
+4. return to the demonstration spine;
+5. terminate at the credential destination.
+
+The five-waypoint path travels approximately **14.4 m** over **12.02 seconds**. The editor derives default timing from distance, permits numerical time and coordinate edits, supports smooth or linear interpolation, provides timeline scrubbing and playback, and stores the track in the same persisted composition document.
+
+This is a spatial movement record, not yet skeletal character animation. It establishes route, timing, orientation, pauses, and staging. Walk cycles, gestures, interactions, and animation blending remain later character-production layers.
 
 ## Comparative decision
 
 The stakeholder is not being asked to choose a color scheme. The useful questions are:
 
-1. Should the room’s first message be **instruction**, **achievement**, **participation**, or **collaboration directed toward achievement**?
-2. Should movement be organized by one clear axis, one ceremonial promenade, a distributed forum loop, or a bent threshold-to-destination sequence?
-3. Should the credential outcome be a supporting zone, the final destination, one of two balanced anchors, or the culmination of a collaborative learning spine?
+1. Should the room’s first message be **instruction**, **achievement**, **participation**, or a disciplined synthesis?
+2. Should movement be organized by one clear axis, one ceremonial promenade, a distributed forum loop, or a bent social-to-achievement route?
+3. Should the credential outcome be a supporting zone, the final destination, one of two balanced anchors, or the conclusion of an occupied journey?
 4. How formal should the learning culture feel?
-5. Does Proposition D preserve a dominant belief, or has it combined too many attractive features?
-6. Which proposition contains the strongest idea even if its current blockout is not yet visually resolved?
+5. Which proposition contains the strongest idea even if its current blockout is not yet visually resolved?
+6. Does the recorded character path confirm that the intended spatial story is legible at human scale?
 
-The synthesis is successful only when its hierarchy remains more legible than its ingredients. Combining every attractive feature without choosing a dominant belief would recreate the generic composition problem this exercise is meant to solve.
+A valid outcome may combine elements, but the combination must preserve a coherent primary hierarchy. Combining every attractive feature without choosing a dominant belief would recreate the generic composition problem this exercise is meant to solve.
 
 ## Review boundary
 
-These are editable blockout propositions. They establish spatial intent, hierarchy, relationships, and circulation. They are not yet claims of final architectural quality, material resolution, furniture specification, accessibility compliance, or stakeholder approval.
+These are editable blockout propositions with persistent movement records. They establish spatial intent, hierarchy, relationships, circulation, route timing, and character staging. They are not yet claims of final architectural quality, material resolution, furniture specification, accessibility compliance, skeletal animation quality, or stakeholder approval.
