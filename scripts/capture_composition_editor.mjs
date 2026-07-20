@@ -24,14 +24,9 @@ const browser = await puppeteer.launch({
   executablePath,
   headless: true,
   args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--use-gl=angle',
-    '--use-angle=swiftshader',
-    '--enable-unsafe-swiftshader',
-    '--ignore-gpu-blocklist',
-    '--enable-webgl',
+    '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
+    '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
+    '--ignore-gpu-blocklist', '--enable-webgl',
   ],
 });
 
@@ -39,36 +34,44 @@ const report = {
   schemaVersion: 2,
   generatedAt: new Date().toISOString(),
   passed: false,
+  fatalError: null,
   screenshots: [],
   states: [],
   checks: {},
   consoleErrors: [],
   pageErrors: [],
 };
-
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 try {
   const page = await browser.newPage();
   await page.evaluateOnNewDocument(() => localStorage.clear());
   await page.setViewport({ width: 1760, height: 1040, deviceScaleFactor: 1 });
-  page.on('console', (message) => {
-    if (message.type() === 'error') report.consoleErrors.push(message.text());
-  });
+  page.on('console', (message) => { if (message.type() === 'error') report.consoleErrors.push(message.text()); });
   page.on('pageerror', (error) => report.pageErrors.push(error.message));
 
   const state = () => page.evaluate(() => window.__CONFLUENCE_EDITOR__);
   const selectInstance = async (id) => {
-    await page.click(`[data-instance-id="${id}"] .outliner-select`);
+    const selector = `[data-instance-id="${id}"] .outliner-select`;
+    await page.waitForSelector(selector, { visible: true, timeout: 30_000 });
+    await page.$eval(selector, (element) => {
+      element.scrollIntoView({ block: 'center' });
+      element.click();
+    });
     await page.waitForFunction((expected) => window.__CONFLUENCE_EDITOR__?.selectedId === expected, {}, id);
   };
   const setAxis = async (kind, axis, value) => {
     const selector = `input[data-transform-kind="${kind}"][data-axis="${axis}"]`;
-    await page.click(selector, { clickCount: 3 });
-    await page.keyboard.press('Control+A');
-    await page.type(selector, String(value));
-    await page.keyboard.press('Tab');
-    await delay(150);
+    await page.waitForSelector(selector, { visible: true, timeout: 30_000 });
+    await page.$eval(selector, (element, nextValue) => {
+      const input = element;
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(input, String(nextValue));
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.blur();
+    }, value);
+    await delay(220);
   };
   const composeInstance = async (id, values) => {
     await selectInstance(id);
@@ -85,10 +88,7 @@ try {
   };
 
   await page.goto(`${baseUrl}/?editor=1&capture=1&scene=room-02`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
-  await page.waitForFunction(
-    () => window.__CONFLUENCE_EDITOR__?.ready === true && window.__CONFLUENCE_EDITOR__?.sceneId === 'room-02',
-    { timeout: 90_000 },
-  );
+  await page.waitForFunction(() => window.__CONFLUENCE_EDITOR__?.ready === true && window.__CONFLUENCE_EDITOR__?.sceneId === 'room-02', { timeout: 90_000 });
   await page.waitForSelector('[data-testid="composition-viewport"] canvas', { timeout: 90_000 });
   await delay(4200);
 
@@ -100,10 +100,7 @@ try {
 
   await selectInstance('room-02-credential-stack');
   await setAxis('position', 0, 99);
-  await page.waitForFunction(
-    () => window.__CONFLUENCE_EDITOR__?.boundaryClampCount >= 1,
-    { timeout: 20_000 },
-  );
+  await page.waitForFunction(() => window.__CONFLUENCE_EDITOR__?.boundaryClampCount >= 1, { timeout: 20_000 });
   const clampedState = await state();
   report.states.push({ name: 'boundary-clamped', value: clampedState });
   await writeScreenshot('room-02-boundary-clamp.png');
@@ -132,15 +129,16 @@ try {
   report.checks = {
     exactRoomDimensions: JSON.stringify(initialState?.dimensions) === JSON.stringify([15.2, 13.8, 5.7]),
     initialObjectsLoaded: initialState?.instanceCount === 9,
+    initialObjectsInside: initialState?.boundaryClampCount === 0,
     outOfBoundsAttemptClamped: Boolean(clampedCredential?.transform?.position?.[0] < 7.6 && clampedState?.boundaryClampCount >= 1),
     credentialRecomposed: Boolean(Math.abs(finalCredential?.transform?.position?.[0] - 5.55) < 0.02 && Math.abs(finalCredential?.transform?.position?.[2] + 4.55) < 0.02),
     coachingTableRecomposed: Boolean(Math.abs(finalTable?.transform?.position?.[0] + 4.2) < 0.02 && Math.abs(finalTable?.transform?.position?.[2] - 2.75) < 0.02),
     heroReoriented: Boolean(Math.abs(finalHero?.transform?.rotation?.[1] - Math.PI / 6) < 0.02),
     saved: composedState?.dirty === false,
   };
-  report.passed = Object.values(report.checks).every(Boolean)
-    && report.consoleErrors.length === 0
-    && report.pageErrors.length === 0;
+  report.passed = Object.values(report.checks).every(Boolean) && report.consoleErrors.length === 0 && report.pageErrors.length === 0;
+} catch (error) {
+  report.fatalError = error instanceof Error ? `${error.name}: ${error.message}\n${error.stack ?? ''}` : String(error);
 } finally {
   await browser.close();
   writeFileSync(path.join(outputDirectory, 'runtime.json'), `${JSON.stringify(report, null, 2)}\n`);
