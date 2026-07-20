@@ -46,13 +46,15 @@ function ExperienceApp() {
 
 function EditorApp() {
   return (
-    <>
+    <div className="editor-review-shell">
       <PropositionSceneLoader />
       <PropositionBrief />
-      <PlacementEditor />
-      <PlacementHistoryControls />
-      <PlacementAssemblyTools />
-    </>
+      <div className="editor-review-stage">
+        <PlacementEditor />
+        <PlacementHistoryControls />
+        <PlacementAssemblyTools />
+      </div>
+    </div>
   );
 }
 
