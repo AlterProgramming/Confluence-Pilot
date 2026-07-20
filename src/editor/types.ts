@@ -8,7 +8,8 @@ export type PrimitiveKind =
   | 'cylinder'
   | 'cone'
   | 'torus'
-  | 'workbench'
+  | 'workbench-table'
+  | 'laptop'
   | 'credential-stack'
   | 'coaching-table';
 
@@ -18,6 +19,13 @@ export interface SceneBounds {
   min: Vector3Tuple;
   max: Vector3Tuple;
   safeInset: number;
+}
+
+export interface AttachmentSurface {
+  id: string;
+  label: string;
+  position: Vector3Tuple;
+  size: [number, number];
 }
 
 export interface AssetCatalogItem {
@@ -30,6 +38,8 @@ export interface AssetCatalogItem {
   targetSize?: number;
   footprint: Vector3Tuple;
   floorAnchored: boolean;
+  attachable?: boolean;
+  attachmentSurfaces?: AttachmentSurface[];
   accent: string;
   description: string;
 }
@@ -45,6 +55,8 @@ export interface PlacedAsset {
   assetId: string;
   name: string;
   transform: AssetTransform;
+  parentId?: string | null;
+  surfaceId?: string | null;
   visible: boolean;
   locked: boolean;
   createdAt: number;
