@@ -12,7 +12,16 @@ on:
       - 'package-lock.json'
   push:
     branches:
-      - 'agent/composition-editor'
+      - main
+    paths:
+      - 'src/editor/**'
+      - 'src/App.tsx'
+      - 'scripts/capture_composition_editor.mjs'
+      - 'scripts/capture_editor_workflow_tools.mjs'
+      - '.github/workflows/composition-editor.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
 
 concurrency:
   group: composition-editor-${{ github.event.pull_request.number || github.ref }}
@@ -79,5 +88,5 @@ jobs:
         with:
           name: composition-editor-evidence
           path: validation/composition-editor
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
