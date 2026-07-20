@@ -18,7 +18,7 @@ function isCompositionDocument(value: unknown): value is CompositionDocument {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<CompositionDocument>;
   return candidate.schemaVersion === 2
-    && (candidate.sceneId === 'sandbox' || candidate.sceneId === 'room-02')
+    && sceneTemplateOptions.some((option) => option.id === candidate.sceneId)
     && candidate.units === 'meters'
     && typeof candidate.name === 'string'
     && typeof candidate.gridUnit === 'number'
