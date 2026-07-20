@@ -3,49 +3,47 @@ import type { AssetCatalogItem } from './types';
 
 const primitives: AssetCatalogItem[] = [
   {
-    id: 'primitive-box',
-    label: 'Block',
-    category: 'primitive',
-    kind: 'primitive',
-    primitive: 'box',
-    accent: '#78a9ff',
+    id: 'primitive-box', label: 'Block', category: 'primitive', kind: 'primitive', primitive: 'box',
+    footprint: [1, 1, 1], floorAnchored: true, accent: '#78a9ff',
     description: 'One-meter architectural block for spacing and collision studies.',
   },
   {
-    id: 'primitive-cylinder',
-    label: 'Pedestal',
-    category: 'primitive',
-    kind: 'primitive',
-    primitive: 'cylinder',
-    accent: '#f2b84b',
+    id: 'primitive-cylinder', label: 'Pedestal', category: 'primitive', kind: 'primitive', primitive: 'cylinder',
+    footprint: [1.44, 1, 1.44], floorAnchored: true, accent: '#f2b84b',
     description: 'Neutral cylindrical pedestal for hero and furniture placement.',
   },
   {
-    id: 'primitive-sphere',
-    label: 'Sphere',
-    category: 'primitive',
-    kind: 'primitive',
-    primitive: 'sphere',
-    accent: '#65d6bd',
+    id: 'primitive-sphere', label: 'Sphere', category: 'primitive', kind: 'primitive', primitive: 'sphere',
+    footprint: [1.2, 1.2, 1.2], floorAnchored: true, accent: '#65d6bd',
     description: 'Reference volume for clearance and lighting composition.',
   },
   {
-    id: 'primitive-cone',
-    label: 'Marker',
-    category: 'primitive',
-    kind: 'primitive',
-    primitive: 'cone',
-    accent: '#ff7b62',
+    id: 'primitive-cone', label: 'Marker', category: 'primitive', kind: 'primitive', primitive: 'cone',
+    footprint: [1.24, 1.2, 1.24], floorAnchored: true, accent: '#ff7b62',
     description: 'Directional marker useful for orientation and camera blocking.',
   },
   {
-    id: 'primitive-torus',
-    label: 'Ring',
-    category: 'primitive',
-    kind: 'primitive',
-    primitive: 'torus',
-    accent: '#bd8cff',
+    id: 'primitive-torus', label: 'Ring', category: 'primitive', kind: 'primitive', primitive: 'torus',
+    footprint: [1.66, 0.36, 1.66], floorAnchored: true, accent: '#bd8cff',
     description: 'Circular reference object for rotation and radial composition.',
+  },
+];
+
+const roomFixtures: AssetCatalogItem[] = [
+  {
+    id: 'academy-workbench', label: 'Academy workbench', category: 'room-fixture', kind: 'primitive', primitive: 'workbench',
+    footprint: [1.8, 1.35, 0.85], floorAnchored: true, accent: '#ff7139',
+    description: 'Desk, legs, and credential monitor used by Room 02.',
+  },
+  {
+    id: 'academy-credential-stack', label: 'Credential display', category: 'room-fixture', kind: 'primitive', primitive: 'credential-stack',
+    footprint: [1.65, 4.1, 0.62], floorAnchored: true, accent: '#ff7139',
+    description: 'Four-panel vertical credential display from the academy wall.',
+  },
+  {
+    id: 'academy-coaching-table', label: 'Coaching table', category: 'room-fixture', kind: 'primitive', primitive: 'coaching-table',
+    footprint: [3.5, 1.2, 3.2], floorAnchored: true, accent: '#ff7139',
+    description: 'Round coaching table with three learner stools.',
   },
 ];
 
@@ -69,11 +67,13 @@ const roomHeroes: AssetCatalogItem[] = [
   kind: 'gltf' as const,
   url: String(url),
   targetSize: Number(targetSize),
+  footprint: [Number(targetSize), Number(targetSize), Number(targetSize)] as [number, number, number],
+  floorAnchored: true,
   accent: String(accent),
-  description: `Existing Room ${id} hero asset, normalized for neutral composition work.`,
+  description: `Existing Room ${id} hero asset, normalized for composition work.`,
 }));
 
-export const assetCatalog: AssetCatalogItem[] = [...primitives, ...roomHeroes];
+export const assetCatalog: AssetCatalogItem[] = [...primitives, ...roomFixtures, ...roomHeroes];
 
 export function getCatalogAsset(assetId: string): AssetCatalogItem {
   return assetCatalog.find((asset) => asset.id === assetId) ?? primitives[0]!;
