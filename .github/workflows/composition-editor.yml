@@ -8,6 +8,7 @@ on:
       - 'scripts/capture_composition_editor.mjs'
       - 'scripts/capture_editor_workflow_tools.mjs'
       - 'scripts/capture_room02_design_propositions.mjs'
+      - 'scripts/capture_motion_authoring.mjs'
       - '.github/workflows/composition-editor.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -20,6 +21,7 @@ on:
       - 'scripts/capture_composition_editor.mjs'
       - 'scripts/capture_editor_workflow_tools.mjs'
       - 'scripts/capture_room02_design_propositions.mjs'
+      - 'scripts/capture_motion_authoring.mjs'
       - '.github/workflows/composition-editor.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -35,7 +37,7 @@ permissions:
 jobs:
   validate-editor:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -86,6 +88,9 @@ jobs:
 
       - name: Compare Room 02 design propositions
         run: node scripts/capture_room02_design_propositions.mjs http://127.0.0.1:4178
+
+      - name: Record and replay a character path
+        run: node scripts/capture_motion_authoring.mjs http://127.0.0.1:4178
 
       - name: Upload composition editor evidence
         if: always()
