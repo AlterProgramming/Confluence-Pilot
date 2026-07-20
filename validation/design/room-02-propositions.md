@@ -2,13 +2,13 @@
 
 ## Why this document exists
 
-The previous Room 02 model was technically navigable but insufficient as a stakeholder visualization. The purpose of this proposition set is not to generate three decorative variants. It is to test three different beliefs about what the room should be.
+The previous Room 02 model was technically navigable but insufficient as a stakeholder visualization. The purpose of this proposition set is not to generate decorative variants. It is to test different beliefs about what the room should be, then construct a deliberate synthesis from the strongest qualities.
 
 The source reference imagery is treated as visual evidence, not ground truth. These propositions preserve useful qualities from that evidence while explicitly rejecting generic AI-lab conventions, decorative screens, and centerpiece objects without a functional role.
 
 ## Shared requirements
 
-All three propositions retain:
+All four propositions retain:
 
 - the production room envelope: **15.2 m × 13.8 m × 5.7 m**;
 - six independently editable learner workbench assemblies;
@@ -125,17 +125,50 @@ It is less efficient for lecture-style instruction. Its distributed circulation 
 
 ---
 
+## Proposition D — The Achievement Forum
+
+### Belief
+
+The strongest room is not a compromise among A, B, and C. It is a forum whose collaboration visibly leads somewhere.
+
+### Spatial thesis
+
+A collaborative table forms the social threshold near the entrance. Circulation bends around that center, then resolves into a clear demonstration and credential spine. Six workstations form angled learning wings rather than rows or an unresolved ring.
+
+### What it inherits deliberately
+
+- **From C:** a human, collaborative center that makes participation visible;
+- **From B:** an intelligible journey culminating in credential achievement;
+- **From A:** a shared direction and clear visual hierarchy.
+
+### What it refuses to inherit
+
+- C’s loose and potentially unresolved furniture ring;
+- B’s large amount of ceremonial but inactive floor area;
+- A’s rigid lecture-first classroom character.
+
+### Intended stakeholder response
+
+> “I can see people gathering, working, demonstrating what they learned, and reaching a visible outcome. The room has both culture and purpose.”
+
+### Risk
+
+The hybrid carries more program than any single-source proposition. It succeeds only if the architectural and lighting pass makes the collaborative threshold, demonstration spine, and achievement destination unmistakably hierarchical.
+
+---
+
 ## Comparative decision
 
 The stakeholder is not being asked to choose a color scheme. The useful questions are:
 
-1. Should the room’s first message be **instruction**, **achievement**, or **participation**?
-2. Should movement be organized by one clear axis, one ceremonial promenade, or a distributed forum loop?
-3. Should the credential outcome be a supporting zone, the final destination, or one of two balanced anchors?
+1. Should the room’s first message be **instruction**, **achievement**, **participation**, or **collaboration directed toward achievement**?
+2. Should movement be organized by one clear axis, one ceremonial promenade, a distributed forum loop, or a bent threshold-to-destination sequence?
+3. Should the credential outcome be a supporting zone, the final destination, one of two balanced anchors, or the culmination of a collaborative learning spine?
 4. How formal should the learning culture feel?
-5. Which proposition contains the strongest idea even if its current blockout is not yet visually resolved?
+5. Does Proposition D preserve a dominant belief, or has it combined too many attractive features?
+6. Which proposition contains the strongest idea even if its current blockout is not yet visually resolved?
 
-A valid outcome may combine elements, but the combination must preserve a coherent primary hierarchy. Combining every attractive feature without choosing a dominant belief would recreate the generic composition problem this exercise is meant to solve.
+The synthesis is successful only when its hierarchy remains more legible than its ingredients. Combining every attractive feature without choosing a dominant belief would recreate the generic composition problem this exercise is meant to solve.
 
 ## Review boundary
 
