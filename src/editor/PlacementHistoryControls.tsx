@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import type { CompositionDocument, PlacedAsset } from './types';
+import type { CompositionDocument, PlacedAsset, SceneTemplateId } from './types';
 import { usePlacementEditorStore } from './usePlacementEditorStore';
 import './history.css';
 
@@ -29,6 +29,11 @@ const HISTORY_LIMIT = 80;
 const undoStack: HistoryEntry[] = [];
 const redoStack: HistoryEntry[] = [];
 const listeners = new Set<() => void>();
+const requestedScene = new URLSearchParams(window.location.search).get('scene');
+const currentScene = usePlacementEditorStore.getState().document.sceneId;
+let bootstrapSceneId: SceneTemplateId | null = (requestedScene === 'sandbox' || requestedScene === 'room-02') && requestedScene !== currentScene
+  ? requestedScene
+  : null;
 let applyingHistory = false;
 let historyReady = usePlacementEditorStore.persist.hasHydrated();
 let historyView: HistoryView = {
@@ -115,6 +120,7 @@ function resetHistory() {
 
 usePlacementEditorStore.persist.onFinishHydration(() => {
   historyReady = true;
+  if (usePlacementEditorStore.getState().document.sceneId === bootstrapSceneId) bootstrapSceneId = null;
   resetHistory();
 });
 
@@ -122,6 +128,17 @@ usePlacementEditorStore.subscribe((state, previous) => {
   if (!historyReady || state.document === previous.document) return;
   if (applyingHistory) {
     applyingHistory = false;
+    refreshHistoryView();
+    return;
+  }
+  if (
+    bootstrapSceneId
+    && undoStack.length === 0
+    && redoStack.length === 0
+    && previous.document.sceneId !== state.document.sceneId
+    && state.document.sceneId === bootstrapSceneId
+  ) {
+    bootstrapSceneId = null;
     refreshHistoryView();
     return;
   }
