@@ -7,6 +7,7 @@ on:
       - 'src/App.tsx'
       - 'scripts/capture_composition_editor.mjs'
       - 'scripts/capture_editor_workflow_tools.mjs'
+      - 'scripts/capture_room02_design_propositions.mjs'
       - '.github/workflows/composition-editor.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -18,6 +19,7 @@ on:
       - 'src/App.tsx'
       - 'scripts/capture_composition_editor.mjs'
       - 'scripts/capture_editor_workflow_tools.mjs'
+      - 'scripts/capture_room02_design_propositions.mjs'
       - '.github/workflows/composition-editor.yml'
       - 'package.json'
       - 'package-lock.json'
@@ -33,7 +35,7 @@ permissions:
 jobs:
   validate-editor:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -81,6 +83,9 @@ jobs:
 
       - name: Validate history and surface workflows
         run: node scripts/capture_editor_workflow_tools.mjs http://127.0.0.1:4178
+
+      - name: Compare Room 02 design propositions
+        run: node scripts/capture_room02_design_propositions.mjs http://127.0.0.1:4178
 
       - name: Upload composition editor evidence
         if: always()
