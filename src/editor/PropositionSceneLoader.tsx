@@ -6,6 +6,7 @@ const propositionSceneIds = new Set<SceneTemplateId>([
   'room-02-academy-axis',
   'room-02-credential-gallery',
   'room-02-learning-forum',
+  'room-02-achievement-forum',
 ]);
 
 export function PropositionSceneLoader() {
