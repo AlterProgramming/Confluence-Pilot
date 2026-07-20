@@ -39,6 +39,12 @@ const propositions = [
     slug: 'learning-forum',
     expectedZoneCount: 4,
   },
+  {
+    sceneId: 'room-02-achievement-forum',
+    propositionId: 'achievement-forum',
+    slug: 'achievement-forum',
+    expectedZoneCount: 5,
+  },
 ];
 
 const browser = await puppeteer.launch({
@@ -52,7 +58,7 @@ const browser = await puppeteer.launch({
 });
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: new Date().toISOString(),
   passed: false,
   fatalError: null,
@@ -141,7 +147,7 @@ try {
     await page.close();
   }
 
-  const [academy, gallery, forum] = report.propositions;
+  const [academy, gallery, forum, achievement] = report.propositions;
   const academyHero = rootByAsset(academy, 'room-02');
   const academyBenches = rootsByAsset(academy, 'academy-workbench');
   const galleryCredential = rootByAsset(gallery, 'academy-credential-stack');
@@ -149,17 +155,21 @@ try {
   const forumHero = rootByAsset(forum, 'room-02');
   const forumTable = rootByAsset(forum, 'academy-coaching-table');
   const forumBenches = rootsByAsset(forum, 'academy-workbench');
+  const achievementHero = rootByAsset(achievement, 'room-02');
+  const achievementTable = rootByAsset(achievement, 'academy-coaching-table');
+  const achievementCredential = rootByAsset(achievement, 'academy-credential-stack');
+  const achievementBenches = rootsByAsset(achievement, 'academy-workbench');
   const signatures = report.propositions.map(signature);
 
   report.checks = {
-    threePropositionsCaptured: report.propositions.length === 3,
+    fourPropositionsCaptured: report.propositions.length === 4,
     exactRoomDimensionsPreserved: report.propositions.every((item) => JSON.stringify(item.dimensions) === JSON.stringify([15.2, 13.8, 5.7])),
     propositionMetadataComplete: report.propositions.every((item) => item.title && item.thesis && item.experientialPromise && item.hierarchy.length === 4),
     expectedZoneStructures: report.propositions.every((item) => item.zoneCount === item.expectedZoneCount && item.circulationPointCount >= 5),
     editableAssemblyCountsPreserved: report.propositions.every((item) => item.instanceCount === 15 && item.rootCount === 9 && item.attachedCount === 6),
     noTemplateBoundaryCorrections: report.propositions.every((item) => item.boundaryClampCount === 0),
-    transformSignaturesDistinct: new Set(signatures).size === 3,
-    thesesDistinct: new Set(report.propositions.map((item) => item.thesis)).size === 3,
+    transformSignaturesDistinct: new Set(signatures).size === 4,
+    thesesDistinct: new Set(report.propositions.map((item) => item.thesis)).size === 4,
     academyAxisReadsAsFrontFacingRows: Boolean(
       academyHero?.transform.position[2] < -3.5
       && academyBenches.length === 6
@@ -178,6 +188,26 @@ try {
       && forumHero?.transform.position[0] > 4.5
       && forumBenches.length === 6
       && new Set(forumBenches.map((item) => item.transform.rotation[1].toFixed(2))).size >= 5,
+    ),
+    achievementForumCombinesSocialThresholdAndOutcomeSpine: Boolean(
+      achievementTable
+      && Math.abs(achievementTable.transform.position[0]) < 0.1
+      && achievementTable.transform.position[2] > 1.4
+      && achievementHero
+      && Math.abs(achievementHero.transform.position[0]) < 0.1
+      && achievementHero.transform.position[2] < -2.3
+      && achievementHero.transform.position[2] > -3.2
+      && achievementCredential
+      && Math.abs(achievementCredential.transform.position[0]) < 0.1
+      && achievementCredential.transform.position[2] < -5.5
+      && achievementBenches.length === 6
+      && achievementBenches.filter((item) => item.transform.position[0] < -4.0).length === 3
+      && achievementBenches.filter((item) => item.transform.position[0] > 4.0).length === 3,
+    ),
+    achievementForumHasDirectionalButNonRigidLearningWings: Boolean(
+      new Set(achievementBenches.map((item) => item.transform.rotation[1].toFixed(2))).size === 6
+      && achievementBenches.some((item) => item.transform.position[2] > 3.0)
+      && achievementBenches.some((item) => item.transform.position[2] < -3.0),
     ),
     browserClean: report.consoleErrors.length === 0 && report.pageErrors.length === 0,
   };
