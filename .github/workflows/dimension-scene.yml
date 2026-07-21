@@ -7,7 +7,10 @@ on:
     paths:
       - 'src/dimension/**'
       - 'public/reference/dimensions/**'
+      - 'assets/dimensions/procedural-source/**'
+      - 'tools/blender/generate_dimension_asset.py'
       - 'scripts/validate_dimension_scene.mjs'
+      - 'scripts/validate_dimension_source_assets.mjs'
       - 'scripts/capture_dimension_scene.mjs'
       - 'scripts/capture_dimension_authoring.mjs'
       - 'scripts/validate_dimension_visual_review.mjs'
@@ -20,7 +23,10 @@ on:
     paths:
       - 'src/dimension/**'
       - 'public/reference/dimensions/**'
+      - 'assets/dimensions/procedural-source/**'
+      - 'tools/blender/generate_dimension_asset.py'
       - 'scripts/validate_dimension_scene.mjs'
+      - 'scripts/validate_dimension_source_assets.mjs'
       - 'scripts/capture_dimension_scene.mjs'
       - 'scripts/capture_dimension_authoring.mjs'
       - 'scripts/validate_dimension_visual_review.mjs'
@@ -61,6 +67,7 @@ jobs:
           npm run typecheck 2>&1 | tee validation/dimension-scene/typecheck.log
           npm run lint 2>&1 | tee validation/dimension-scene/lint.log
           npm run validate:dimension 2>&1 | tee validation/dimension-scene/source-validation.log
+          npm run validate:dimension:assets 2>&1 | tee validation/dimension-scene/source-assets-validation.log
 
       - name: Build production bundle
         run: |
@@ -101,6 +108,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dimension-scene-evidence
-          path: validation/dimension-scene
+          path: |
+            validation/dimension-scene
+            validation/dimension-assets
           if-no-files-found: warn
           retention-days: 14

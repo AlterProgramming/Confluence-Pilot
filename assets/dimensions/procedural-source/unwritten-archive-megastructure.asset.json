@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "id": "unwritten-archive-megastructure",
+  "title": "Unwritten Archive Megastructure",
+  "realm": "parallel-remembrance",
+  "category": "archive-megastructure",
+  "revision": 1,
+  "description": "A colossal modular archive for lives that were possible but never chosen. The structure combines stacked floating vault blocks, impossible cantilevers, narrow illuminated catalog cuts, nine directional spires, and internal voids large enough to contain streets. It should feel simultaneously architectural, geological, and computational.",
+  "narrativeFunction": "The megastructure anchors Parallel Remembrance with a distant city-scale mass. It gives the Unwritten Archive a credible place, establishes horizon depth, produces corridors and plazas from repeated modules, and contrasts tiny drifting pages with overwhelming stored possibility.",
+  "designKeywords": ["unwritten lives", "floating archive city", "impossible cantilever", "deep catalog void", "violet megastructure", "stacked volumes", "directional spires", "computational geology"],
+  "scale": {"unit": "meter", "bounds": {"width": 42, "height": 31, "depth": 36}, "heroScale": 1, "modularScale": 1.2},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0,-15.5,0],
+    "originMeaning": "The origin is centered beneath the primary central vault at the lowest stable datum. Floating sub-volumes and cantilevers reference this root even when visibly disconnected."
+  },
+  "silhouette": {
+    "primary": "A broad asymmetrical mountain of stacked rectangular vaults with a deep central cleft and three major cantilever arms extending at different heights.",
+    "secondary": "Nine slender archive spires puncture the stepped mass while several floating satellite volumes orbit beyond the primary footprint.",
+    "tertiary": "Catalog cuts, bridge slots, page vents, buttress fins, maintenance apertures, coordinate bands, and thin indexing lines add directional detail to selected faces.",
+    "negativeSpace": "The central cleft, two horizontal street-scale tunnels, gaps beneath cantilevers, and spaces around satellites remain large readable voids. The structure never becomes one solid wall.",
+    "recognitionTest": "From long distance the asset reads as an impossible archive mountain with stacked vaults, deep urban voids, and needle-like spires, not as a normal skyline or generic block cluster."
+  },
+  "materials": [
+    {
+      "id": "archive-vault",
+      "role": "Primary megastructure mass",
+      "baseColor": "#26213A",
+      "metallic": 0.2,
+      "roughness": 0.68,
+      "emission": {"color": "#382A58", "strength": 0.08},
+      "surfaceDescription": "Dense violet-black stone composite with enormous planar faces, chipped corners, layered geological seams, and sparse polished transit paths."
+    },
+    {
+      "id": "catalog-cut",
+      "role": "Illuminated indexing channels",
+      "baseColor": "#5F4E8B",
+      "metallic": 0.05,
+      "roughness": 0.24,
+      "emission": {"color": "#B9A1FF", "strength": 2.05},
+      "surfaceDescription": "Inset crystalline bands and narrow cuts revealing moving layers of pale violet information far inside the mass rather than surface strip lighting."
+    },
+    {
+      "id": "spire-metal",
+      "role": "Spire frames and bridge reinforcement",
+      "baseColor": "#465C72",
+      "metallic": 0.64,
+      "roughness": 0.34,
+      "emission": {"color": "#72D7F0", "strength": 0.72},
+      "surfaceDescription": "Cool dark alloy with cyan edge emission, etched directional coordinates, open lower ribbing, and narrow illuminated tips."
+    }
+  ],
+  "components": [
+    {
+      "id": "vault-blocks",
+      "primitive": "box",
+      "role": "One hundred thirty-two varied archive volumes forming the primary mountain mass.",
+      "dimensions": {"width": 3.2, "height": 1.65, "depth": 2.8},
+      "transform": {"position": [-15,-12,-12], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "archive-vault",
+      "detail": "Blocks vary in width, height, depth, edge damage, and face offset. The generation mask reserves major corridors and avoids a regular warehouse grid.",
+      "repeat": {"mode": "grid", "count": 132, "columns": 12, "spacing": [2.7,1.55,2.15]}
+    },
+    {
+      "id": "catalog-cuts",
+      "primitive": "box",
+      "role": "Narrow luminous slots set deeply into selected vault faces.",
+      "dimensions": {"width": 1.8, "height": 0.12, "depth": 0.035},
+      "transform": {"position": [-14.2,-10.9,-13.42], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "catalog-cut",
+      "detail": "Cuts appear in short grouped sequences, include dim and bright states, and imply internal catalog motion rather than decorative exterior lighting.",
+      "repeat": {"mode": "grid", "count": 48, "columns": 8, "spacing": [3.1,2.2,2.1]}
+    },
+    {
+      "id": "archive-spires",
+      "primitive": "cone",
+      "role": "Nine directional spires marking major archive sectors.",
+      "dimensions": {"radiusBottom": 0.55, "radiusTop": 0.06, "height": 10.5, "segments": 8},
+      "transform": {"position": [-12,-4,-8], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "spire-metal",
+      "detail": "Spire silhouettes vary through staggered fins and open lower frames while preserving one narrow luminous tip and a clear sector direction.",
+      "repeat": {"mode": "grid", "count": 9, "columns": 3, "spacing": [10.5,4.2,9]}
+    },
+    {
+      "id": "cantilever-arms",
+      "primitive": "box",
+      "role": "Three major projecting vault arms producing impossible overhangs.",
+      "dimensions": {"width": 11.5, "height": 2.1, "depth": 4.2},
+      "transform": {"position": [-8,5,-3], "rotation": [0,-8,2], "scale": [1,1,1]},
+      "material": "archive-vault",
+      "detail": "Each arm narrows toward the unsupported end, contains one large underside service void, and attaches through a visibly reinforced root volume.",
+      "repeat": {"mode": "linear", "count": 3, "step": [7.5,5.2,-6.4]}
+    },
+    {
+      "id": "floating-satellites",
+      "primitive": "box",
+      "role": "Disconnected archive blocks orbiting the main mass.",
+      "dimensions": {"width": 2.3, "height": 1.1, "depth": 1.9},
+      "transform": {"position": [18,2,-12], "rotation": [8,17,3], "scale": [1,1,1]},
+      "material": "archive-vault",
+      "detail": "Every satellite carries one catalog cut, one chipped or missing corner, and a stable open distance from the closest main-mass surface.",
+      "repeat": {"mode": "scatter", "count": 17, "bounds": [20,14,18], "scaleMin": 0.55, "scaleMax": 1.3}
+    }
+  ],
+  "generation": {
+    "seed": 8641,
+    "deterministic": true,
+    "assemblyOrder": ["Establish central cleft and lowest vault datum", "Stack varied vault blocks into an asymmetric mountain", "Reserve tunnels and cantilever voids", "Add major arms and satellites", "Place sector spires and catalog-light hierarchy"],
+    "deformationRules": [
+      "Remove or offset enough blocks to preserve a central cleft at least seven meters wide.",
+      "Cantilever arms may droop up to four degrees but remain intentional rather than collapsed.",
+      "Satellite blocks rotate independently and remain three to twelve meters from the nearest primary surface."
+    ],
+    "variationRules": [
+      "Vault occupancy masks vary by instance while preserving the total silhouette and every named negative space.",
+      "Catalog-cut density concentrates near public routes and decreases on distant geological faces.",
+      "Spire height varies twenty percent, but the central sector spire remains tallest."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready modular city-scale architecture with reusable vault blocks, separate catalog inserts, detachable spires, accessible terrace shells, and distant instancing support.",
+    "bevel": "Use scale-aware broad vault bevels, sharper spire-metal bevels, and visibly damaged but structurally credible cantilever ends.",
+    "subdivision": "Avoid global subdivision. Use local smoothing on geological seams and selected public-facing repairs while retaining monumental planar forms.",
+    "normals": "Weighted normals preserve large vault planes and clean cantilever silhouettes while chipped corners and catalog cuts create local highlight complexity.",
+    "uv": "Use triplanar or modular vault projection, shared catalog-emission strips, spire trim sheets, and unique hero-zone decals near public approaches.",
+    "watertightParts": ["vault block source modules", "cantilever shells", "archive spires", "walkable terrace caps"]
+  },
+  "animation": {
+    "channels": ["catalog-cut.data_flow", "floating-satellites.orbit_drift", "spire-tip.signal", "selected-vault.phase_offset"],
+    "loopLengthSeconds": 64,
+    "motionCharacter": "The megastructure appears nearly static. Catalog bands move inside deep cuts, satellites drift over minutes, and rare vault blocks shift by centimeters as archive sectors re-index.",
+    "constraints": ["The primary mass and collision datum remain stable.", "No satellite crosses a cantilever or major tunnel.", "Catalog flow direction stays consistent within each sector."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 480000, "preserve": ["block variation", "all tunnels", "cantilever roots", "catalog depth", "spires"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 120000, "preserve": ["archive mountain", "central cleft", "major arms", "nine spires", "light hierarchy"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 18000, "preserve": ["stepped mass", "central cleft", "three cantilever directions", "three dominant spires"]}
+  ],
+  "collision": {
+    "mode": "compound",
+    "description": "Use coarse stepped boxes for walkable terraces and major cantilevers plus exclusion volumes around the central cleft. Floating satellites use no collision unless made accessible."
+  },
+  "sockets": [
+    {"id": "public-approach", "purpose": "Main camera and navigation approach to the central archive cleft.", "position": [0,-14,20], "rotation": [0,180,0]},
+    {"id": "echo-bridge", "purpose": "Connection socket for the primary Echo Bridge span.", "position": [11,-3,9], "rotation": [0,35,0]},
+    {"id": "lattice-network", "purpose": "Possibility-lattice conduit connection above the archive.", "position": [-6,11,1], "rotation": [-20,0,0]},
+    {"id": "sector-focus", "purpose": "Hero focus inside the central vertical archive void.", "position": [0,0,0], "rotation": [0,0,0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show the asymmetric archive mountain, central cleft, three cantilever arms, floating satellites, and clear hierarchy among nine spires.",
+    "side": "Emphasize impossible overhangs, deep tunnels, satellite separation, and the structure's total depth rather than flattening it into a skyline.",
+    "top": "Reveal street-like voids, stepped sector organization, disconnected satellites, and bridge and lattice socket directions.",
+    "threeQuarter": "Use a distant low angle across the central cleft so stacked vault scale, illuminated cuts, and unsupported arms feel monumental.",
+    "scaleCue": "Include a sixty-meter bridge or clusters of tiny human lights at the public approach; individual people should be barely visible."
+  },
+  "validation": [
+    "The primary mass uses at least one hundred twenty distinct vault blocks and remains asymmetrical.",
+    "The central cleft and two horizontal tunnels are physically open in geometry.",
+    "Three major cantilever arms extend from different elevations and directions.",
+    "Nine spires remain legible above the stepped vault skyline.",
+    "Floating satellites do not merge visually with the main mass from the hero view.",
+    "LOD2 preserves archive mountain, central cleft, three cantilever directions, and at least three spires.",
+    "Public-approach and Echo Bridge sockets align with open navigable space."
+  ]
+}

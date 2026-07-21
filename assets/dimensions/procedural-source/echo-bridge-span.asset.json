@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "id": "echo-bridge-span",
+  "title": "Echo Bridge Span",
+  "realm": "parallel-remembrance",
+  "category": "bridge-span",
+  "revision": 1,
+  "description": "A traversable bridge segment made from two luminous memory rails, a fractured translucent walking deck, repeating echo ribs, and suspended afterimage panels. Multiple spans can run parallel, fork, or merge so several versions of the same route appear to occupy neighboring possibilities.",
+  "narrativeFunction": "Echo Bridge turns alternate choice into movement. It carries the viewer among archive, lattice, and garden regions while adjacent ghost spans show routes that might have been taken. Structural repetition creates strong perspective, route legibility, and a destination landmark distinct from every other realm system.",
+  "designKeywords": ["parallel route", "afterimage bridge", "fractured glass deck", "echo ribs", "luminous rails", "alternate path", "suspended panels", "traversable memory"],
+  "scale": {"unit": "meter", "bounds": {"width": 3.8, "height": 2.2, "depth": 14}, "heroScale": 1, "modularScale": 0.4},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "+Z",
+    "pivot": [0,0,7],
+    "originMeaning": "The origin is centered on the entrance edge of the walkable deck. Local positive Z follows intended travel, enabling exact span chaining and branch alignment."
+  },
+  "silhouette": {
+    "primary": "A long slightly rising bridge with two sweeping side rails and a fractured deck narrowing at the midpoint before widening toward the far socket.",
+    "secondary": "Sixteen repeated ribs lean forward along the route while two adjacent ghost spans appear offset in height, width, and temporal phase.",
+    "tertiary": "Suspended afterimage panels, step lights, broken deck edges, hanging threads, rail clamps, transient footprints, and incomplete ribs localize detail along the journey.",
+    "negativeSpace": "Open gaps between deck plates, spaces inside leaning ribs, and the air separating primary and ghost spans remain visible. The asset must never become a solid tunnel.",
+    "recognitionTest": "From a distance the asset reads as one traversable bridge accompanied by translucent alternate-route echoes, never as a pipe bundle, enclosed corridor, or ordinary suspension bridge."
+  },
+  "materials": [
+    {
+      "id": "bridge-frame",
+      "role": "Primary structural ribs, rails, and clamps",
+      "baseColor": "#334A60",
+      "metallic": 0.68,
+      "roughness": 0.32,
+      "emission": {"color": "#6CD4F0", "strength": 0.48},
+      "surfaceDescription": "Dark blue-gray alloy with bright cyan stress edges, worn clamp points, route coordinates, and narrow energy channels following load paths."
+    },
+    {
+      "id": "memory-deck",
+      "role": "Walkable fractured deck",
+      "baseColor": "#6A6290",
+      "metallic": 0.04,
+      "roughness": 0.18,
+      "emission": {"color": "#A99BFF", "strength": 1.05},
+      "surfaceDescription": "Thick translucent violet glass-stone with cloudy internal depth, bright fracture edges, trapped afterimages, and worn central travel paths."
+    },
+    {
+      "id": "echo-surface",
+      "role": "Alternate-route ghost geometry",
+      "baseColor": "#7365B2",
+      "metallic": 0,
+      "roughness": 0.12,
+      "emission": {"color": "#C6B9FF", "strength": 1.7},
+      "surfaceDescription": "Low-opacity spectral material with directional fade, edge-biased emission, temporal noise, and no conventional dirt or physical wear."
+    }
+  ],
+  "components": [
+    {
+      "id": "walkable-deck",
+      "primitive": "box",
+      "role": "Primary route divided into staggered translucent plates.",
+      "dimensions": {"width": 2.25, "height": 0.16, "depth": 1.05},
+      "transform": {"position": [0,0,0.55], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "memory-deck",
+      "detail": "Every plate has asymmetric chipped ends, a narrow safe overlap with the next plate, a unique internal afterimage, and a consistent central traversal band.",
+      "repeat": {"mode": "linear", "count": 12, "step": [0,0.055,1.08]}
+    },
+    {
+      "id": "side-rails",
+      "primitive": "curve-tube",
+      "role": "Twin continuous luminous rails following the bridge rise and lateral bend.",
+      "dimensions": {"points": [[-1.3,0.45,0],[-1.45,0.7,3.6],[-1.15,0.9,7.2],[-1.35,1.1,10.6],[-1.1,1.25,14]], "radius": 0.055, "resolution": 20, "bevelResolution": 4},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "bridge-frame",
+      "detail": "Rails bend independently, carry visible clamps at rib intersections, and thicken slightly near entrance, exit, and branch sockets.",
+      "repeat": {"mode": "linear", "count": 2, "step": [2.6,0,0]}
+    },
+    {
+      "id": "echo-ribs",
+      "primitive": "custom-profile",
+      "role": "Sixteen leaning frames establishing perspective and repeated route identity.",
+      "dimensions": {"points": [[-1.2,0,0],[-1.35,1.4,0],[0,2,0],[1.35,1.4,0],[1.2,0,0]], "radius": 0.045, "resolution": 8, "bevelResolution": 3},
+      "transform": {"position": [0,0,0.5], "rotation": [6,0,0], "scale": [1,1,1]},
+      "material": "bridge-frame",
+      "detail": "Ribs lean progressively toward travel direction and contain one broken or incomplete side every fifth frame without creating consecutive gaps.",
+      "repeat": {"mode": "linear", "count": 16, "step": [0,0.045,0.86]}
+    },
+    {
+      "id": "ghost-spans",
+      "primitive": "box",
+      "role": "Offset translucent deck echoes representing alternate nearby routes.",
+      "dimensions": {"width": 1.45, "height": 0.06, "depth": 0.9},
+      "transform": {"position": [-3,0.45,0.5], "rotation": [0,-2,0], "scale": [1,1,1]},
+      "material": "echo-surface",
+      "detail": "Ghost plates fade along the route, vary in vertical offset, and never appear as fully solid secondary bridges unless promoted to physical route state.",
+      "repeat": {"mode": "grid", "count": 18, "columns": 9, "spacing": [6,0.32,1.45]}
+    },
+    {
+      "id": "afterimage-panels",
+      "primitive": "plane",
+      "role": "Suspended vertical panels showing travelers and route outcomes from adjacent possibilities.",
+      "dimensions": {"size": 0.72},
+      "transform": {"position": [-1.8,1.1,1.8], "rotation": [0,18,2], "scale": [0.72,1,1]},
+      "material": "echo-surface",
+      "detail": "Panels vary in aspect ratio, display faint figure-like silhouettes, hang outside walkable clearance, and phase independently from ghost deck plates.",
+      "repeat": {"mode": "linear", "count": 8, "step": [0.52,0.08,1.45]}
+    }
+  ],
+  "generation": {
+    "seed": 9739,
+    "deterministic": true,
+    "assemblyOrder": ["Define entrance and destination sockets", "Build staggered walkable deck plates", "Author twin side-rail curves", "Place leaning echo ribs along arc length", "Add ghost spans and suspended afterimage panels"],
+    "deformationRules": [
+      "The bridge centerline rises one meter and bends laterally up to forty centimeters across the full span.",
+      "The deck narrows eighteen percent at midpoint and widens toward both sockets.",
+      "Ghost spans remain one and a half to three meters from the physical route and drift vertically by up to seventy centimeters."
+    ],
+    "variationRules": [
+      "One in five ribs may be incomplete, but no two incomplete frames occur consecutively.",
+      "Deck fracture patterns change while preserving a continuous sixty-centimeter traversal corridor.",
+      "Afterimage-panel count ranges from six to ten and concentrates near route decisions."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready modular bridge topology with continuous simplified traversal, separable deck plates, curve-native rails, instanced ribs, ghost-route variants, and riggable afterimage panels.",
+    "bevel": "Use narrow structural metal bevels, brighter fractured deck bevels, smooth rail profiles, and intentionally sharp broken glass-stone edges only outside the safe path.",
+    "subdivision": "Use curve resolution for rails and local smoothing on translucent deck surfaces. Ribs remain controlled hard-surface profiles.",
+    "normals": "Weighted normals keep ribs and deck plate faces stable while fracture edges, clamps, and rail channels carry highlights.",
+    "uv": "Use arc-length rail UVs, unique deck image layers, reusable frame trim UVs, and directional fade coordinates for ghost geometry.",
+    "watertightParts": ["physical deck plates", "rail clamp modules", "echo rib source mesh"]
+  },
+  "animation": {
+    "channels": ["echo-surface.temporal_fade", "afterimage-panels.drift", "side-rails.energy_flow", "memory-deck.footprint_echo"],
+    "loopLengthSeconds": 12,
+    "motionCharacter": "The physical bridge remains stable while alternate routes slide subtly out of temporal alignment. Ghost spans phase in sequence, panels lag behind camera movement, and pale footprints briefly appear ahead of the traveler.",
+    "constraints": ["Primary walkable clearance never changes.", "Ghost geometry never reaches full opacity.", "Rib movement remains below two centimeters."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 110000, "preserve": ["deck fractures", "sixteen ribs", "rail clamps", "afterimage panels", "ghost routes"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 30000, "preserve": ["bridge rise", "twin rails", "rib rhythm", "deck segmentation", "one ghost route"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 5200, "preserve": ["primary deck", "two rail lines", "route rise", "one spectral echo"]}
+  ],
+  "collision": {
+    "mode": "compound",
+    "description": "Use a continuous simplified deck collider following the centerline plus low rail barriers. Visual gaps between plates must not interrupt traversal."
+  },
+  "sockets": [
+    {"id": "entrance", "purpose": "Start connection to archive, lattice, or another bridge span.", "position": [0,0,0], "rotation": [0,0,0]},
+    {"id": "exit", "purpose": "End connection fourteen meters along local positive Z.", "position": [0,1,14], "rotation": [0,0,0]},
+    {"id": "parallel-left", "purpose": "Optional branching connection to a left ghost or physical span.", "position": [-3,0.55,7], "rotation": [0,-4,0]},
+    {"id": "parallel-right", "purpose": "Optional branching connection to a right alternate span.", "position": [3,0.25,7], "rotation": [0,4,0]}
+  ],
+  "orthographicGuidance": {
+    "front": "From the entrance show narrowing deck perspective, twin rails, repeated rib rhythm, and ghost spans clearly separated on both sides.",
+    "side": "Reveal the one-meter rise, lateral bend, leaning ribs, hanging panels, and vertical offsets among alternate routes.",
+    "top": "Make the centerline, width change, ghost-route separation, and left and right branch sockets explicit.",
+    "threeQuarter": "Use a low oblique angle along the deck to emphasize translucent fractures, rib repetition, and several route echoes extending into fog.",
+    "scaleCue": "Include two humans on different physical deck plates and one faint echo figure on a ghost span."
+  },
+  "validation": [
+    "The primary span provides an uninterrupted simplified collision path from entrance to exit.",
+    "Twelve deck plates create visible fractures while retaining safe overlap.",
+    "Sixteen ribs establish perspective and include non-consecutive incomplete frames.",
+    "At least two ghost-route bands remain visibly separated from the physical bridge.",
+    "Afterimage panels stay outside minimum walkable clearance.",
+    "LOD2 preserves bridge rise, twin rails, primary deck, and one ghost span.",
+    "Entrance, exit, and branch sockets align with their route directions."
+  ]
+}
