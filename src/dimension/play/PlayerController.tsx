@@ -54,7 +54,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
   const verticalVelocityRef = useRef(0);
   const groundedRef = useRef(true);
   const jumpLatchRef = useRef(false);
-  const interactionLatchRef = useRef(false);
+  const interactionRequestedRef = useRef(false);
   const interactionAnchorIdRef = useRef<string | null>(null);
   const telemetryClockRef = useRef(0);
   const draggingRef = useRef(false);
@@ -69,15 +69,16 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      keysRef.current.add(normalizedKey(event.key));
-      if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(normalizedKey(event.key))) {
+      const key = normalizedKey(event.key);
+      keysRef.current.add(key);
+      if (key === 'e') interactionRequestedRef.current = true;
+      if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
         event.preventDefault();
       }
     };
     const onKeyUp = (event: KeyboardEvent) => {
       keysRef.current.delete(normalizedKey(event.key));
       if (event.key === ' ') jumpLatchRef.current = false;
-      if (event.key.toLowerCase() === 'e') interactionLatchRef.current = false;
     };
     const resetPlayer = () => {
       positionRef.current.set(
@@ -88,6 +89,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
       velocityRef.current.set(0, 0, 0);
       verticalVelocityRef.current = 0;
       groundedRef.current = true;
+      interactionRequestedRef.current = false;
       interactionAnchorIdRef.current = null;
     };
     window.addEventListener('keydown', onKeyDown, { passive: false });
@@ -216,6 +218,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
       velocityRef.current.set(0, 0, 0);
       verticalVelocityRef.current = 0;
       groundedRef.current = true;
+      interactionRequestedRef.current = false;
       interactionAnchorIdRef.current = null;
     }
 
@@ -228,8 +231,8 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
         nearestAnchorId = anchor.id;
       }
     }
-    if (keys.has('e') && !interactionLatchRef.current) {
-      interactionLatchRef.current = true;
+    if (interactionRequestedRef.current) {
+      interactionRequestedRef.current = false;
       if (nearestAnchorId && nearestAnchorDistance <= INTERACTION_RADIUS) {
         interactionAnchorIdRef.current = nearestAnchorId;
       }
@@ -286,7 +289,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
   });
 
   return (
-    <group ref={groupRef} name="traversable-player" data-testid="traversable-player">
+    <group ref={groupRef} name="traversable-player">
       <mesh castShadow>
         <capsuleGeometry args={[0.32, 0.8, 8, 16]} />
         <meshStandardMaterial color="#d8c7ff" roughness={0.56} metalness={0.08} />
