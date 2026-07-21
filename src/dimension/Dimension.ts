@@ -1,8 +1,6 @@
-import type { RoomDefinition } from '../types/room';
-import { rooms } from '../data/rooms';
-
 export type DimensionLayerKind = 'sky' | 'memory' | 'inhabited' | 'foreground';
 export type DimensionAnchorKind = 'anchor' | 'portal' | 'archive' | 'city' | 'heart';
+export type DimensionEntranceKind = 'room' | 'route' | 'external';
 
 export interface DimensionLayer {
   id: string;
@@ -38,6 +36,15 @@ export interface DimensionPortal {
   destination: string;
 }
 
+export interface DimensionEntrance {
+  id: string;
+  kind: DimensionEntranceKind;
+  sourceId: string;
+  label: string;
+  dimensionId: string;
+  portalId?: string;
+}
+
 export interface DimensionDestinationNode {
   id: string;
   label: string;
@@ -69,7 +76,6 @@ export interface DimensionSceneSpec {
   title: string;
   subtitle: string;
   law: string;
-  roomCode: string;
   seedImageUrl: string;
   palette: {
     void: string;
@@ -87,9 +93,10 @@ export interface DimensionSceneSpec {
   paths: DimensionPath[];
   portals: DimensionPortal[];
   destinations: DimensionDestination[];
+  entrances: DimensionEntrance[];
 }
 
-const rememberingSpec: Omit<DimensionSceneSpec, 'roomCode'> = {
+const rememberingSpec: DimensionSceneSpec = {
   id: 'the-weight-of-remembering',
   title: 'The Weight of Remembering',
   subtitle: 'A living memory realm bound by love, thread, and light',
@@ -276,10 +283,27 @@ const rememberingSpec: Omit<DimensionSceneSpec, 'roomCode'> = {
       ],
     },
   ],
+  entrances: [
+    {
+      id: 'room-02-memory-threshold',
+      kind: 'room',
+      sourceId: '02',
+      label: 'Room 02 memory threshold',
+      dimensionId: 'the-weight-of-remembering',
+      portalId: 'portal-horizon',
+    },
+    {
+      id: 'standalone-dimension-route',
+      kind: 'route',
+      sourceId: '/dimension',
+      label: 'Standalone dimension review route',
+      dimensionId: 'the-weight-of-remembering',
+    },
+  ],
 };
 
-const sceneByRoomCode: Record<string, Omit<DimensionSceneSpec, 'roomCode'>> = {
-  '02': rememberingSpec,
+const sceneByDimensionId: Record<string, DimensionSceneSpec> = {
+  [rememberingSpec.id]: rememberingSpec,
 };
 
 function cloneSceneSpec(spec: DimensionSceneSpec): DimensionSceneSpec {
@@ -315,35 +339,54 @@ function cloneSceneSpec(spec: DimensionSceneSpec): DimensionSceneSpec {
         position: [...node.position] as [number, number, number],
       })),
     })),
+    entrances: spec.entrances.map((entrance) => ({ ...entrance })),
   };
 }
 
+function findEntrance(kind: DimensionEntranceKind, sourceId: string): DimensionEntrance | null {
+  for (const scene of Object.values(sceneByDimensionId)) {
+    const entrance = scene.entrances.find((candidate) => candidate.kind === kind && candidate.sourceId === sourceId);
+    if (entrance) return entrance;
+  }
+  return null;
+}
+
 export class Dimension {
-  readonly room: RoomDefinition;
-  readonly roomCode: string;
+  readonly id: string;
   private readonly sceneSpec: DimensionSceneSpec;
 
-  constructor(roomCode: string) {
-    const room = rooms.find((candidate) => candidate.id === roomCode);
-    if (!room) {
-      throw new Error(`Unknown room code "${roomCode}".`);
+  constructor(dimensionId: string) {
+    const scene = sceneByDimensionId[dimensionId];
+    if (!scene) {
+      throw new Error(`Unknown dimension "${dimensionId}".`);
     }
 
-    const seededScene = sceneByRoomCode[roomCode];
-    if (!seededScene) {
-      throw new Error(`Room ${roomCode} does not have a dimension scene yet.`);
-    }
-
-    this.room = room;
-    this.roomCode = roomCode;
-    this.sceneSpec = { ...seededScene, roomCode };
+    this.id = dimensionId;
+    this.sceneSpec = scene;
   }
 
   buildScene(): DimensionSceneSpec {
     return cloneSceneSpec(this.sceneSpec);
   }
 
-  static supports(roomCode: string): boolean {
-    return roomCode in sceneByRoomCode;
+  static fromEntrance(kind: DimensionEntranceKind, sourceId: string): Dimension {
+    const entrance = findEntrance(kind, sourceId);
+    if (!entrance) {
+      throw new Error(`No dimension entrance is registered for ${kind} "${sourceId}".`);
+    }
+    return new Dimension(entrance.dimensionId);
+  }
+
+  static supports(dimensionId: string): boolean {
+    return dimensionId in sceneByDimensionId;
+  }
+
+  static list(): string[] {
+    return Object.keys(sceneByDimensionId);
+  }
+
+  static entrancesFor(dimensionId: string): DimensionEntrance[] {
+    const scene = sceneByDimensionId[dimensionId];
+    return scene ? scene.entrances.map((entrance) => ({ ...entrance })) : [];
   }
 }
