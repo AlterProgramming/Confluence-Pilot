@@ -36,7 +36,7 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 export function DimensionApp() {
-  const request = useMemo(resolveRuntimeRequest, []);
+  const request = useMemo(() => resolveRuntimeRequest(), []);
   const result = useMemo(() => {
     try {
       const dimension = request.dimensionId
@@ -58,23 +58,13 @@ export function DimensionApp() {
       };
     }
   }, [request.dimensionId, request.roomEntranceId]);
-  const registryScene = useMemo(() => result.dimension?.buildScene() ?? null, [result.dimension]);
-  const [scene, setScene] = useState<DimensionSceneSpec | null>(registryScene);
+  const [scene, setScene] = useState<DimensionSceneSpec | null>(() => result.dimension?.buildScene() ?? null);
   const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>(null);
   const [portalOpen, setPortalOpen] = useState(false);
   const [activeDestinationId, setActiveDestinationId] = useState<string | null>(null);
   const [selectedDestinationNodeId, setSelectedDestinationNodeId] = useState<string | null>(null);
   const [cameraTravel, setCameraTravel] = useState<CameraTravelState | null>(null);
   const [authoringOpen, setAuthoringOpen] = useState(request.authoring);
-
-  useEffect(() => {
-    setScene(registryScene);
-    setSelectedAnchorId(null);
-    setPortalOpen(false);
-    setActiveDestinationId(null);
-    setSelectedDestinationNodeId(null);
-    setCameraTravel(null);
-  }, [registryScene]);
 
   const activeDestination = scene?.destinations.find((destination) => destination.id === activeDestinationId) ?? null;
 
