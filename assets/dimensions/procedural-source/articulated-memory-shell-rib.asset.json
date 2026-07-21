@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "id": "articulated-memory-shell-rib",
+  "title": "Articulated Memory-Shell Rib",
+  "realm": "the-weight-of-remembering",
+  "category": "structural-rib",
+  "revision": 1,
+  "description": "A monumental curved rib from the world's memory shell, combining the anatomy of a whale skeleton, the precision of an observatory truss, and the ceremonial finish of a reliquary. Each rib is modular enough to stand alone, interlock into a shell, or carry smaller remembered objects in suspended satellite cages.",
+  "narrativeFunction": "The rib gives the world a protective but incomplete enclosure. It implies that memories are held inside body-like architecture without becoming a literal creature. Repeated ribs establish scale, frame camera views, carry lights and satellites, and create strong near-to-far parallax.",
+  "designKeywords": ["reliquary rib", "whale-bone arc", "articulated truss", "protective shell", "hinged vertebrae", "ivory stone", "gold seam", "carried memory"],
+  "scale": {"unit": "meter", "bounds": {"width": 1.15, "height": 7.4, "depth": 2.6}, "heroScale": 1, "modularScale": 0.28},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0, -3.7, 0],
+    "originMeaning": "The origin sits at the center of the lower foundation shoe so the rib can be planted, rotated, mirrored, or snapped around a world-shell baseline."
+  },
+  "silhouette": {
+    "primary": "A tall inward-curving arc that begins thick and load-bearing at the base, narrows through the middle, and forks into two delicate prongs near the crown.",
+    "secondary": "Seven visible vertebral plates interrupt the continuous arc, each offset enough to expose hinge gaps and a dark internal tendon running through the center.",
+    "tertiary": "Gold repair seams, socket caps, hanging satellite loops, engraved memory dates, fine tension cables, and bearing indicators accumulate around joints rather than uninterrupted surfaces.",
+    "negativeSpace": "The inside of the curve is one large uninterrupted opening. Hinge gaps and the forked crown create smaller repeated slivers of darkness visible at medium distance.",
+    "recognitionTest": "In silhouette the asset reads as one anatomical architectural rib with a planted foot, segmented spine, and forked crown, not as a generic arch, branch, tusk, or complete ring."
+  },
+  "materials": [
+    {
+      "id": "bone-stone",
+      "role": "Primary carved shell substance",
+      "baseColor": "#C7B99F",
+      "metallic": 0.12,
+      "roughness": 0.58,
+      "emission": {"color": "#5A4126", "strength": 0.03},
+      "surfaceDescription": "Dense ivory-gray stone with faint translucent edges, longitudinal growth lines, chipped corners, and fractures repaired by narrow metallic seams."
+    },
+    {
+      "id": "hinge-metal",
+      "role": "Joint plates and tension hardware",
+      "baseColor": "#584738",
+      "metallic": 0.78,
+      "roughness": 0.31,
+      "emission": {"color": "#C9934F", "strength": 0.15},
+      "surfaceDescription": "Dark bronze-black hardware with polished bearing surfaces, oxidized recesses, visible fasteners, and warm indicators at articulation pins."
+    },
+    {
+      "id": "memory-tendon",
+      "role": "Internal luminous tension member",
+      "baseColor": "#7D527A",
+      "metallic": 0.05,
+      "roughness": 0.22,
+      "emission": {"color": "#D89AF2", "strength": 1.85},
+      "surfaceDescription": "A semi-translucent braided energy tendon with visible internal fiber direction and brighter nodes where it crosses each mechanical joint."
+    }
+  ],
+  "components": [
+    {
+      "id": "foundation-shoe",
+      "primitive": "box",
+      "role": "Heavy planted base transferring shell load into terraces or invisible world structure.",
+      "dimensions": {"width": 1.1, "height": 0.48, "depth": 1.65},
+      "transform": {"position": [0, 0.24, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "hinge-metal",
+      "detail": "Chamfer the footprint, model four recessed anchor wells, expose one service plate, and repair one side with a visible but restrained gold seam.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "rib-segments",
+      "primitive": "custom-profile",
+      "role": "Seven tapered curved shell segments forming the main anatomical arc.",
+      "dimensions": {"points": [[0,0,0],[0.12,0.9,0.1],[0.24,1.75,0.26],[0.3,2.55,0.55]], "radius": 0.18, "resolution": 10, "bevelResolution": 4},
+      "transform": {"position": [0, 0.45, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "bone-stone",
+      "detail": "Each segment tapers upward, flattens slightly toward the shell interior, and contains one shallow longitudinal channel that aligns imperfectly across hinges.",
+      "repeat": {"mode": "arc", "count": 7, "radius": 3.15, "arcDegrees": 68}
+    },
+    {
+      "id": "vertebral-hinges",
+      "primitive": "cylinder",
+      "role": "Exposed articulation pins and plates positioned between shell segments.",
+      "dimensions": {"radius": 0.16, "height": 0.54, "segments": 20},
+      "transform": {"position": [0, 0.9, 0], "rotation": [90, 0, 0], "scale": [1, 1, 1]},
+      "material": "hinge-metal",
+      "detail": "Each joint has one emissive central bearing, two unequal retaining collars, and a visible stop limiting excessive articulation.",
+      "repeat": {"mode": "arc", "count": 6, "radius": 3.15, "arcDegrees": 58}
+    },
+    {
+      "id": "luminous-tendon",
+      "primitive": "curve-tube",
+      "role": "Continuous internal tension line visible through every segment gap.",
+      "dimensions": {"points": [[0,0.6,0],[0.1,2.0,0.18],[0.34,4.0,0.62],[0.12,6.7,1.1]], "radius": 0.045, "resolution": 18, "bevelResolution": 4},
+      "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "memory-tendon",
+      "detail": "The tendon remains visually continuous, bows toward the open interior between joints, and thickens slightly at articulation nodes.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "satellite-loops",
+      "primitive": "torus",
+      "role": "Attachment loops for photographs, lanterns, or carried-memory cages.",
+      "dimensions": {"majorRadius": 0.16, "minorRadius": 0.026, "majorSegments": 28, "minorSegments": 8},
+      "transform": {"position": [0.42, 1.4, 0.12], "rotation": [90, 0, 0], "scale": [1, 1, 1]},
+      "material": "hinge-metal",
+      "detail": "Loops alternate sides and hang from reinforced tabs. Each loop includes a clasp break and a small engraved ownership mark.",
+      "repeat": {"mode": "linear", "count": 4, "step": [0.02, 1.32, 0.18]}
+    }
+  ],
+  "generation": {
+    "seed": 2113,
+    "deterministic": true,
+    "assemblyOrder": ["Build foundation shoe and lower bearing", "Generate tapered segmented arc", "Insert articulation plates and pins", "Thread luminous tendon through every joint", "Attach satellite loops and repair seams"],
+    "deformationRules": [
+      "The complete rib bends inward approximately thirty-four degrees from base to crown while preserving a stable planted foot.",
+      "Each segment rotates two to six degrees relative to the previous one to expose hinge gaps without breaking the overall arc.",
+      "The crown bifurcates into two prongs whose tips diverge by twenty-two centimeters and lean into different depth directions."
+    ],
+    "variationRules": [
+      "Foundation repair seams may move between left and right faces but remain visually subordinate to the silhouette.",
+      "Individual segment lengths vary by eight percent while total assembled height remains within three percent of target.",
+      "Satellite loop count ranges from three to five and avoids perfectly regular vertical spacing."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready modular hard-surface and curve-derived topology with separate segment, hinge, tendon, and foundation objects for rigging and replacement.",
+    "bevel": "Use broad stone edge softening, narrower bronze bevels, and distinct polished bearing bevels; do not round the complete rib into an organic tube.",
+    "subdivision": "Use limited subdivision on bone-stone profiles and tendon only. Hinge plates, footing, and repair bands remain controlled hard-surface forms.",
+    "normals": "Weighted normals preserve calm carved planes while hinge gaps, repair seams, and structural edges carry readable highlights.",
+    "uv": "Use longitudinal UV flow on shell segments, trim-sheet hardware UVs, and a dedicated emissive mask for tendon fibers and bearing indicators.",
+    "watertightParts": ["foundation-shoe", "seven rib segments", "hinge collars"]
+  },
+  "animation": {
+    "channels": ["vertebral-hinges.rotation_local_x", "luminous-tendon.emission_flow", "satellite-loops.secondary_sway"],
+    "loopLengthSeconds": 22,
+    "motionCharacter": "A nearly imperceptible breathing articulation. Upper joints flex first, lower joints answer later, and the luminous tendon brightens as the shell tightens. Motion communicates structural life rather than rubber deformation.",
+    "constraints": ["Foundation shoe remains fixed.", "Joint rotation stays below three degrees during idle motion.", "Crown prongs never touch adjacent shell ribs."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 52000, "preserve": ["all segment breaks", "forked crown", "repair seams", "satellite loops"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 15000, "preserve": ["seven-segment rhythm", "foundation shoe", "hinge silhouettes", "luminous tendon"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 2800, "preserve": ["inward arc", "planted base", "forked crown", "single tendon line"]}
+  ],
+  "collision": {
+    "mode": "compound",
+    "description": "Use the foundation box plus three tapered capsules following the primary arc. Satellite loops, tendon, cables, and crown tips remain non-colliding."
+  },
+  "sockets": [
+    {"id": "base-anchor", "purpose": "Placement socket for terraces, shell rings, or world foundations.", "position": [0, 0, 0], "rotation": [0, 0, 0]},
+    {"id": "crown-join", "purpose": "Optional connection to a shell spine or overhead tension cable.", "position": [0.18, 7.2, 1.05], "rotation": [-18, 0, 4]},
+    {"id": "memory-cage", "purpose": "Attachment point for one hero carried-memory cage.", "position": [0.44, 3.8, 0.5], "rotation": [0, 0, -12]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show the full inward arc, seven segment breaks, wide planted shoe, and forked crown. The tendon appears as a thin inner line crossing every joint.",
+    "side": "Reveal the depth bow, alternating hinge plates, crown-prong separation, and satellite loops offset from the shell surface.",
+    "top": "Emphasize the flattened inner face, thicker outer spine, and slight corkscrew progression of segment rotations.",
+    "threeQuarter": "Frame from the open interior looking toward the rib so hinge gaps, gold repairs, and carried-memory sockets are readable against negative space.",
+    "scaleCue": "Place a human at the foundation shoe; the first hinge sits above head height and the crown reaches roughly four human heights."
+  },
+  "validation": [
+    "The assembled rib has exactly seven primary shell segments and six visible hinge intervals.",
+    "The planted base is wider in depth than the mid-rib and reads as a structural footing.",
+    "The internal tendon remains visible through at least five hinge gaps from the hero camera.",
+    "The crown visibly forks and does not terminate as one blunt point.",
+    "No satellite loop intersects shell geometry during bind pose or idle animation.",
+    "LOD2 preserves the overall inward arc, foundation shoe, forked crown, and tendon line.",
+    "Mirrored instances remain plausible without becoming perfectly identical."
+  ]
+}
