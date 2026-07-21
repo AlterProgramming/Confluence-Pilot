@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "id": "lantern-metropolis-tower",
+  "title": "Lantern Metropolis Tower",
+  "realm": "the-weight-of-remembering",
+  "category": "city-tower",
+  "revision": 1,
+  "description": "A narrow inhabited tower designed for dense procedural instancing across the lantern basin. Its body is a dark tapered civic column wrapped by irregular balconies, broken window bands, suspended lantern cages, and a luminous crown. The asset supports many deterministic variants while retaining one unmistakable family silhouette.",
+  "narrativeFunction": "The tower turns the basin into a believable city rather than a field of lights. Repetition supplies urban density and scale, while balcony, window, and crown variation prevents procedural sameness. Each tower acts as a small vertical archive where domestic memory and civic ritual overlap.",
+  "designKeywords": ["vertical memory city", "tapered civic tower", "lantern crown", "irregular balconies", "inhabited archive", "dark metal stone", "amber windows", "dense instancing"],
+  "scale": {"unit": "meter", "bounds": {"width": 0.9, "height": 4.8, "depth": 0.9}, "heroScale": 1, "modularScale": 0.18},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0, -2.4, 0],
+    "originMeaning": "The origin is centered on the tower footprint at ground level, enabling radial city placement, deterministic height scaling, bridge attachment, and vertical LOD substitution."
+  },
+  "silhouette": {
+    "primary": "A slim tower tapering inward through the middle and opening into a wider luminous crown, producing a readable needle-and-lantern profile.",
+    "secondary": "Three to five offset balcony plates alternate around the shaft and create asymmetry without exceeding the width of the crown cage.",
+    "tertiary": "Window slits, hanging cages, aerial-bridge sockets, vents, maintenance ladders, roof fins, gutters, and repair seams create localized close-view detail.",
+    "negativeSpace": "Gaps below balconies, the open cage around the crown light, and occasional bridge sockets remain open. The shaft never becomes a uniformly solid glowing column.",
+    "recognitionTest": "At city scale every variant reads as the same family: a dark tapered shaft carrying a warm open lantern crown, even when total height, balcony order, and window pattern differ."
+  },
+  "materials": [
+    {
+      "id": "tower-shell",
+      "role": "Primary tower structure",
+      "baseColor": "#1B1922",
+      "metallic": 0.34,
+      "roughness": 0.61,
+      "emission": {"color": "#2A1D32", "strength": 0.03},
+      "surfaceDescription": "Black-violet cast stone and metal composite with vertical rain streaks, repaired panel seams, soot accumulation, and slightly polished balcony edges."
+    },
+    {
+      "id": "city-bronze",
+      "role": "Balcony frames, crown cage, and bridge hardware",
+      "baseColor": "#66503A",
+      "metallic": 0.76,
+      "roughness": 0.36,
+      "emission": {"color": "#CE8A3E", "strength": 0.2},
+      "surfaceDescription": "Warm dark bronze with soot around lantern cages, rubbed rail tops, turquoise oxidation in protected corners, and small engraved civic marks."
+    },
+    {
+      "id": "inhabited-light",
+      "role": "Window groups and crown lantern",
+      "baseColor": "#A65F2C",
+      "metallic": 0,
+      "roughness": 0.24,
+      "emission": {"color": "#FFB75E", "strength": 2.2},
+      "surfaceDescription": "Layered warm light with brighter cores, dimmer outer glass, and subtle hue variation suggesting many occupied rooms rather than one flat emissive panel."
+    }
+  ],
+  "components": [
+    {
+      "id": "tapered-shaft",
+      "primitive": "cone",
+      "role": "Main load-bearing city tower body.",
+      "dimensions": {"radiusBottom": 0.34, "radiusTop": 0.23, "height": 3.95, "segments": 10},
+      "transform": {"position": [0, 1.98, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "tower-shell",
+      "detail": "Use a faceted ten-sided shaft with three vertical service channels, one recessed entry seam, uneven panel breaks, and a slightly heavier lower third.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "window-bands",
+      "primitive": "box",
+      "role": "Thin inhabited window slits distributed unevenly along selected shaft facets.",
+      "dimensions": {"width": 0.31, "height": 0.08, "depth": 0.025},
+      "transform": {"position": [0, 0.7, -0.31], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "inhabited-light",
+      "detail": "Window groups vary in length and wrap selected facets without forming continuous horizontal rings; at least one vertical region remains mostly dark.",
+      "repeat": {"mode": "linear", "count": 11, "step": [0, 0.26, 0]}
+    },
+    {
+      "id": "balcony-plates",
+      "primitive": "box",
+      "role": "Offset civic balconies and maintenance decks breaking the shaft silhouette.",
+      "dimensions": {"width": 0.68, "height": 0.055, "depth": 0.48},
+      "transform": {"position": [0.15, 1.15, 0], "rotation": [0, 12, 0], "scale": [1, 1, 1]},
+      "material": "city-bronze",
+      "detail": "Every plate receives a thin rail, one visible support rib, one hanging cage or planter socket, and a unique angular projection around the shaft.",
+      "repeat": {"mode": "linear", "count": 4, "step": [-0.08, 0.72, 0.06]}
+    },
+    {
+      "id": "crown-cage",
+      "primitive": "torus",
+      "role": "Open ring cage supporting the hero lantern at the tower top.",
+      "dimensions": {"majorRadius": 0.31, "minorRadius": 0.025, "majorSegments": 28, "minorSegments": 7},
+      "transform": {"position": [0, 4.18, 0], "rotation": [90, 0, 0], "scale": [1, 1, 1]},
+      "material": "city-bronze",
+      "detail": "The crown includes four vertical cage struts, one narrow roof fin, a hanging maintenance loop, and one deliberately absent quadrant for silhouette asymmetry.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "crown-light",
+      "primitive": "sphere",
+      "role": "Primary urban light source and tower-family identity mark.",
+      "dimensions": {"radius": 0.16, "segments": 20, "rings": 12},
+      "transform": {"position": [0, 4.18, 0], "rotation": [0, 0, 0], "scale": [0.78, 1.25, 0.78]},
+      "material": "inhabited-light",
+      "detail": "The light has a bright elongated center, dim outer glass, faint vertical flame motion, and a narrow shadow band cast by the incomplete cage.",
+      "repeat": {"mode": "none", "count": 1}
+    }
+  ],
+  "generation": {
+    "seed": 4289,
+    "deterministic": true,
+    "assemblyOrder": ["Generate faceted tapered shaft", "Place nonuniform window bands", "Attach alternating balconies and rails", "Build incomplete crown cage", "Insert lantern core, maintenance details, and bridge sockets"],
+    "deformationRules": [
+      "Scale total height from seventy to one hundred thirty percent while preserving footprint and crown proportions.",
+      "Rotate each balcony around the shaft using a deterministic non-repeating sequence and vary projection by twelve centimeters.",
+      "Allow a maximum three-degree whole-tower lean toward the basin center for peripheral instances."
+    ],
+    "variationRules": [
+      "Window occupancy varies independently by floor while at least twenty percent of windows remain dark.",
+      "Crown light hue shifts narrowly among amber, pale gold, and muted rose.",
+      "Balcony count ranges from three to five and neighboring towers may not share the same order."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready instancing-friendly hard-surface model with one shaft mesh, detachable balcony modules, reusable window inserts, crown cage, and separate emissive lantern core.",
+    "bevel": "Use narrow architectural bevels on shell facets, wider touch-safe balcony and rail bevels, and soft crown-light glass edges.",
+    "subdivision": "Avoid subdivision on the faceted shaft. Use local smoothing only for crown light, hanging cages, and selected rail curves.",
+    "normals": "Weighted normals preserve the ten-sided tower facets and give balcony plates and crown hardware crisp but stable highlights.",
+    "uv": "Use one shared tower-shell trim region, one bronze hardware trim, packed window-emission strips, and a unique crown-light mask.",
+    "watertightParts": ["tapered shaft", "balcony plates", "crown cage segments", "lantern glass"]
+  },
+  "animation": {
+    "channels": ["crown-light.flame_motion", "window-bands.occupancy_flicker", "hanging-cages.secondary_sway"],
+    "loopLengthSeconds": 13,
+    "motionCharacter": "Urban light behavior is quiet and asynchronous. Crown lights breathe slowly, individual window groups change over long intervals, and hanging cages respond with minimal wind-driven sway.",
+    "constraints": ["Tower structure remains rigid.", "No more than fifteen percent of windows change state within one second.", "The crown light never fully extinguishes."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 22000, "preserve": ["faceted shaft", "all balconies", "window breaks", "open crown cage"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 6500, "preserve": ["shaft taper", "three balcony breaks", "window bands", "crown light"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 900, "preserve": ["tapered needle silhouette", "one balcony interruption", "wider luminous crown"]}
+  ],
+  "collision": {
+    "mode": "capsule",
+    "description": "Use one tapered capsule or low-sided convex hull for the shaft. Balconies, windows, bridge sockets, cages, and crown structure remain decorative."
+  },
+  "sockets": [
+    {"id": "ground-placement", "purpose": "Terrain or terrace placement at tower footprint.", "position": [0, 0, 0], "rotation": [0, 0, 0]},
+    {"id": "aerial-bridge-a", "purpose": "Optional pedestrian bridge connection at lower-mid elevation.", "position": [0.34, 1.7, 0], "rotation": [0, 90, 0]},
+    {"id": "aerial-bridge-b", "purpose": "Optional bridge connection on an opposing upper facet.", "position": [-0.3, 2.55, 0.08], "rotation": [0, -90, 0]},
+    {"id": "crown-particle", "purpose": "Lantern sparks, fog illumination, or city locator effect.", "position": [0, 4.2, 0], "rotation": [0, 0, 0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show tapered shaft, irregular balcony projections, broken warm window bands, and the crown cage widening beyond the upper shaft.",
+    "side": "Reveal balcony rotation, one aerial bridge socket, crown depth, and the slight inward taper through the middle.",
+    "top": "Display the faceted ten-sided shaft, asymmetric balcony footprints, incomplete crown ring, and bridge connection directions.",
+    "threeQuarter": "Use a low upward angle with a darker neighboring tower silhouette for scale; inhabited windows remain visible without overexposing the shell.",
+    "scaleCue": "Place a human on the largest balcony and another at the base entry; the tower reads as roughly three compact urban stories."
+  },
+  "validation": [
+    "The default tower reads as a tapered dark shaft with a wider open luminous crown.",
+    "At least three balconies project in different directions and remain physically supported.",
+    "Window bands occupy multiple facets and include deliberate dark gaps.",
+    "The crown cage contains an open quadrant and never becomes a closed cap.",
+    "Instanced height variation preserves the ground pivot and crown proportions.",
+    "LOD2 retains shaft taper, one balcony break, and the crown light.",
+    "Bridge sockets remain outside the shaft and use opposing outward orientations."
+  ]
+}
