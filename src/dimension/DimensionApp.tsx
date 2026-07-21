@@ -45,16 +45,18 @@ export function DimensionApp() {
     target: [...scene.camera.target],
   };
   const selectedAnchor = scene.anchors.find((anchor) => anchor.id === selectedAnchorId) ?? null;
+  const focusMode = selectedAnchor ? 'anchor' : 'overview';
 
   return (
     <main
-      className="dimension-shell"
+      className={`dimension-shell${selectedAnchor ? ' dimension-focused' : ''}`}
       data-testid="dimension-runtime"
       data-dimension-id={scene.id}
       data-room-code={result.dimension.roomCode}
       data-anchor-count={scene.anchors.length}
       data-path-count={scene.paths.length}
       data-layer-count={scene.layers.length}
+      data-focus-mode={focusMode}
       data-camera-focus={effectiveCameraTravel.focusId}
       data-camera-position={formatCameraPosition(effectiveCameraTravel.position)}
       data-camera-target={formatCameraPosition(effectiveCameraTravel.target)}

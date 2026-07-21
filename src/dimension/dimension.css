@@ -33,6 +33,7 @@
   width: min(34rem, calc(100vw - 2rem));
   pointer-events: none;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85);
+  transition: top 360ms ease, left 360ms ease, width 360ms ease, opacity 360ms ease, transform 360ms ease;
 }
 
 .dimension-room-code,
@@ -48,6 +49,7 @@
   display: block;
   margin-bottom: 0.55rem;
   font-size: 0.66rem;
+  transition: font-size 360ms ease, margin 360ms ease, opacity 360ms ease;
 }
 
 .dimension-title-panel h1 {
@@ -58,24 +60,62 @@
   letter-spacing: -0.035em;
   line-height: 0.92;
   text-wrap: balance;
+  transform-origin: top left;
+  transition: font-size 360ms ease, line-height 360ms ease, letter-spacing 360ms ease, opacity 360ms ease;
 }
 
 .dimension-title-panel p {
   margin: 0.75rem 0 0;
   max-width: 32rem;
+  max-height: 4rem;
+  overflow: hidden;
   color: rgba(248, 236, 221, 0.78);
   font-size: clamp(0.74rem, 1.1vw, 0.95rem);
   letter-spacing: 0.11em;
   text-transform: uppercase;
+  transition: max-height 300ms ease, margin 300ms ease, opacity 220ms ease, transform 300ms ease;
 }
 
 .dimension-title-panel blockquote {
   margin: 1.2rem 0 0;
   max-width: 23rem;
+  max-height: 5rem;
+  overflow: hidden;
   padding-left: 0.9rem;
   border-left: 1px solid rgba(231, 189, 120, 0.65);
   font-size: 0.68rem;
   line-height: 1.65;
+  transition: max-height 300ms ease, margin 300ms ease, padding 300ms ease, opacity 220ms ease, transform 300ms ease;
+}
+
+.dimension-focused .dimension-title-panel {
+  top: 1rem;
+  left: 1.25rem;
+  width: min(28rem, calc(100vw - 2.5rem));
+  opacity: 0.82;
+  transform: translateY(-0.1rem);
+}
+
+.dimension-focused .dimension-room-code {
+  margin-bottom: 0.25rem;
+  font-size: 0.54rem;
+  opacity: 0.72;
+}
+
+.dimension-focused .dimension-title-panel h1 {
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.dimension-focused .dimension-title-panel p,
+.dimension-focused .dimension-title-panel blockquote {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  transform: translateY(-0.35rem);
 }
 
 .dimension-anchor-rail {
@@ -84,6 +124,13 @@
   display: grid;
   gap: 0.38rem;
   width: min(18rem, 28vw);
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+.dimension-focused .dimension-anchor-rail {
+  opacity: 0.82;
+  transform: scale(0.96);
+  transform-origin: bottom left;
 }
 
 .dimension-anchor-rail button {
@@ -184,6 +231,11 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   pointer-events: none;
+  transition: opacity 260ms ease;
+}
+
+.dimension-focused .dimension-controls {
+  opacity: 0.46;
 }
 
 .dimension-anchor-label {
@@ -250,6 +302,15 @@
     display: none;
   }
 
+  .dimension-focused .dimension-title-panel {
+    left: 0.8rem;
+    width: calc(100vw - 1.6rem);
+  }
+
+  .dimension-focused .dimension-title-panel h1 {
+    font-size: 1.2rem;
+  }
+
   .dimension-controls {
     display: none;
   }
@@ -261,6 +322,10 @@
     width: auto;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 0.25rem;
+  }
+
+  .dimension-focused .dimension-anchor-rail {
+    transform: none;
   }
 
   .dimension-anchor-rail button {
@@ -289,8 +354,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .dimension-title-panel,
+  .dimension-title-panel h1,
+  .dimension-title-panel p,
+  .dimension-title-panel blockquote,
+  .dimension-anchor-rail,
   .dimension-anchor-rail button,
-  .dimension-inspector {
+  .dimension-inspector,
+  .dimension-controls {
     transition: none;
   }
 }
