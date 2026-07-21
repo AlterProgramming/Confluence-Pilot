@@ -1,9 +1,11 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import { Group, PerspectiveCamera, Vector3 } from 'three';
-import { Dimension } from './Dimension';
+import { Dimension, type DimensionSceneSpec } from './Dimension';
 import { ProceduralDestinationArchitecture } from './ProceduralDestinationArchitecture';
 import { ProceduralWorldArchitecture } from './ProceduralWorldArchitecture';
+import { ProceduralWorldFabric } from './ProceduralWorldFabric';
+import { generateWorldFabric, type WorldFabricSpec } from './WorldFabric';
 import './complexity.css';
 
 const WORLD_ID = 'the-weight-of-remembering';
@@ -16,10 +18,14 @@ function parseVector(value: string | null): Vector3 | null {
   return new Vector3(coordinates[0], coordinates[1], coordinates[2]);
 }
 
-function SynchronizedArchitecture() {
+interface SynchronizedArchitectureProps {
+  scene: DimensionSceneSpec;
+  fabric: WorldFabricSpec;
+}
+
+function SynchronizedArchitecture({ scene, fabric }: SynchronizedArchitectureProps) {
   const worldGroup = useRef<Group>(null);
   const destinationGroup = useRef<Group>(null);
-  const scene = useMemo(() => new Dimension(WORLD_ID).buildScene(), []);
   const destination = scene.destinations.find((candidate) => candidate.id === DESTINATION_ID) ?? null;
   const target = useRef(new Vector3(...scene.camera.target));
 
@@ -52,6 +58,7 @@ function SynchronizedArchitecture() {
         <ambientLight intensity={0.22} color="#a79bc7" />
         <pointLight position={[-4.5, 2.5, 3]} intensity={5} distance={13} color={scene.palette.memory} />
         <pointLight position={[3.8, -0.8, 0]} intensity={4} distance={12} color={scene.palette.violet} />
+        <ProceduralWorldFabric scene={scene} fabric={fabric} />
         <ProceduralWorldArchitecture scene={scene} />
       </group>
       {destination && (
@@ -68,15 +75,27 @@ function SynchronizedArchitecture() {
 
 export function ProceduralWorldOverlay() {
   const scene = useMemo(() => new Dimension(WORLD_ID).buildScene(), []);
+  const fabric = useMemo(() => generateWorldFabric(scene), [scene]);
   return (
-    <Canvas
+    <div
       className="dimension-complexity-overlay"
-      camera={{ position: scene.camera.position, fov: 45, near: 0.1, far: 100 }}
-      dpr={[1, 1.35]}
-      gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
-      onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+      data-testid="world-fabric"
+      data-world-fabric-id={fabric.id}
+      data-world-cell-count={fabric.stats.cellCount}
+      data-world-biome-count={fabric.stats.biomeCount}
+      data-world-route-count={fabric.stats.routeCount}
+      data-world-settlement-count={fabric.stats.settlementCount}
+      data-world-shape-family-count={fabric.stats.shapeFamilyCount}
     >
-      <SynchronizedArchitecture />
-    </Canvas>
+      <Canvas
+        className="dimension-complexity-canvas"
+        camera={{ position: scene.camera.position, fov: 45, near: 0.1, far: 100 }}
+        dpr={[1, 1.35]}
+        gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+      >
+        <SynchronizedArchitecture scene={scene} fabric={fabric} />
+      </Canvas>
+    </div>
   );
 }
