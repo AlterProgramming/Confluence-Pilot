@@ -36,13 +36,23 @@ These files are not screenshots or mood-board prompts. Each `*.asset.json` file 
 11. `probability-monolith.asset.json`
 12. `timeline-fragment.asset.json`
 
+## Coordinate and export contract
+
+Descriptors use meters, **+Y up**, and **-Z forward**, matching the runtime world. Blender uses +Z up internally. The generator converts positions, rotations, scales, curve points, custom profiles, pivots, and sockets into Blender space, then exports them back to a Y-up interchange format without changing the authored world-space meaning.
+
+Supported outputs:
+
+- `.blend` for continued modeling, sculpting, rigging, and material work;
+- `.glb` for a self-contained runtime asset;
+- `.gltf` plus external buffers and textures for inspectable interchange.
+
 ## 3D generation
 
-`tools/blender/generate_dimension_asset.py` reads one descriptor or the complete catalog and produces a named Blender collection containing a deterministic blockout. The generated blockout preserves scale, component hierarchy, materials, pivots, sockets, repeated-placement logic, and LOD collection names.
+`tools/blender/generate_dimension_asset.py` reads one descriptor or the complete catalog and produces a named Blender collection containing a deterministic blockout. The generated blockout preserves scale, component hierarchy, materials, pivots, sockets, repeated-placement logic, LOD collection names, custom metadata, and runtime-system identity.
 
-The blockout is intentionally more useful than a generic primitive placeholder: it captures the authored silhouette, density hierarchy, and assembly logic while leaving room for sculpting, retopology, texture painting, and art-direction review.
+The blockout is intentionally more useful than a generic primitive placeholder: it captures the authored silhouette, density hierarchy, negative space, and assembly logic while leaving room for sculpting, retopology, texture painting, and art-direction review.
 
-Example:
+Generate one editable Blender asset:
 
 ```bash
 blender --background --python tools/blender/generate_dimension_asset.py -- \
@@ -50,13 +60,32 @@ blender --background --python tools/blender/generate_dimension_asset.py -- \
   --output build/assets/celestial-memory-mechanism.blend
 ```
 
-Generate every asset in the catalog:
+Generate one runtime-ready GLB:
+
+```bash
+blender --background --python tools/blender/generate_dimension_asset.py -- \
+  --asset assets/dimensions/procedural-source/echo-bridge-span.asset.json \
+  --output build/assets/echo-bridge-span.glb
+```
+
+Generate every catalog asset as GLB:
 
 ```bash
 blender --background --python tools/blender/generate_dimension_asset.py -- \
   --catalog assets/dimensions/procedural-source/catalog.json \
-  --output-directory build/assets
+  --output-directory build/assets \
+  --format glb
 ```
+
+Select a lower-detail generation target with `--lod LOD1` or `--lod LOD2`.
+
+## Validation
+
+```bash
+npm run validate:dimension:assets
+```
+
+The validation gate requires all twelve descriptors, six assets per realm, unique semantic IDs, complete material/component/socket/LOD definitions, deterministic generation, runtime-system bindings, coordinate conversion, custom-profile geometry, and Blender/GLTF export support. CI also compiles the Blender Python source before accepting the asset pack.
 
 ## Production rule
 

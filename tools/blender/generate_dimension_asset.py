@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Generate Blender blockouts from Confluence procedural asset descriptors.
+"""Generate 3D production blockouts from Confluence dimension asset descriptors.
 
-Usage from Blender:
+Examples:
 
     blender --background --python tools/blender/generate_dimension_asset.py -- \
       --asset assets/dimensions/procedural-source/celestial-memory-mechanism.asset.json \
       --output build/assets/celestial-memory-mechanism.blend
 
-The generator intentionally produces deterministic production blockouts rather
-than final sculpted models. It preserves the descriptor's scale, hierarchy,
-materials, repetition logic, pivots, sockets, and LOD collection structure.
+    blender --background --python tools/blender/generate_dimension_asset.py -- \
+      --catalog assets/dimensions/procedural-source/catalog.json \
+      --output-directory build/assets --format glb
+
+Descriptors use the runtime coordinate contract: +Y is up and -Z is forward.
+Blender uses +Z as up, so every position, rotation, scale, curve point, socket,
+and primitive orientation is converted without changing the authored pivot.
 """
 
 from __future__ import annotations
@@ -25,9 +29,19 @@ from typing import Any, Iterable
 
 try:
     import bpy
-    from mathutils import Vector
+    from mathutils import Euler, Matrix, Vector
 except ImportError as error:  # pragma: no cover - executed inside Blender
     raise SystemExit("This script must be executed by Blender's Python runtime.") from error
+
+
+# Runtime asset space (+Y up, -Z forward) to Blender space (+Z up, +Y forward).
+ASSET_TO_BLENDER_3 = Matrix(
+    (
+        (1.0, 0.0, 0.0),
+        (0.0, 0.0, -1.0),
+        (0.0, 1.0, 0.0),
+    )
+)
 
 
 @dataclass(frozen=True)
@@ -43,10 +57,10 @@ def parse_args() -> argparse.Namespace:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--asset", type=Path, help="One .asset.json descriptor")
     source.add_argument("--catalog", type=Path, help="Catalog containing descriptor paths")
-    parser.add_argument("--output", type=Path, help="Output .blend file for a single asset")
+    parser.add_argument("--output", type=Path, help="Single output path: .blend, .glb, or .gltf")
     parser.add_argument("--output-directory", type=Path, help="Output directory for catalog mode")
+    parser.add_argument("--format", default="blend", choices=("blend", "glb", "gltf"))
     parser.add_argument("--lod", default="LOD0", choices=("LOD0", "LOD1", "LOD2"))
-    parser.add_argument("--clean-scene", action="store_true", default=True)
     return parser.parse_args(argv)
 
 
@@ -57,6 +71,8 @@ def load_json(path: Path) -> dict[str, Any]:
 def clean_scene() -> None:
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
+    for collection in list(bpy.data.collections):
+        bpy.data.collections.remove(collection)
     for datablocks in (
         bpy.data.meshes,
         bpy.data.curves,
@@ -72,11 +88,9 @@ def clean_scene() -> None:
 def ensure_collection(name: str, parent: bpy.types.Collection | None = None) -> bpy.types.Collection:
     collection = bpy.data.collections.get(name) or bpy.data.collections.new(name)
     parent_collection = parent or bpy.context.scene.collection
-    if collection.name not in parent_collection.children:
-        try:
-            parent_collection.children.link(collection)
-        except RuntimeError:
-            pass
+    child_names = {child.name for child in parent_collection.children}
+    if collection.name not in child_names:
+        parent_collection.children.link(collection)
     return collection
 
 
@@ -91,9 +105,20 @@ def hex_to_rgba(value: str) -> tuple[float, float, float, float]:
     return tuple(int(value[index : index + 2], 16) / 255 for index in (0, 2, 4)) + (1.0,)
 
 
+def asset_vector_to_blender(value: Iterable[float]) -> Vector:
+    vector = Vector(tuple(float(component) for component in value))
+    return ASSET_TO_BLENDER_3 @ vector
+
+
+def asset_rotation_to_blender(value: Iterable[float]) -> Matrix:
+    asset_rotation = Euler(tuple(float(component) for component in value), "XYZ").to_matrix()
+    return ASSET_TO_BLENDER_3 @ asset_rotation @ ASSET_TO_BLENDER_3.inverted()
+
+
 def create_material(spec: dict[str, Any]) -> bpy.types.Material:
     material = bpy.data.materials.get(spec["id"]) or bpy.data.materials.new(spec["id"])
     material.use_nodes = True
+    material.diffuse_color = hex_to_rgba(spec["baseColor"])
     nodes = material.node_tree.nodes
     principled = nodes.get("Principled BSDF")
     if principled:
@@ -122,9 +147,74 @@ def transform_from_spec(spec: dict[str, Any]) -> Transform:
 
 
 def apply_transform(obj: bpy.types.Object, transform: Transform) -> None:
-    obj.location = transform.position
-    obj.rotation_euler = transform.rotation
-    obj.scale = transform.scale
+    obj.location = asset_vector_to_blender(transform.position)
+    obj.rotation_mode = "QUATERNION"
+    obj.rotation_quaternion = asset_rotation_to_blender(transform.rotation).to_quaternion()
+    # Asset X/Y/Z scale maps to Blender X/Z/Y after the basis conversion.
+    obj.scale = (transform.scale[0], transform.scale[2], transform.scale[1])
+
+
+def create_plane(name: str, size: float) -> bpy.types.Object:
+    half = size / 2
+    # Asset XY plane, normal +Z, converted to Blender XZ plane, normal -Y.
+    vertices = [
+        asset_vector_to_blender((-half, -half, 0)),
+        asset_vector_to_blender((half, -half, 0)),
+        asset_vector_to_blender((half, half, 0)),
+        asset_vector_to_blender((-half, half, 0)),
+    ]
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(vertices, [], [(0, 1, 2, 3)])
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    return obj
+
+
+def create_custom_profile(component: dict[str, Any], name: str) -> bpy.types.Object:
+    dimensions = component.get("dimensions", {})
+    points = dimensions.get("points") or [
+        [-0.5, -0.5, 0], [0.5, -0.5, 0], [0.5, 0.5, 0], [-0.5, 0.5, 0]
+    ]
+    thickness = float(dimensions.get("thickness", max(0.012, float(dimensions.get("radius", 0.02)) * 2)))
+    count = len(points)
+    front_asset = [(float(x), float(y), float(z) + thickness / 2) for x, y, z in points]
+    back_asset = [(float(x), float(y), float(z) - thickness / 2) for x, y, z in points]
+    vertices = [asset_vector_to_blender(point) for point in front_asset + back_asset]
+    faces: list[tuple[int, ...]] = [
+        tuple(range(count)),
+        tuple(reversed(range(count, count * 2))),
+    ]
+    for index in range(count):
+        next_index = (index + 1) % count
+        faces.append((index, next_index, count + next_index, count + index))
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    return obj
+
+
+def add_curve_component(component: dict[str, Any], name: str) -> bpy.types.Object:
+    dimensions = component.get("dimensions", {})
+    points = dimensions.get("points") or [
+        [-0.5, 0, 0], [-0.15, 0.2, 0.1], [0.15, -0.1, 0.2], [0.5, 0, 0]
+    ]
+    curve_data = bpy.data.curves.new(name=f"{name}_curve", type="CURVE")
+    curve_data.dimensions = "3D"
+    curve_data.resolution_u = int(dimensions.get("resolution", 12))
+    curve_data.bevel_depth = float(dimensions.get("radius", 0.04))
+    curve_data.bevel_resolution = int(dimensions.get("bevelResolution", 3))
+    spline = curve_data.splines.new("BEZIER")
+    spline.bezier_points.add(len(points) - 1)
+    for point, coordinate in zip(spline.bezier_points, points):
+        point.co = asset_vector_to_blender(coordinate)
+        point.handle_left_type = "AUTO"
+        point.handle_right_type = "AUTO"
+    obj = bpy.data.objects.new(name, curve_data)
+    bpy.context.scene.collection.objects.link(obj)
+    return obj
 
 
 def add_primitive(component: dict[str, Any], name: str) -> bpy.types.Object:
@@ -175,39 +265,18 @@ def add_primitive(component: dict[str, Any], name: str) -> bpy.types.Object:
             minor_segments=int(dimensions.get("minorSegments", 10)),
         )
         obj = bpy.context.object
-    elif primitive in {"curve-tube", "custom-profile"}:
+        # Three.js/runtime torus lies in asset XY with normal +Z.
+        obj.data.transform(Matrix.Rotation(math.pi / 2, 4, "X"))
+    elif primitive == "curve-tube":
         obj = add_curve_component(component, name)
+    elif primitive == "custom-profile":
+        obj = create_custom_profile(component, name)
     elif primitive == "plane":
-        bpy.ops.mesh.primitive_plane_add(size=float(dimensions.get("size", 1)))
-        obj = bpy.context.object
+        obj = create_plane(name, float(dimensions.get("size", 1)))
     else:
         raise ValueError(f"Unsupported primitive: {primitive}")
 
     obj.name = name
-    return obj
-
-
-def add_curve_component(component: dict[str, Any], name: str) -> bpy.types.Object:
-    dimensions = component.get("dimensions", {})
-    points = dimensions.get("points") or [
-        [-0.5, 0, 0],
-        [-0.15, 0.2, 0.1],
-        [0.15, -0.1, 0.2],
-        [0.5, 0, 0],
-    ]
-    curve_data = bpy.data.curves.new(name=f"{name}_curve", type="CURVE")
-    curve_data.dimensions = "3D"
-    curve_data.resolution_u = int(dimensions.get("resolution", 12))
-    curve_data.bevel_depth = float(dimensions.get("radius", 0.04))
-    curve_data.bevel_resolution = int(dimensions.get("bevelResolution", 3))
-    spline = curve_data.splines.new("BEZIER")
-    spline.bezier_points.add(len(points) - 1)
-    for point, coordinate in zip(spline.bezier_points, points):
-        point.co = coordinate
-        point.handle_left_type = "AUTO"
-        point.handle_right_type = "AUTO"
-    obj = bpy.data.objects.new(name, curve_data)
-    bpy.context.scene.collection.objects.link(obj)
     return obj
 
 
@@ -240,8 +309,7 @@ def repeat_transforms(component: dict[str, Any], seed: int) -> Iterable[Transfor
                 position.y += math.sin(angle) * radius
                 rotation.z += angle
         elif mode == "linear":
-            step = Vector(repeat.get("step", [1, 0, 0]))
-            position += step * index
+            position += Vector(repeat.get("step", [1, 0, 0])) * index
         elif mode == "grid":
             columns = int(repeat.get("columns", max(1, round(math.sqrt(count)))))
             spacing = Vector(repeat.get("spacing", [1, 1, 1]))
@@ -269,7 +337,10 @@ def repeat_transforms(component: dict[str, Any], seed: int) -> Iterable[Transfor
             bounds = repeat.get("bounds", [1, 1, 1])
             position += Vector(tuple(randomizer.uniform(-float(bound), float(bound)) for bound in bounds))
             rotation += Vector(tuple(randomizer.uniform(-0.4, 0.4) for _ in range(3)))
-            scale *= randomizer.uniform(float(repeat.get("scaleMin", 0.85)), float(repeat.get("scaleMax", 1.15)))
+            scale *= randomizer.uniform(
+                float(repeat.get("scaleMin", 0.85)),
+                float(repeat.get("scaleMax", 1.15)),
+            )
 
         yield Transform(tuple(position), tuple(rotation), tuple(scale))
 
@@ -284,10 +355,15 @@ def add_metadata(obj: bpy.types.Object, descriptor: dict[str, Any], component: d
 
 
 def create_socket(socket: dict[str, Any], collection: bpy.types.Collection) -> None:
-    bpy.ops.object.empty_add(type="ARROWS", location=socket["position"])
+    bpy.ops.object.empty_add(type="ARROWS")
     obj = bpy.context.object
     obj.name = f"SOCKET_{socket['id']}"
-    obj.rotation_euler = tuple(math.radians(value) for value in socket["rotation"])
+    transform = Transform(
+        tuple(float(value) for value in socket["position"]),
+        tuple(math.radians(float(value)) for value in socket["rotation"]),
+        (1.0, 1.0, 1.0),
+    )
+    apply_transform(obj, transform)
     obj["socket_purpose"] = socket["purpose"]
     move_to_collection(obj, collection)
 
@@ -321,27 +397,47 @@ def create_asset(descriptor: dict[str, Any], lod_name: str) -> bpy.types.Collect
 
     root["descriptor_schema_version"] = descriptor["schemaVersion"]
     root["asset_title"] = descriptor["title"]
+    root["realm"] = descriptor["realm"]
     root["narrative_function"] = descriptor["narrativeFunction"]
     root["recognition_test"] = descriptor["silhouette"]["recognitionTest"]
+    root["source_coordinate_system"] = "+Y up, -Z forward"
     return root
 
 
-def save_blend(path: Path) -> None:
+def export_output(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    bpy.ops.wm.save_as_mainfile(filepath=str(path.resolve()))
+    suffix = path.suffix.lower()
+    if suffix == ".blend":
+        bpy.ops.wm.save_as_mainfile(filepath=str(path.resolve()))
+    elif suffix == ".glb":
+        bpy.ops.export_scene.gltf(
+            filepath=str(path.resolve()),
+            export_format="GLB",
+            export_yup=True,
+            export_extras=True,
+        )
+    elif suffix == ".gltf":
+        bpy.ops.export_scene.gltf(
+            filepath=str(path.resolve()),
+            export_format="GLTF_SEPARATE",
+            export_yup=True,
+            export_extras=True,
+        )
+    else:
+        raise ValueError(f"Unsupported output extension: {path.suffix}. Use .blend, .glb, or .gltf.")
 
 
 def generate_one(descriptor_path: Path, output_path: Path, lod_name: str) -> None:
     clean_scene()
     descriptor = load_json(descriptor_path)
     create_asset(descriptor, lod_name)
-    save_blend(output_path)
+    export_output(output_path)
 
 
 def main() -> None:
     args = parse_args()
     if args.asset:
-        output = args.output or Path("build/assets") / f"{args.asset.stem.removesuffix('.asset')}.blend"
+        output = args.output or Path("build/assets") / f"{args.asset.stem.removesuffix('.asset')}.{args.format}"
         generate_one(args.asset, output, args.lod)
         return
 
@@ -349,7 +445,7 @@ def main() -> None:
     output_directory = args.output_directory or Path("build/assets")
     for entry in catalog["assets"]:
         descriptor_path = args.catalog.parent / entry["path"]
-        output = output_directory / f"{entry['id']}.blend"
+        output = output_directory / f"{entry['id']}.{args.format}"
         generate_one(descriptor_path, output, args.lod)
 
 
