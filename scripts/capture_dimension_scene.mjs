@@ -31,7 +31,7 @@ const browser = await puppeteer.launch({
 });
 
 const report = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   generatedAt: new Date().toISOString(),
   route: '/dimension?room=02',
   passed: false,
@@ -39,6 +39,8 @@ const report = {
   metadata: null,
   interaction: null,
   journeyStep: null,
+  portalOpen: null,
+  portalClosed: null,
   returnToOverview: null,
   seedRequest: null,
   screenshots: [],
@@ -87,6 +89,7 @@ try {
     layerCount: Number(element.getAttribute('data-layer-count')),
     canvasCount: element.querySelectorAll('canvas').length,
     focusMode: element.getAttribute('data-focus-mode'),
+    portalState: element.getAttribute('data-portal-state'),
     cameraFocus: element.getAttribute('data-camera-focus'),
     cameraPosition: element.getAttribute('data-camera-position'),
     cameraTarget: element.getAttribute('data-camera-target'),
@@ -142,15 +145,56 @@ try {
       selectedAnchor: inspector?.getAttribute('data-selected-anchor') ?? '',
       anchorIndex: Number(inspector?.getAttribute('data-anchor-index')),
       heading: inspector?.querySelector('h2')?.textContent?.trim() ?? '',
+      portalState: runtime.getAttribute('data-portal-state'),
       cameraFocus: runtime.getAttribute('data-camera-focus'),
       cameraPosition: runtime.getAttribute('data-camera-position'),
       cameraTarget: runtime.getAttribute('data-camera-target'),
+      openControl: Boolean(inspector?.querySelector('[data-testid="open-dimension-portal"]')),
     };
   });
 
   const portalPath = path.join(outputDirectory, 'dimension-room-02-portal-horizon.png');
   await page.screenshot({ path: portalPath, captureBeyondViewport: false });
   report.screenshots.push(path.basename(portalPath));
+
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-portal-state') === 'open',
+    { timeout: 20_000 },
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'portal-horizon:open',
+    { timeout: 30_000 },
+  );
+  await delay(900);
+  report.portalOpen = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
+    portalState: runtime.getAttribute('data-portal-state'),
+    focusMode: runtime.getAttribute('data-focus-mode'),
+    cameraFocus: runtime.getAttribute('data-camera-focus'),
+    cameraPosition: runtime.getAttribute('data-camera-position'),
+    cameraTarget: runtime.getAttribute('data-camera-target'),
+    thresholdClass: runtime.classList.contains('dimension-threshold-open'),
+    closeControl: Boolean(document.querySelector('[data-testid="close-dimension-portal"]')),
+  }));
+
+  const portalOpenPath = path.join(outputDirectory, 'dimension-room-02-portal-open.png');
+  await page.screenshot({ path: portalOpenPath, captureBeyondViewport: false });
+  report.screenshots.push(path.basename(portalOpenPath));
+
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-portal-state') === 'closed',
+    { timeout: 20_000 },
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'portal-horizon',
+    { timeout: 30_000 },
+  );
+  report.portalClosed = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
+    portalState: runtime.getAttribute('data-portal-state'),
+    selectedAnchor: document.querySelector('[data-testid="dimension-inspector"]')?.getAttribute('data-selected-anchor') ?? '',
+    cameraFocus: runtime.getAttribute('data-camera-focus'),
+  }));
 
   await page.keyboard.press('Escape');
   await page.waitForFunction(
@@ -163,6 +207,7 @@ try {
   );
   report.returnToOverview = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
     focusMode: runtime.getAttribute('data-focus-mode'),
+    portalState: runtime.getAttribute('data-portal-state'),
     cameraFocus: runtime.getAttribute('data-camera-focus'),
     cameraPosition: runtime.getAttribute('data-camera-position'),
     cameraTarget: runtime.getAttribute('data-camera-target'),
@@ -187,6 +232,7 @@ try {
     webglCanvasMounted: report.metadata?.canvasCount === 1,
     seededArtworkFetched: report.seedRequest?.ok === true && report.seedRequest?.status === 200,
     overviewCameraReported: report.metadata?.focusMode === 'overview'
+      && report.metadata?.portalState === 'closed'
       && report.metadata?.cameraFocus === 'overview'
       && typeof report.metadata?.cameraPosition === 'string'
       && typeof report.metadata?.cameraTarget === 'string',
@@ -203,15 +249,27 @@ try {
     keyboardJourneyAdvanced: report.journeyStep?.selectedAnchor === 'portal-horizon'
       && report.journeyStep?.anchorIndex === 6
       && report.journeyStep?.heading === 'Portal horizon'
+      && report.journeyStep?.portalState === 'closed'
       && report.journeyStep?.cameraFocus === 'portal-horizon'
-      && report.journeyStep?.cameraTarget !== report.interaction?.cameraTarget,
-    escapeReturnedToOverview: report.returnToOverview?.focusMode === 'overview'
+      && report.journeyStep?.openControl === true,
+    portalOpenedByKeyboard: report.portalOpen?.portalState === 'open'
+      && report.portalOpen?.focusMode === 'anchor'
+      && report.portalOpen?.cameraFocus === 'portal-horizon:open'
+      && report.portalOpen?.cameraPosition !== report.journeyStep?.cameraPosition
+      && report.portalOpen?.cameraTarget !== report.journeyStep?.cameraTarget
+      && report.portalOpen?.thresholdClass === true
+      && report.portalOpen?.closeControl === true,
+    firstEscapeClosedPortalOnly: report.portalClosed?.portalState === 'closed'
+      && report.portalClosed?.selectedAnchor === 'portal-horizon'
+      && report.portalClosed?.cameraFocus === 'portal-horizon',
+    secondEscapeReturnedToOverview: report.returnToOverview?.focusMode === 'overview'
+      && report.returnToOverview?.portalState === 'closed'
       && report.returnToOverview?.cameraFocus === 'overview'
       && report.returnToOverview?.cameraPosition === report.metadata?.cameraPosition
       && report.returnToOverview?.cameraTarget === report.metadata?.cameraTarget,
     unsupportedRoomFailsExplicitly: explicitFailure.roomCode === '99'
       && explicitFailure.message.includes('Unknown room code'),
-    evidenceCaptured: report.screenshots.length === 3,
+    evidenceCaptured: report.screenshots.length === 4,
     browserClean: report.consoleErrors.length === 0
       && report.pageErrors.length === 0
       && report.requestFailures.length === 0,
