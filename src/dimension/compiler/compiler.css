@@ -1,0 +1,472 @@
+:root {
+  color-scheme: dark;
+}
+
+.image-world-compiler-shell {
+  min-height: 100vh;
+  padding: clamp(1rem, 2.5vw, 2.5rem);
+  background:
+    radial-gradient(circle at 14% 10%, rgba(109, 201, 255, 0.12), transparent 28rem),
+    radial-gradient(circle at 82% 4%, rgba(159, 124, 255, 0.16), transparent 32rem),
+    #070a13;
+  color: #f8ecdd;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.image-world-compiler-header,
+.image-world-compiler-controls,
+.image-world-panel-heading,
+.image-world-review-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.image-world-compiler-header {
+  margin: 0 auto 1.3rem;
+  max-width: 1500px;
+  align-items: flex-end;
+}
+
+.image-world-compiler-header span,
+.image-world-panel-heading span,
+.image-world-review-panel > span,
+.image-world-anchor-inspector > span {
+  color: #e8bd7b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.image-world-compiler-header h1,
+.image-world-panel-heading h2 {
+  margin: 0.2rem 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.image-world-compiler-header h1 {
+  font-size: clamp(2rem, 5vw, 4.8rem);
+  line-height: 0.95;
+}
+
+.image-world-compiler-header p {
+  max-width: 48rem;
+  margin: 0.7rem 0 0;
+  color: rgba(248, 236, 221, 0.68);
+}
+
+.image-world-compiler-header nav {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.image-world-compiler-header a,
+.image-world-compiler-controls button,
+.image-world-review-actions button {
+  border: 1px solid rgba(231, 189, 120, 0.32);
+  border-radius: 0.35rem;
+  background: rgba(14, 17, 31, 0.74);
+  color: #f8ecdd;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.image-world-compiler-header a {
+  padding: 0.65rem 0.8rem;
+}
+
+.image-world-compiler-controls {
+  max-width: 1500px;
+  margin: 0 auto 1rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.55rem;
+  background: rgba(10, 13, 25, 0.78);
+  box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.26);
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.image-world-compiler-controls label {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 9rem;
+}
+
+.image-world-compiler-controls label > span,
+.image-world-anchor-inspector label > span {
+  color: rgba(248, 236, 221, 0.56);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.image-world-compiler-controls input,
+.image-world-compiler-controls select,
+.image-world-anchor-inspector select {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.3rem;
+  background: #101522;
+  color: #f8ecdd;
+  font: inherit;
+}
+
+.image-world-upload {
+  position: relative;
+  min-width: min(21rem, 100%) !important;
+}
+
+.image-world-upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-world-upload strong {
+  overflow: hidden;
+  padding: 0.58rem 0.7rem;
+  border: 1px dashed rgba(109, 201, 255, 0.4);
+  border-radius: 0.3rem;
+  color: #a9dcff;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-world-compiler-controls button,
+.image-world-review-actions button {
+  min-height: 2.35rem;
+  padding: 0.52rem 0.72rem;
+}
+
+.image-world-compiler-controls button:hover,
+.image-world-compiler-header a:hover,
+.image-world-review-actions button:hover,
+.image-world-review-actions button.active {
+  border-color: #e8bd7b;
+  background: rgba(53, 39, 30, 0.9);
+}
+
+.image-world-compiler-controls button.secondary,
+.image-world-review-actions button.secondary {
+  border-color: rgba(109, 201, 255, 0.26);
+  color: #afdfff;
+}
+
+.image-world-review-actions button.danger {
+  border-color: rgba(255, 120, 132, 0.34);
+  color: #ffb1b8;
+}
+
+.image-world-review-actions button.danger.active {
+  background: rgba(91, 30, 41, 0.9);
+}
+
+.image-world-compiler-controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.image-world-compiler-error {
+  max-width: 1500px;
+  margin: 0 auto 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(255, 100, 115, 0.42);
+  border-radius: 0.4rem;
+  background: rgba(74, 20, 30, 0.62);
+  color: #ffd6d9;
+}
+
+.image-world-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(20rem, 0.75fr);
+  gap: 1rem;
+  max-width: 1500px;
+  margin: 0 auto 1rem;
+}
+
+.image-world-source-panel,
+.image-world-review-panel,
+.image-world-preview-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.55rem;
+  background: rgba(10, 13, 25, 0.78);
+  box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.26);
+}
+
+.image-world-source-panel,
+.image-world-review-panel {
+  padding: 0.9rem;
+}
+
+.image-world-panel-heading {
+  margin-bottom: 0.75rem;
+  align-items: flex-end;
+}
+
+.image-world-panel-heading h2 {
+  font-size: 1.35rem;
+}
+
+.image-world-panel-heading > strong,
+.image-world-panel-heading > p {
+  margin: 0;
+  color: rgba(248, 236, 221, 0.58);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.image-world-overlay-toggles {
+  display: flex;
+  gap: 0.45rem 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.image-world-overlay-toggles label {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: rgba(248, 236, 221, 0.64);
+  font-size: 0.68rem;
+  text-transform: capitalize;
+}
+
+.image-world-source-frame {
+  position: relative;
+  overflow: hidden;
+  min-height: 24rem;
+  border-radius: 0.35rem;
+  background: #04060d;
+}
+
+.image-world-source-frame > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.image-world-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.image-world-overlay-anchor {
+  pointer-events: all;
+  cursor: pointer;
+  outline: none;
+}
+
+.image-world-source-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 6, 13, 0.72);
+  color: #e8bd7b;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.image-world-review-panel {
+  max-height: 48rem;
+  overflow: auto;
+}
+
+.image-world-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.image-world-stat-grid > div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.image-world-stat-grid strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.image-world-stat-grid span {
+  color: rgba(248, 236, 221, 0.5);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.image-world-anchor-review h3,
+.image-world-anchor-inspector h3,
+.image-world-rationale h3,
+.image-world-warnings h3 {
+  margin: 0 0 0.5rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.image-world-anchor-list {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.image-world-anchor-list button {
+  display: grid;
+  grid-template-columns: 4.3rem 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.3rem;
+  background: rgba(255, 255, 255, 0.025);
+  color: #f8ecdd;
+  text-align: left;
+  cursor: pointer;
+}
+
+.image-world-anchor-list button:hover,
+.image-world-anchor-list button.selected {
+  border-color: rgba(232, 189, 123, 0.62);
+  background: rgba(232, 189, 123, 0.08);
+}
+
+.image-world-anchor-list button.rejected {
+  opacity: 0.48;
+}
+
+.image-world-anchor-list span,
+.image-world-anchor-list small {
+  color: rgba(248, 236, 221, 0.52);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.image-world-anchor-list strong {
+  overflow: hidden;
+  font-size: 0.74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-world-anchor-inspector,
+.image-world-rationale,
+.image-world-warnings {
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.image-world-anchor-inspector p,
+.image-world-rationale p,
+.image-world-warnings p {
+  color: rgba(248, 236, 221, 0.64);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.image-world-anchor-inspector label {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.7rem 0;
+}
+
+.image-world-review-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.image-world-warnings p {
+  padding: 0.5rem;
+  border-left: 2px solid rgba(255, 180, 100, 0.54);
+  background: rgba(255, 180, 100, 0.045);
+}
+
+.image-world-preview-panel {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0.9rem;
+}
+
+.image-world-preview {
+  height: min(62vh, 42rem);
+  min-height: 30rem;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  background: #080b16;
+}
+
+.image-world-preview-placeholder {
+  display: grid;
+  min-height: 24rem;
+  place-items: center;
+  color: rgba(248, 236, 221, 0.48);
+}
+
+@media (max-width: 1050px) {
+  .image-world-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .image-world-review-panel {
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .image-world-compiler-header,
+  .image-world-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .image-world-compiler-header nav,
+  .image-world-overlay-toggles {
+    justify-content: flex-start;
+  }
+
+  .image-world-compiler-controls label,
+  .image-world-upload {
+    width: 100%;
+  }
+
+  .image-world-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .image-world-anchor-list button {
+    grid-template-columns: 3.5rem 1fr;
+  }
+
+  .image-world-anchor-list small {
+    grid-column: 2;
+  }
+
+  .image-world-source-frame {
+    min-height: 14rem;
+  }
+
+  .image-world-preview {
+    min-height: 24rem;
+  }
+}
