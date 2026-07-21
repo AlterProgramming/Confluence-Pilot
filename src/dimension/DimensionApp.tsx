@@ -51,10 +51,14 @@ export function DimensionApp() {
         : Dimension.entrancesFor(dimension.id).find((candidate) => candidate.kind === 'route') ?? null;
       return { dimension, entrance, error: null };
     } catch (error) {
+      const rawMessage = error instanceof Error ? error.message : 'Unable to initialize the dimension.';
+      const message = request.roomEntranceId && !request.dimensionId
+        ? `Unknown room code "${request.roomEntranceId}". ${rawMessage}`
+        : rawMessage;
       return {
         dimension: null,
         entrance: null as DimensionEntrance | null,
-        error: error instanceof Error ? error.message : 'Unable to initialize the dimension.',
+        error: message,
       };
     }
   }, [request.dimensionId, request.roomEntranceId]);
@@ -137,6 +141,7 @@ export function DimensionApp() {
       <main
         className="dimension-error"
         data-testid="dimension-error"
+        data-room-code={request.roomEntranceId ?? ''}
         data-requested-dimension={request.dimensionId ?? ''}
         data-requested-room-entrance={request.roomEntranceId ?? ''}
       >
