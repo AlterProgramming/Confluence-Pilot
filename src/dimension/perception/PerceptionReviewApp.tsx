@@ -267,8 +267,9 @@ export function PerceptionReviewApp() {
       setError('This bundle cannot enter the world until it has a walkable surface and an approved spawn candidate.');
       return;
     }
-    reviewedBundle.validation.status = 'approved';
-    enterPerceptionWorld(reviewedBundle);
+    const approvedBundle = structuredClone(reviewedBundle);
+    approvedBundle.validation.status = 'approved';
+    enterPerceptionWorld(approvedBundle);
   }
 
   async function importBundle(file: File): Promise<void> {
