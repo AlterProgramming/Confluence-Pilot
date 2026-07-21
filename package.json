@@ -17,6 +17,7 @@
     "evidence:dimension-authoring": "node scripts/capture_dimension_authoring.mjs http://127.0.0.1:4178",
     "evidence:image-world-compiler": "node scripts/capture_image_world_compiler.mjs http://127.0.0.1:4178",
     "evidence:traversable-world": "node scripts/capture_traversable_world.mjs http://127.0.0.1:4178",
+    "evidence:perception-integration": "node scripts/capture_perception_integration.mjs http://127.0.0.1:4178",
     "evidence:dimension-lite": "node scripts/capture_weight_dimension.mjs http://127.0.0.1:4179",
     "audio:generate": "node scripts/generate_audio.mjs",
     "audio:generate:sfx": "node scripts/generate_audio.mjs --skip-music sfx",
@@ -26,11 +27,12 @@
     "validate:hero-camera": "node scripts/validate_hero_camera.mjs",
     "assets:inventory": "node scripts/asset_inventory.mjs",
     "validate": "npm run generate:semantic-heroes && npm run typecheck && npm run lint && npm run validate:rooms && npm run validate:hero-camera",
-    "validate:dimension": "node scripts/validate_dimension_scene.mjs && node scripts/validate_world_fabric.mjs && node scripts/validate_image_world_compiler.mjs && node scripts/validate_traversable_world.mjs",
+    "validate:dimension": "node scripts/validate_dimension_scene.mjs && node scripts/validate_world_fabric.mjs && node scripts/validate_image_world_compiler.mjs && node scripts/validate_traversable_world.mjs && node scripts/validate_perception_integration.mjs",
     "validate:dimension:assets": "node scripts/validate_dimension_source_assets.mjs",
     "validate:world-fabric": "node scripts/validate_world_fabric.mjs",
     "validate:image-world-compiler": "node scripts/validate_image_world_compiler.mjs",
     "validate:traversable-world": "node scripts/validate_traversable_world.mjs",
+    "validate:perception-integration": "node scripts/validate_perception_integration.mjs",
     "validate:dimension:visual": "node scripts/validate_dimension_visual_review.mjs"
   },
   "dependencies": {
