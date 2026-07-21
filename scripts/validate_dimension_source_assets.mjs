@@ -151,7 +151,7 @@ try {
     readFile(schemaPath, 'utf8'),
     readFile(generatorPath, 'utf8'),
     readFile('src/dimension/ProceduralWorldArchitecture.tsx', 'utf8'),
-    readFile('src/dimension/ParallelRemembranceArchitecture.tsx', 'utf8'),
+    readFile('src/dimension/ProceduralDestinationArchitecture.tsx', 'utf8'),
   ]);
   const catalog = JSON.parse(catalogText);
   JSON.parse(schemaText);
