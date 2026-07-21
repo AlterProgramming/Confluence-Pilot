@@ -84,7 +84,12 @@ export function TraversableWorldApp() {
   const nearestAnchor = draft?.proposals.anchors.find((anchor) => anchor.id === telemetry?.nearestAnchorId) ?? null;
   const interactionAnchor = draft?.proposals.anchors.find((anchor) => anchor.id === telemetry?.interactionAnchorId) ?? null;
   const nearestDistance = telemetry?.nearestAnchorDistance;
-  const canInteract = Boolean(nearestAnchor && nearestDistance !== null && nearestDistance <= 2.55);
+  const canInteract = Boolean(
+    nearestAnchor
+    && nearestDistance !== null
+    && nearestDistance !== undefined
+    && nearestDistance <= 2.55,
+  );
 
   const resetPlayer = () => {
     window.dispatchEvent(new Event('confluence:reset-player'));
