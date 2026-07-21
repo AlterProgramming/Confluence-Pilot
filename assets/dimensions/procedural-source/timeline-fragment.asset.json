@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "id": "timeline-fragment",
+  "title": "Timeline Fragment",
+  "realm": "parallel-remembrance",
+  "category": "timeline-debris",
+  "revision": 1,
+  "description": "A small floating remnant of an unrealized scene, shaped as a thin faceted plate with one preserved edge, one torn edge, an embedded temporal image layer, exposed luminous strata, and a trailing fiber. Hundreds may form drifting fields, but hero fragments remain individually readable as pieces of interrupted time.",
+  "narrativeFunction": "Timeline fragments fill the air between major structures with meaningful debris rather than generic particles. They create motion parallax, reveal glimpses of alternate events, collect around possibility nodes, and visually connect archive pages to garden seeds.",
+  "designKeywords": ["interrupted time", "floating memory plate", "torn temporal edge", "embedded scene", "luminous strata", "afterimage debris", "thin ceramic", "slow drift"],
+  "scale": {"unit": "meter", "bounds": {"width": 0.62, "height": 0.42, "depth": 0.07}, "heroScale": 1, "modularScale": 0.06},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0,0,0],
+    "originMeaning": "The origin is the fragment's center of mass rather than its geometric center, so tumbling feels weighted toward the thicker preserved edge."
+  },
+  "silhouette": {
+    "primary": "A thin irregular quadrilateral with one clean preserved edge and one visibly torn, stepped, or missing edge.",
+    "secondary": "A small offset corner tab or split layer breaks the plate outline and implies several temporal strata occupying nearby positions.",
+    "tertiary": "Embedded scene lines, luminous edge laminations, tiny glyphs, one trailing fiber, scratches, punctures, and slight surface warping carry close-up information.",
+    "negativeSpace": "One notch or puncture breaks the plate silhouette. Layer separation near the torn edge creates a second fine gap visible in grazing light.",
+    "recognitionTest": "At medium distance the asset reads as a thin broken piece of recorded time, not as a rock, leaf, paper square, glass shard, or generic glowing particle."
+  },
+  "materials": [
+    {
+      "id": "fragment-shell",
+      "role": "Preserved temporal plate",
+      "baseColor": "#5C526B",
+      "metallic": 0.08,
+      "roughness": 0.58,
+      "emission": {"color": "#6E5480", "strength": 0.16},
+      "surfaceDescription": "Thin ceramic-glass shell with a matte face, polished preserved edge, fine scratches, subtle warping, and clearly layered thickness at the tear."
+    },
+    {
+      "id": "temporal-image",
+      "role": "Embedded alternate-scene layer",
+      "baseColor": "#726390",
+      "metallic": 0,
+      "roughness": 0.22,
+      "emission": {"color": "#B9A4E7", "strength": 1.1},
+      "surfaceDescription": "Low-contrast translucent image field with parallax-separated line work, intermittent silhouettes, and depth that changes with viewing angle rather than a flat photograph."
+    },
+    {
+      "id": "exposed-time",
+      "role": "Torn luminous strata and trailing fiber",
+      "baseColor": "#4C7990",
+      "metallic": 0.02,
+      "roughness": 0.18,
+      "emission": {"color": "#86DDF2", "strength": 1.75},
+      "surfaceDescription": "Bright cyan-violet internal layers visible only at broken edges, punctures, delamination gaps, and the fine trailing temporal fiber."
+    }
+  ],
+  "components": [
+    {
+      "id": "plate-body",
+      "primitive": "custom-profile",
+      "role": "Thin irregular preserved shell forming the primary fragment silhouette.",
+      "dimensions": {"points": [[-0.31,-0.15,0],[-0.26,0.2,0],[0.15,0.21,0],[0.31,0.05,0],[0.19,-0.2,0],[-0.08,-0.16,0]], "radius": 0.018, "resolution": 6, "bevelResolution": 2},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "fragment-shell",
+      "detail": "Extrude to a thin layered depth, preserve one smooth edge, create a stepped torn edge, and model one notch or puncture into the profile.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "image-layer",
+      "primitive": "plane",
+      "role": "Inset temporal scene surface on the protected face.",
+      "dimensions": {"size": 0.42},
+      "transform": {"position": [0.02,0,0.038], "rotation": [0,0,3], "scale": [1.15,0.72,1]},
+      "material": "temporal-image",
+      "detail": "Crop image geometry inside the shell boundary, offset internal line layers for parallax, and keep content abstract enough to imply a scene without becoming a literal screen.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "edge-strata",
+      "primitive": "curve-tube",
+      "role": "Luminous exposed layer tracing selected torn edges.",
+      "dimensions": {"points": [[-0.08,-0.16,0.02],[0.12,-0.2,0.02],[0.24,-0.12,0.02],[0.31,0.05,0.02]], "radius": 0.012, "resolution": 8, "bevelResolution": 2},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "exposed-time",
+      "detail": "Emission is strongest at two discontinuities, fades before reaching the preserved edge, and reveals at least three visible material laminations.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "corner-tab",
+      "primitive": "box",
+      "role": "Offset split layer creating a secondary silhouette break.",
+      "dimensions": {"width": 0.14, "height": 0.018, "depth": 0.11},
+      "transform": {"position": [-0.22,0.17,-0.02], "rotation": [4,12,-8], "scale": [1,1,1]},
+      "material": "fragment-shell",
+      "detail": "The tab appears partially delaminated from the plate, exposes a thin light gap, and preserves one common attachment edge.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "trailing-fiber",
+      "primitive": "curve-tube",
+      "role": "Fine temporal thread extending behind the fragment.",
+      "dimensions": {"points": [[-0.3,0.02,0],[-0.46,-0.02,-0.05],[-0.55,0.08,-0.12],[-0.62,-0.04,-0.18]], "radius": 0.006, "resolution": 10, "bevelResolution": 2},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "exposed-time",
+      "detail": "The fiber is irregular, tapers visually through emission, and follows weighted tumbling without crossing the image face.",
+      "repeat": {"mode": "none", "count": 1}
+    }
+  ],
+  "generation": {
+    "seed": 12077,
+    "deterministic": true,
+    "assemblyOrder": ["Author irregular thin plate profile", "Extrude layered shell and torn edge", "Insert temporal image below the protected face", "Trace exposed luminous strata", "Add corner tab, puncture, and trailing fiber"],
+    "deformationRules": [
+      "Warp the complete plate by no more than four degrees so it remains recorded or manufactured rather than organic.",
+      "Offset center of mass toward the preserved edge by varying shell thickness.",
+      "Separate torn strata by one to three millimeters in hero versions to catch fine light gaps."
+    ],
+    "variationRules": [
+      "Profile families include broken rectangle, narrow trapezoid, and split oval while retaining one preserved and one torn edge.",
+      "Embedded image content, glyph density, puncture position, and edge-emission pattern vary by fragment.",
+      "Field instances scale from thirty to one hundred forty percent and use deterministic tumbling phase."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready thin-shell topology with layered edge construction, a separate temporal-image surface, detachable corner tab, curve-based luminous strata, and instancing-friendly pivots.",
+    "bevel": "Use a narrow preserved-edge bevel, intentionally irregular torn-edge layers, and enough thickness for the plate to catch grazing light without reading as heavy stone.",
+    "subdivision": "Use minimal subdivision for the shell warp and image surface. Preserve deliberately faceted broken corners and tab separation.",
+    "normals": "Smooth the protected face while retaining hard torn-edge breaks and correct two-sided shading on extremely thin surfaces.",
+    "uv": "Use unique front-face UVs for temporal imagery, narrow edge-strip UVs for strata, and reusable back-face wear coordinates.",
+    "watertightParts": ["plate shell", "corner tab"]
+  },
+  "animation": {
+    "channels": ["fragment.tumble", "fragment.drift", "temporal-image.parallax", "edge-strata.pulse", "trailing-fiber.secondary_motion"],
+    "loopLengthSeconds": 17,
+    "motionCharacter": "Fragments drift with slow weighted tumbling, occasionally pause as if caught in an invisible current, and reveal internal image parallax only when viewing angle changes.",
+    "constraints": ["Tumble remains below one full rotation per twelve seconds.", "The image layer stays inside the shell boundary.", "The trailing fiber never crosses the plate face."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 9000, "preserve": ["layered torn edge", "image parallax", "corner tab gap", "puncture", "fiber"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 2800, "preserve": ["irregular profile", "image plane", "torn-edge glow", "corner tab"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 420, "preserve": ["broken plate silhouette", "one cyan torn edge", "temporal-image color break"]}
+  ],
+  "collision": {
+    "mode": "none",
+    "description": "Timeline fragments are non-colliding visual debris. Hero inspection uses a separate proximity or selection volume."
+  },
+  "sockets": [
+    {"id": "center-of-mass", "purpose": "Physics or deterministic drift pivot biased toward the preserved edge.", "position": [-0.05,0.01,0], "rotation": [0,0,0]},
+    {"id": "image-focus", "purpose": "Optional camera or content inspection target above the embedded temporal scene.", "position": [0.02,0,0.06], "rotation": [0,0,0]},
+    {"id": "fiber-root", "purpose": "Attachment root for the trailing temporal thread.", "position": [-0.3,0.02,0], "rotation": [0,0,0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show irregular profile, preserved edge, torn stepped edge, puncture or notch, embedded image, and split corner tab.",
+    "side": "Emphasize extremely thin layered construction, image inset depth, tab delamination, and fiber root.",
+    "top": "Reveal subtle plate warp, center-of-mass bias, and separation among shell, image, and exposed strata.",
+    "threeQuarter": "Use grazing light and a dark background to show temporal image, torn luminous layers, and thin material thickness simultaneously.",
+    "scaleCue": "Include a human hand holding a hero fragment; default size resembles a small photograph or tablet shard."
+  },
+  "validation": [
+    "The silhouette includes one preserved edge, one torn edge, and at least one notch or puncture.",
+    "The temporal image remains inside the shell boundary and shows visible parallax depth.",
+    "Exposed luminous strata occur only along damaged regions.",
+    "The corner tab creates a real shadow gap and does not merge into the plate body.",
+    "Weighted tumbling uses the center-of-mass socket rather than geometric center.",
+    "LOD2 preserves irregular plate profile, one torn-edge emission line, and image color break.",
+    "Large fields support deterministic variation without identical neighboring profiles."
+  ]
+}
