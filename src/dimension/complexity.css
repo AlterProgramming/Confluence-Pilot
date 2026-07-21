@@ -8,7 +8,7 @@
   position: fixed !important;
   inset: 0;
   z-index: 2;
-  mix-blend-mode: normal;
+  mix-blend-mode: screen;
   touch-action: none;
   user-select: none;
 }
@@ -19,7 +19,7 @@
 
 @media (max-width: 900px) {
   .dimension-complexity-overlay {
-    opacity: 0.82;
+    opacity: 0.72;
   }
 }
 
