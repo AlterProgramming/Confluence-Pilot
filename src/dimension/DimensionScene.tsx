@@ -4,6 +4,32 @@ import { AdditiveBlending, CatmullRomCurve3, DoubleSide, Group, Vector3 } from '
 import { useMemo, useRef, useState } from 'react';
 import type { DimensionAnchor, DimensionPath, DimensionSceneSpec } from './Dimension';
 
+export interface CameraTravelState {
+  focusId: string;
+  position: [number, number, number];
+  target: [number, number, number];
+}
+
+interface OrbitControlsLike {
+  target: Vector3;
+  enabled: boolean;
+  update: () => void;
+}
+
+interface CameraTransition {
+  focusId: string;
+  elapsed: number;
+  duration: number;
+  fromPosition: Vector3;
+  toPosition: Vector3;
+  fromTarget: Vector3;
+  toTarget: Vector3;
+}
+
+function vectorTuple(vector: Vector3): [number, number, number] {
+  return [vector.x, vector.y, vector.z];
+}
+
 function SeedBackdrop({ scene }: { scene: DimensionSceneSpec }) {
   const texture = useTexture(scene.seedImageUrl);
   return (
@@ -251,14 +277,84 @@ function LanternBasin({ scene }: { scene: DimensionSceneSpec }) {
   );
 }
 
+function GuidedCamera({
+  scene,
+  selectedAnchorId,
+  onTravelComplete,
+}: {
+  scene: DimensionSceneSpec;
+  selectedAnchorId: string | null;
+  onTravelComplete: (state: CameraTravelState) => void;
+}) {
+  const lastFocusId = useRef<string | undefined>(undefined);
+  const transition = useRef<CameraTransition | null>(null);
+
+  useFrame((rootState, delta) => {
+    const controls = (rootState as typeof rootState & { controls?: OrbitControlsLike }).controls;
+    if (!controls) return;
+
+    const focusId = selectedAnchorId ?? 'overview';
+    if (lastFocusId.current !== focusId) {
+      lastFocusId.current = focusId;
+      const anchor = scene.anchors.find((candidate) => candidate.id === selectedAnchorId);
+      const toTarget = anchor ? new Vector3(...anchor.position) : new Vector3(...scene.camera.target);
+      let toPosition = new Vector3(...scene.camera.position);
+
+      if (anchor) {
+        const viewingDirection = rootState.camera.position.clone().sub(controls.target);
+        if (viewingDirection.lengthSq() < 0.001) viewingDirection.set(0, 0.12, 1);
+        viewingDirection.normalize();
+        const distance = anchor.kind === 'city' ? 7.8 : anchor.kind === 'portal' ? 7.2 : 6.8;
+        toPosition = toTarget.clone().add(viewingDirection.multiplyScalar(distance));
+        toPosition.y += anchor.kind === 'city' ? 0.7 : 0.32;
+      }
+
+      transition.current = {
+        focusId,
+        elapsed: 0,
+        duration: anchor ? 1.45 : 1.2,
+        fromPosition: rootState.camera.position.clone(),
+        toPosition,
+        fromTarget: controls.target.clone(),
+        toTarget,
+      };
+      controls.enabled = false;
+    }
+
+    const active = transition.current;
+    if (!active) return;
+
+    active.elapsed += delta;
+    const progress = Math.min(1, active.elapsed / active.duration);
+    const eased = progress * progress * (3 - 2 * progress);
+    rootState.camera.position.lerpVectors(active.fromPosition, active.toPosition, eased);
+    controls.target.lerpVectors(active.fromTarget, active.toTarget, eased);
+    controls.update();
+
+    if (progress >= 1) {
+      controls.enabled = true;
+      transition.current = null;
+      onTravelComplete({
+        focusId: active.focusId,
+        position: vectorTuple(rootState.camera.position),
+        target: vectorTuple(controls.target),
+      });
+    }
+  });
+
+  return null;
+}
+
 function DimensionWorld({
   scene,
   selectedAnchorId,
   onSelectAnchor,
+  onCameraTravelComplete,
 }: {
   scene: DimensionSceneSpec;
   selectedAnchorId: string | null;
   onSelectAnchor: (anchorId: string) => void;
+  onCameraTravelComplete: (state: CameraTravelState) => void;
 }) {
   const parallax = useRef<Group>(null);
   useFrame((state, delta) => {
@@ -304,11 +400,16 @@ function DimensionWorld({
         enableDamping
         dampingFactor={0.055}
         enablePan={false}
-        minDistance={8.8}
-        maxDistance={18}
-        minPolarAngle={Math.PI * 0.28}
-        maxPolarAngle={Math.PI * 0.72}
+        minDistance={5.5}
+        maxDistance={20}
+        minPolarAngle={Math.PI * 0.24}
+        maxPolarAngle={Math.PI * 0.76}
         target={scene.camera.target}
+      />
+      <GuidedCamera
+        scene={scene}
+        selectedAnchorId={selectedAnchorId}
+        onTravelComplete={onCameraTravelComplete}
       />
     </>
   );
@@ -318,10 +419,12 @@ export function DimensionScene({
   scene,
   selectedAnchorId,
   onSelectAnchor,
+  onCameraTravelComplete,
 }: {
   scene: DimensionSceneSpec;
   selectedAnchorId: string | null;
   onSelectAnchor: (anchorId: string) => void;
+  onCameraTravelComplete: (state: CameraTravelState) => void;
 }) {
   return (
     <Canvas
@@ -335,6 +438,7 @@ export function DimensionScene({
         scene={scene}
         selectedAnchorId={selectedAnchorId}
         onSelectAnchor={onSelectAnchor}
+        onCameraTravelComplete={onCameraTravelComplete}
       />
     </Canvas>
   );

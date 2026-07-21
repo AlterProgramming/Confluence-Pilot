@@ -31,13 +31,14 @@ const browser = await puppeteer.launch({
 });
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: new Date().toISOString(),
   route: '/dimension?room=02',
   passed: false,
   fatalError: null,
   metadata: null,
   interaction: null,
+  returnToOverview: null,
   seedRequest: null,
   screenshots: [],
   consoleErrors: [],
@@ -71,7 +72,11 @@ try {
     const canvas = document.querySelector('.dimension-canvas canvas');
     return canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0;
   }, { timeout: 30_000 });
-  await delay(4500);
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'overview',
+    { timeout: 20_000 },
+  );
+  await delay(3200);
 
   report.metadata = await page.$eval('[data-testid="dimension-runtime"]', (element) => ({
     dimensionId: element.getAttribute('data-dimension-id'),
@@ -80,6 +85,9 @@ try {
     pathCount: Number(element.getAttribute('data-path-count')),
     layerCount: Number(element.getAttribute('data-layer-count')),
     canvasCount: element.querySelectorAll('canvas').length,
+    cameraFocus: element.getAttribute('data-camera-focus'),
+    cameraPosition: element.getAttribute('data-camera-position'),
+    cameraTarget: element.getAttribute('data-camera-target'),
   }));
 
   const overviewPath = path.join(outputDirectory, 'dimension-room-02-overview.png');
@@ -91,12 +99,22 @@ try {
     () => document.querySelector('[data-testid="dimension-inspector"]')?.getAttribute('data-selected-anchor') === 'lantern-city',
     { timeout: 20_000 },
   );
-  await delay(850);
-  report.interaction = await page.$eval('[data-testid="dimension-inspector"]', (element) => ({
-    selectedAnchor: element.getAttribute('data-selected-anchor'),
-    heading: element.querySelector('h2')?.textContent?.trim() ?? '',
-    description: element.querySelector('p')?.textContent?.trim() ?? '',
-  }));
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'lantern-city',
+    { timeout: 30_000 },
+  );
+  await delay(650);
+  report.interaction = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => {
+    const inspector = document.querySelector('[data-testid="dimension-inspector"]');
+    return {
+      selectedAnchor: inspector?.getAttribute('data-selected-anchor') ?? '',
+      heading: inspector?.querySelector('h2')?.textContent?.trim() ?? '',
+      description: inspector?.querySelector('p')?.textContent?.trim() ?? '',
+      cameraFocus: runtime.getAttribute('data-camera-focus'),
+      cameraPosition: runtime.getAttribute('data-camera-position'),
+      cameraTarget: runtime.getAttribute('data-camera-target'),
+    };
+  });
 
   const selectedPath = path.join(outputDirectory, 'dimension-room-02-lantern-city.png');
   await page.screenshot({ path: selectedPath, captureBeyondViewport: false });
@@ -107,6 +125,15 @@ try {
     () => document.querySelector('[data-testid="dimension-inspector"]')?.getAttribute('data-selected-anchor') === '',
     { timeout: 20_000 },
   );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'overview',
+    { timeout: 30_000 },
+  );
+  report.returnToOverview = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
+    cameraFocus: runtime.getAttribute('data-camera-focus'),
+    cameraPosition: runtime.getAttribute('data-camera-position'),
+    cameraTarget: runtime.getAttribute('data-camera-target'),
+  }));
 
   const invalidPage = await browser.newPage();
   await invalidPage.setViewport({ width: 900, height: 600, deviceScaleFactor: 1 });
@@ -126,9 +153,18 @@ try {
       && report.metadata?.layerCount === 5,
     webglCanvasMounted: report.metadata?.canvasCount === 1,
     seededArtworkFetched: report.seedRequest?.ok === true && report.seedRequest?.status === 200,
+    overviewCameraReported: report.metadata?.cameraFocus === 'overview'
+      && typeof report.metadata?.cameraPosition === 'string'
+      && typeof report.metadata?.cameraTarget === 'string',
     anchorSelectionWorks: report.interaction?.selectedAnchor === 'lantern-city'
       && report.interaction?.heading === 'Lantern city basin'
       && report.interaction?.description.length > 40,
+    guidedCameraReachedAnchor: report.interaction?.cameraFocus === 'lantern-city'
+      && report.interaction?.cameraPosition !== report.metadata?.cameraPosition
+      && report.interaction?.cameraTarget !== report.metadata?.cameraTarget,
+    cameraReturnedToOverview: report.returnToOverview?.cameraFocus === 'overview'
+      && report.returnToOverview?.cameraPosition === report.metadata?.cameraPosition
+      && report.returnToOverview?.cameraTarget === report.metadata?.cameraTarget,
     unsupportedRoomFailsExplicitly: explicitFailure.roomCode === '99'
       && explicitFailure.message.includes('Unknown room code'),
     evidenceCaptured: report.screenshots.length === 2,

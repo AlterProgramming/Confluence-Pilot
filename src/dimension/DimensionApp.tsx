@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Dimension } from './Dimension';
-import { DimensionScene } from './DimensionScene';
+import { DimensionScene, type CameraTravelState } from './DimensionScene';
 import './dimension.css';
 
 function resolveRoomCode() {
   const params = new URLSearchParams(window.location.search);
   return params.get('room') ?? '02';
+}
+
+function formatCameraPosition(position: [number, number, number]) {
+  return position.map((value) => value.toFixed(3)).join(',');
 }
 
 export function DimensionApp() {
@@ -21,7 +25,8 @@ export function DimensionApp() {
       };
     }
   }, [roomCode]);
-  const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>('heart-light');
+  const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>(null);
+  const [cameraTravel, setCameraTravel] = useState<CameraTravelState | null>(null);
 
   if (!result.dimension) {
     return (
@@ -34,6 +39,11 @@ export function DimensionApp() {
   }
 
   const scene = result.dimension.buildScene();
+  const effectiveCameraTravel: CameraTravelState = cameraTravel ?? {
+    focusId: 'overview',
+    position: [...scene.camera.position],
+    target: [...scene.camera.target],
+  };
   const selectedAnchor = scene.anchors.find((anchor) => anchor.id === selectedAnchorId) ?? null;
 
   return (
@@ -45,11 +55,15 @@ export function DimensionApp() {
       data-anchor-count={scene.anchors.length}
       data-path-count={scene.paths.length}
       data-layer-count={scene.layers.length}
+      data-camera-focus={effectiveCameraTravel.focusId}
+      data-camera-position={formatCameraPosition(effectiveCameraTravel.position)}
+      data-camera-target={formatCameraPosition(effectiveCameraTravel.target)}
     >
       <DimensionScene
         scene={scene}
         selectedAnchorId={selectedAnchorId}
         onSelectAnchor={(anchorId) => setSelectedAnchorId(anchorId || null)}
+        onCameraTravelComplete={setCameraTravel}
       />
 
       <header className="dimension-title-panel">
@@ -86,14 +100,14 @@ export function DimensionApp() {
         <h2>{selectedAnchor?.label ?? 'Choose an anchor'}</h2>
         <p>{selectedAnchor?.description ?? 'Select a light, archive, city, or portal to inspect how this world is connected.'}</p>
         {selectedAnchor && (
-          <button type="button" data-testid="release-dimension-anchor" onClick={() => setSelectedAnchorId(null)}>Release anchor</button>
+          <button type="button" data-testid="release-dimension-anchor" onClick={() => setSelectedAnchorId(null)}>Return to overview</button>
         )}
       </aside>
 
       <div className="dimension-controls">
         <span>Drag to orbit</span>
         <span>Scroll to cross depth</span>
-        <span>Select lights to inspect</span>
+        <span>Select a light to travel</span>
       </div>
     </main>
   );
