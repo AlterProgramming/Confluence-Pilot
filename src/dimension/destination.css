@@ -1,0 +1,182 @@
+.dimension-destination-canvas {
+  position: absolute !important;
+  inset: 0;
+  animation: destination-reveal 900ms ease both;
+}
+
+.dimension-destination-active {
+  background:
+    radial-gradient(circle at 28% 38%, rgba(189, 167, 255, 0.18), transparent 30%),
+    radial-gradient(circle at 74% 46%, rgba(121, 216, 255, 0.14), transparent 34%),
+    #150d34;
+}
+
+.dimension-destination-active::after {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(205, 192, 255, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(12, 7, 31, 0.06), rgba(9, 5, 24, 0.22));
+  opacity: 1;
+}
+
+.dimension-destination-title {
+  width: min(38rem, calc(100vw - 2rem));
+}
+
+.dimension-destination-title h1 {
+  color: #f1ebff;
+  text-shadow: 0 0 2.2rem rgba(189, 167, 255, 0.24), 0 2px 18px rgba(0, 0, 0, 0.86);
+}
+
+.dimension-destination-title .dimension-room-code,
+.dimension-destination-title blockquote {
+  color: #c8b8ff;
+}
+
+.dimension-destination-rail {
+  position: absolute;
+  z-index: 5;
+  left: clamp(0.8rem, 2vw, 2rem);
+  bottom: clamp(1rem, 3vw, 2.2rem);
+  display: grid;
+  gap: 0.42rem;
+  width: min(18rem, 28vw);
+  animation: destination-controls-reveal 560ms 300ms ease both;
+}
+
+.dimension-destination-rail button {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.58rem 0.7rem;
+  border: 1px solid rgba(189, 167, 255, 0.18);
+  border-radius: 0.28rem;
+  background: rgba(13, 8, 34, 0.66);
+  color: rgba(238, 233, 255, 0.74);
+  text-align: left;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: border-color 170ms ease, background 170ms ease, color 170ms ease, transform 170ms ease;
+}
+
+.dimension-destination-rail button:hover,
+.dimension-destination-rail button:focus-visible,
+.dimension-destination-rail button.active {
+  border-color: rgba(121, 216, 255, 0.72);
+  background: rgba(28, 17, 65, 0.86);
+  color: #fff;
+  transform: translateX(0.25rem);
+  outline: none;
+}
+
+.dimension-destination-rail button > span {
+  color: #79d8ff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.68rem;
+}
+
+.dimension-destination-rail strong {
+  overflow: hidden;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dimension-destination-inspector {
+  border-color: rgba(189, 167, 255, 0.36);
+  background: linear-gradient(145deg, rgba(10, 7, 29, 0.9), rgba(29, 17, 65, 0.78));
+  box-shadow: 0 1.2rem 5rem rgba(25, 12, 67, 0.48);
+  animation: destination-controls-reveal 560ms 360ms ease both;
+}
+
+.dimension-destination-inspector .dimension-inspector-heading > span,
+.dimension-destination-inspector .dimension-journey-actions button:last-child {
+  color: #c8b8ff;
+}
+
+.dimension-destination-node-label {
+  display: grid;
+  min-width: 9rem;
+  gap: 0.16rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(189, 167, 255, 0.34);
+  border-radius: 0.25rem;
+  background: rgba(12, 8, 31, 0.86);
+  color: #f1ebff;
+  text-align: left;
+  backdrop-filter: blur(9px);
+  cursor: pointer;
+}
+
+.dimension-destination-node-label strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.dimension-destination-node-label span {
+  color: #79d8ff;
+  font-size: 0.5rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.dimension-destination-active .dimension-controls {
+  color: rgba(225, 216, 255, 0.58);
+}
+
+@keyframes destination-reveal {
+  from { opacity: 0; filter: blur(8px); transform: scale(1.025); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes destination-controls-reveal {
+  from { opacity: 0; transform: translateY(0.65rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 760px) {
+  .dimension-destination-title {
+    width: calc(100vw - 2rem);
+  }
+
+  .dimension-destination-rail {
+    right: 0.7rem;
+    bottom: 0.7rem;
+    left: 0.7rem;
+    width: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+
+  .dimension-destination-rail button {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .dimension-destination-rail button:hover,
+  .dimension-destination-rail button:focus-visible,
+  .dimension-destination-rail button.active {
+    transform: translateY(-0.2rem);
+  }
+
+  .dimension-destination-rail strong {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dimension-destination-canvas,
+  .dimension-destination-rail,
+  .dimension-destination-inspector {
+    animation: none;
+  }
+
+  .dimension-destination-rail button {
+    transition: none;
+  }
+}
