@@ -13,15 +13,12 @@ import { ScenePropPreparer } from './SceneProps';
 import { ProceduralRoomProxy } from './ProceduralRoomProxy';
 import { TowerOverview } from './TowerOverview';
 
-// Shared furniture is reused by every room — parse it once, up front, so no
-// room ever pays a load/parse hitch when its furniture mounts mid-transition.
 const FURNITURE = [
   'armchair', 'task-chair', 'office-desk', 'coffee-table', 'table',
   'sofa', 'bookshelf', 'planter', 'cabinet', 'ceiling-lamp',
-  // Overhead/lounge pieces added to the scenes — preload so they never hitch
-  // when a room mounts mid-transition (pendants + fans mount as room fabric).
   'modern_ceiling_lamp_01', 'ceiling_fan', 'mid_century_lounge_chair',
 ];
+const HERO_CAMERA_WALL_ROOMS = new Set(['02', '04', '06']);
 const queuedGltfs = new Set<string>();
 const queuedTextures = new Set<string>();
 let visualWarmupQueued = false;
@@ -44,7 +41,7 @@ function queueRoomVisuals(index: number) {
   if (!room) return;
   if (room.assetUrl) preloadRoomAsset(room.assetUrl);
   const led = sceneConfigs[room.id]?.ledWall;
-  if (led) queueTexture(led);
+  if (led && !HERO_CAMERA_WALL_ROOMS.has(room.id)) queueTexture(led);
 }
 
 function queueSharedVisuals() {
@@ -96,8 +93,6 @@ function RenderWarmupCompiler({ enabled, onReady }: { enabled: boolean; onReady:
         await nextFrame();
       }
 
-      // Give texture uploads and program switches a couple of frames to settle
-      // before exposing the app to the recording harness.
       await nextFrame();
       await nextFrame();
       if (!cancelled) onReady();
@@ -210,9 +205,6 @@ export function RoomStack() {
         </Suspense>
       )}
       {rooms.map((room, index) => {
-        // Render mode mounts every room only while shaders and textures compile.
-        // After warmup, conduit travel uses the lightweight proxy so the camera
-        // cannot see the outgoing and incoming room architectures at once.
         const warmupInProgress = renderMode && !renderCompileReady;
         const focalRoom = isTransitioning
           ? activeRoom + (requestedRoom - activeRoom) * transitionProgress

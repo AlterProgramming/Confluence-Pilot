@@ -1,0 +1,84 @@
+name: Lightweight Dimension validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/dimensions/**'
+      - 'src/App.tsx'
+      - 'scripts/capture_weight_dimension.mjs'
+      - '.github/workflows/dimension-validation.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/dimensions/**'
+      - 'src/App.tsx'
+      - 'scripts/capture_weight_dimension.mjs'
+      - '.github/workflows/dimension-validation.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: lightweight-dimension-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-lightweight-dimension:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: |
+          mkdir -p validation/dimension/weight-of-remembering-lite
+          set -o pipefail
+          npm run typecheck 2>&1 | tee validation/dimension/weight-of-remembering-lite/typecheck.log
+
+      - name: Lint
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee validation/dimension/weight-of-remembering-lite/lint.log
+
+      - name: Build production bundle
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee validation/dimension/weight-of-remembering-lite/build.log
+
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4179 > /tmp/confluence-dimension-lite-preview.log 2>&1 &
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4179/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cp /tmp/confluence-dimension-lite-preview.log validation/dimension/weight-of-remembering-lite/preview.log
+          exit 1
+
+      - name: Capture and inspect lightweight dimension
+        run: node scripts/capture_weight_dimension.mjs http://127.0.0.1:4179
+
+      - name: Upload lightweight dimension evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weight-of-remembering-lite-evidence
+          path: validation/dimension/weight-of-remembering-lite
+          if-no-files-found: warn
+          retention-days: 14

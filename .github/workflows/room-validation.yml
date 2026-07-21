@@ -41,13 +41,13 @@ jobs:
       - name: Determine validation scope
         id: scope
         env:
-          BEFORE_SHA: ${{ github.event.before }}
-          AFTER_SHA: ${{ github.event.after || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           PR_DRAFT: ${{ github.event.pull_request.draft }}
         run: |
           set -euo pipefail
-          if [[ "$GITHUB_EVENT_NAME" == "pull_request" && -n "${BEFORE_SHA:-}" && "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]]; then
-            CHANGED_FILES="$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA")"
+          if [[ -n "${BASE_SHA:-}" && "$BASE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+            CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
           elif git rev-parse HEAD^ >/dev/null 2>&1; then
             CHANGED_FILES="$(git diff --name-only HEAD^ HEAD)"
           else
@@ -57,7 +57,7 @@ jobs:
           FULL_EVIDENCE=false
           if [[ "$GITHUB_EVENT_NAME" != "pull_request" || "${PR_DRAFT:-false}" != "true" ]]; then
             FULL_EVIDENCE=true
-          elif grep -Eq '^(src/(App\.tsx|components/|scenes/|state/|data/)|public/|validation/|scripts/(capture_room_evidence|capture_runtime_smoke)\.mjs|\.github/workflows/room-validation\.yml|package(-lock)?\.json|vite\.config\.ts)' <<< "$CHANGED_FILES"; then
+          elif grep -Eq '^(src/(App\.tsx|components/|scenes/|state/|data/)|public/|validation/|scripts/(capture_room_evidence|capture_runtime_smoke|smoke_room_runtime|probe_hero_camera|generate_semantic_heroes|validate_hero_camera)\.mjs|\.github/workflows/room-validation\.yml|package(-lock)?\.json|vite\.config\.ts)' <<< "$CHANGED_FILES"; then
             FULL_EVIDENCE=true
           fi
 
@@ -68,7 +68,7 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Validate room manifests and types
+      - name: Validate types, rooms, and hero-camera contract
         run: npm run validate
 
       - name: Build production bundle
@@ -80,10 +80,14 @@ jobs:
           node --input-type=module <<'NODE'
           import { appendFileSync, readFileSync } from 'node:fs';
           const registry = JSON.parse(readFileSync('validation/rooms.json', 'utf8'));
+          const semanticOverrides = {
+            '02': '/assets/room-02-semantic.glb',
+            '06': '/assets/room-06-semantic.glb',
+          };
           const include = registry.rooms.map((room) => ({
             id: room.id,
             number: Number(room.id),
-            asset: room.signatureAssets?.[0] ?? `/assets/room-${room.id}-asset.glb`,
+            asset: semanticOverrides[room.id] ?? room.signatureAssets?.[0] ?? `/assets/room-${room.id}-asset.glb`,
           }));
           appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({ include })}\n`);
           NODE
@@ -101,7 +105,7 @@ jobs:
           {
             echo '## Structural gate'
             echo
-            echo '- TypeScript, lint, room-registry validation, and production build completed.'
+            echo '- TypeScript, lint, room-registry, hero-camera, and production-build validation completed.'
             echo '- A green structural gate does **not** promote a room beyond `phase-1`.'
             echo '- Candidate or validated status still requires runtime evidence, manual criteria, and human approval.'
             echo "- Full runtime evidence requested for this run: **${{ steps.scope.outputs.full_evidence }}**"
@@ -142,20 +146,79 @@ jobs:
             fi
             sleep 1
           done
-          mkdir -p validation/evidence/browser-smoke
+          mkdir -p validation/evidence/browser-smoke validation/browser-smoke
           cp /tmp/confluence-preview.log validation/evidence/browser-smoke/preview.log
+          cp /tmp/confluence-preview.log validation/browser-smoke/preview.log
           exit 1
 
-      - name: Launch browser and verify Room 02 runtime
+      - name: Verify Room 02 browser runtime
         run: node scripts/capture_runtime_smoke.mjs http://127.0.0.1:4173
+
+      - name: Verify shared room runtime readiness
+        run: node scripts/smoke_room_runtime.mjs http://127.0.0.1:4173
 
       - name: Upload browser-smoke diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: room-validation-browser-smoke
-          path: validation/evidence/browser-smoke
+          path: |
+            validation/evidence/browser-smoke
+            validation/browser-smoke
           if-no-files-found: warn
+          retention-days: 14
+
+  hero-camera:
+    name: Progressive hero-camera synchronization
+    needs:
+      - validate
+      - browser-smoke
+    if: needs.browser-smoke.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
+      - name: Start hero-camera preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/confluence-hero-camera-preview.log 2>&1 &
+          echo $! > /tmp/confluence-hero-camera-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4174/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          mkdir -p validation/hero-camera
+          cp /tmp/confluence-hero-camera-preview.log validation/hero-camera/preview.log
+          exit 1
+
+      - name: Prove progressive hero-camera synchronization
+        run: node scripts/probe_hero_camera.mjs http://127.0.0.1:4174
+
+      - name: Upload hero-camera evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hero-camera-validation-evidence
+          path: validation/hero-camera
+          if-no-files-found: error
           retention-days: 14
 
   evidence:
@@ -163,7 +226,8 @@ jobs:
     needs:
       - validate
       - browser-smoke
-    if: needs.browser-smoke.result == 'success'
+      - hero-camera
+    if: needs.hero-camera.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -204,7 +268,18 @@ jobs:
           exit 1
 
       - name: Capture Room ${{ matrix.id }} validation evidence
-        run: node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 ${{ matrix.number }} ${{ matrix.asset }}
+        shell: bash
+        run: |
+          set +e
+          mkdir -p validation/evidence/room-${{ matrix.id }}
+          node scripts/capture_room_evidence.mjs \
+            http://127.0.0.1:4173 \
+            ${{ matrix.number }} \
+            ${{ matrix.asset }} \
+            > validation/evidence/room-${{ matrix.id }}/runner.log 2>&1
+          status=$?
+          cat validation/evidence/room-${{ matrix.id }}/runner.log
+          exit $status
 
       - name: Upload Room ${{ matrix.id }} evidence
         if: always()
@@ -212,7 +287,7 @@ jobs:
         with:
           name: room-${{ matrix.id }}-validation-evidence
           path: validation/evidence/room-${{ matrix.id }}
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
 
   gate-summary:
@@ -220,6 +295,7 @@ jobs:
     needs:
       - validate
       - browser-smoke
+      - hero-camera
       - evidence
     if: always()
     runs-on: ubuntu-latest
@@ -233,12 +309,13 @@ jobs:
             echo '|---|---|'
             echo '| Structural gate | `${{ needs.validate.result }}` |'
             echo '| Shared browser smoke | `${{ needs.browser-smoke.result }}` |'
+            echo '| Progressive hero camera | `${{ needs.hero-camera.result }}` |'
             echo '| Twelve-room evidence | `${{ needs.evidence.result }}` |'
             echo
             if [[ '${{ needs.validate.outputs.full_evidence }}' != 'true' ]]; then
               echo 'Full runtime evidence was intentionally deferred because this is a draft PR and the latest commit did not alter production-room or validation infrastructure.'
             else
-              echo 'Full runtime evidence was requested. A failed evidence result is a real blocking gate; a skipped result means the shared smoke gate did not pass.'
+              echo 'Full runtime evidence was requested. Failed or skipped downstream gates are blocking until explained and corrected.'
             fi
             echo
             echo 'CI success is evidence availability, not automatic human validation. Room status remains governed by `validation/rooms.json` and explicit human review.'

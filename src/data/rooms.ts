@@ -32,7 +32,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffd29e',
     shape: 'torus',
     architecture: 'academy',
-    assetUrl: '/assets/room-02-hero.glb',
+    assetUrl: '/assets/room-02-semantic.glb',
     assetTargetSize: 3.2,
     assetMaterialTuning: {
       envMapIntensity: 0.9,
@@ -96,7 +96,7 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
     secondaryColor: '#ffe3a2',
     shape: 'cylinder',
     architecture: 'infrastructure',
-    assetUrl: '/assets/room-06-hero.glb',
+    assetUrl: '/assets/room-06-semantic.glb',
     assetTargetSize: 3.2,
   },
   {
@@ -179,8 +179,6 @@ const roomSeed: Omit<RoomDefinition, 'y' | 'camera' | 'target'>[] = [
   },
 ];
 
-// Per-room camera framing to flatter each layout. Values are relative — the
-// y component is added to the room's own y. Falls back to the default framing.
 type View = { camera: [number, number, number]; target: [number, number, number] };
 const DEFAULT_VIEW: View = { camera: [0, 1.8, 12.4], target: [0, 1.25, 0] };
 const views: Record<string, View> = {

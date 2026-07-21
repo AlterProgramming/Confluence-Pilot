@@ -13,6 +13,13 @@ import { RoomLighting } from './RoomLighting';
 import { SceneProps } from './SceneProps';
 import { SceneStage } from './SceneStage';
 import { roomScenes } from '../scenes/registry';
+import { HeroCameraWall } from '../scenes/kit/HeroCameraWall';
+
+const HERO_CAMERA_LAYOUTS: Record<string, { width: number; height: number; y: number; z: number }> = {
+  '02': { width: 14.4, height: 4.4, y: 1.45, z: -7.18 },
+  '04': { width: 15.4, height: 4.65, y: 1.65, z: -7.68 },
+  '06': { width: 16, height: 4.45, y: 1.5, z: -7.18 },
+};
 
 function revealOffset(room: RoomDefinition): [number, number, number] {
   if (room.architecture === 'academy') return [0, -0.24, 0.16];
@@ -37,7 +44,9 @@ export function Room({
   const BespokeScene = roomScenes[room.id];
   const usesRoomSet = ['gallery', 'academy', 'studio', 'living-building', 'neighborhood'].includes(room.architecture);
   const fallback = usesRoomSet ? null : <RoomCore room={room} active={active} />;
+  const heroCamera = HERO_CAMERA_LAYOUTS[room.id];
   const assetProps = {
+    roomId: room.id,
     ...(room.assetUrl !== undefined ? { assetUrl: room.assetUrl } : {}),
     ...(room.assetScale !== undefined ? { assetScale: room.assetScale } : {}),
     ...(room.assetPosition !== undefined ? { assetPosition: room.assetPosition } : {}),
@@ -82,6 +91,18 @@ export function Room({
           </>
         )}
         <RoomAsset {...assetProps} active={visible} fallback={fallback} />
+        {heroCamera && (
+          <HeroCameraWall
+            roomId={room.id}
+            active={active && visible}
+            accent={room.color}
+            secondary={room.secondaryColor}
+            width={heroCamera.width}
+            height={heroCamera.height}
+            y={heroCamera.y}
+            z={heroCamera.z}
+          />
+        )}
       </group>
       {active && <LifeMotes color={room.color} />}
       <RoomLighting room={room} active={active} />
