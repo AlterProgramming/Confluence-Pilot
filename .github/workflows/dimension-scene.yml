@@ -5,6 +5,7 @@ on:
     branches:
       - 'agent/dimension-scene-runtime'
       - 'agent/traversable-world-runtime'
+      - 'agent/perception-integration-shell'
     paths:
       - 'src/dimension/**'
       - 'public/reference/dimensions/**'
@@ -15,16 +16,19 @@ on:
       - 'scripts/validate_world_fabric.mjs'
       - 'scripts/validate_image_world_compiler.mjs'
       - 'scripts/validate_traversable_world.mjs'
+      - 'scripts/validate_perception_integration.mjs'
       - 'scripts/capture_dimension_scene.mjs'
       - 'scripts/capture_dimension_authoring.mjs'
       - 'scripts/capture_image_world_compiler.mjs'
       - 'scripts/capture_traversable_world.mjs'
+      - 'scripts/capture_perception_integration.mjs'
       - 'scripts/validate_dimension_visual_review.mjs'
       - 'validation/design/dimension-*.json'
       - 'validation/design/dimension-scene.md'
       - 'validation/design/world-fabric.md'
       - 'validation/design/image-world-compiler.md'
       - 'validation/design/traversable-world-runtime.md'
+      - 'validation/design/perception-integration-shell.md'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -39,16 +43,19 @@ on:
       - 'scripts/validate_world_fabric.mjs'
       - 'scripts/validate_image_world_compiler.mjs'
       - 'scripts/validate_traversable_world.mjs'
+      - 'scripts/validate_perception_integration.mjs'
       - 'scripts/capture_dimension_scene.mjs'
       - 'scripts/capture_dimension_authoring.mjs'
       - 'scripts/capture_image_world_compiler.mjs'
       - 'scripts/capture_traversable_world.mjs'
+      - 'scripts/capture_perception_integration.mjs'
       - 'scripts/validate_dimension_visual_review.mjs'
       - 'validation/design/dimension-*.json'
       - 'validation/design/dimension-scene.md'
       - 'validation/design/world-fabric.md'
       - 'validation/design/image-world-compiler.md'
       - 'validation/design/traversable-world-runtime.md'
+      - 'validation/design/perception-integration-shell.md'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -79,7 +86,7 @@ jobs:
 
       - name: Validate source contract
         run: |
-          mkdir -p validation/dimension-scene validation/image-world-compiler validation/traversable-world
+          mkdir -p validation/dimension-scene validation/image-world-compiler validation/traversable-world validation/perception-integration
           set -o pipefail
           npm run typecheck 2>&1 | tee validation/dimension-scene/typecheck.log
           npm run lint 2>&1 | tee validation/dimension-scene/lint.log
@@ -117,6 +124,9 @@ jobs:
       - name: Capture traversable world evidence
         run: node scripts/capture_traversable_world.mjs http://127.0.0.1:4178
 
+      - name: Capture perception integration evidence
+        run: node scripts/capture_perception_integration.mjs http://127.0.0.1:4178
+
       - name: Validate visual review contract
         run: npm run validate:dimension:visual
 
@@ -137,5 +147,6 @@ jobs:
             validation/dimension-assets
             validation/image-world-compiler
             validation/traversable-world
+            validation/perception-integration
           if-no-files-found: warn
           retention-days: 14
