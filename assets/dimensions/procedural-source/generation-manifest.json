@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "dimension-generation-manifest",
+  "state": "ready-to-generate",
+  "purpose": "Explicit queue of every geometry archetype and reusable PBR material variant required for the current procedural dimension asset population pass.",
+  "pipeline": {
+    "model": "tencent/Hunyuan3D-2.1",
+    "geometryStage": "Hunyuan3D-Shape-v2-1 image-to-3D",
+    "materialStage": "Hunyuan3D-Paint-v2-1 PBR-oriented paint",
+    "shapeCandidatesPerGeometryItem": 3,
+    "selectionRule": "Retain the strongest descriptor-conforming shape candidate and paint only the retained candidate.",
+    "exports": ["glb", "gltf", "blend"],
+    "sourceProtection": "Generated candidates must remain beside and must never overwrite the deterministic .asset.json descriptor or Blender blockout."
+  },
+  "summary": {
+    "familyCount": 12,
+    "geometryArchetypeCount": 82,
+    "materialVariantCount": 49,
+    "explicitQueueItems": 131,
+    "shapeCandidateRuns": 246,
+    "defaultRuntimeAssemblies": 455
+  },
+  "outputContract": {
+    "root": "assets/dimensions/generated/<family-id>/<entry-id>/",
+    "geometryCandidateFiles": ["reference.png", "candidate-01.glb", "candidate-02.glb", "candidate-03.glb", "selected.glb"],
+    "materialFiles": ["basecolor.png", "normal.png", "roughness.png", "metallic.png", "emissive.png"],
+    "metadataFiles": ["generation.json", "review.json"]
+  },
+  "families": [
+    {
+      "familyId": "celestial-memory-mechanism",
+      "realm": "the-weight-of-remembering",
+      "runtimeSystem": "CelestialMechanism",
+      "sourceDescriptor": "assets/dimensions/procedural-source/celestial-memory-mechanism.asset.json",
+      "defaultRuntimeInstances": 8,
+      "description": "Orbital mechanical assemblies with nested rings, counterweights, luminous memory cores, and asymmetrical celestial silhouettes.",
+      "geometryItems": ["celestial-memory-mechanism__geo_v01", "celestial-memory-mechanism__geo_v02", "celestial-memory-mechanism__geo_v03", "celestial-memory-mechanism__geo_v04"],
+      "materialItems": ["celestial-memory-mechanism__mat_v01", "celestial-memory-mechanism__mat_v02", "celestial-memory-mechanism__mat_v03"]
+    },
+    {
+      "familyId": "articulated-memory-shell-rib",
+      "realm": "the-weight-of-remembering",
+      "runtimeSystem": "MemoryShellRibs",
+      "sourceDescriptor": "assets/dimensions/procedural-source/articulated-memory-shell-rib.asset.json",
+      "defaultRuntimeInstances": 11,
+      "description": "Segmented structural ribs with articulated joints, carried-memory satellites, worn metal, and luminous inset seams.",
+      "geometryItems": ["articulated-memory-shell-rib__geo_v01", "articulated-memory-shell-rib__geo_v02", "articulated-memory-shell-rib__geo_v03", "articulated-memory-shell-rib__geo_v04"],
+      "materialItems": ["articulated-memory-shell-rib__mat_v01", "articulated-memory-shell-rib__mat_v02", "articulated-memory-shell-rib__mat_v03"]
+    },
+    {
+      "familyId": "archive-terrace-module",
+      "realm": "the-weight-of-remembering",
+      "runtimeSystem": "ArchiveTerraces",
+      "sourceDescriptor": "assets/dimensions/procedural-source/archive-terrace-module.asset.json",
+      "defaultRuntimeInstances": 7,
+      "description": "Traversable memory-archive terraces with stairs, shelving masses, retaining walls, ledges, thresholds, and connection sockets.",
+      "geometryItems": ["archive-terrace-module__geo_v01", "archive-terrace-module__geo_v02", "archive-terrace-module__geo_v03", "archive-terrace-module__geo_v04", "archive-terrace-module__geo_v05", "archive-terrace-module__geo_v06"],
+      "materialItems": ["archive-terrace-module__mat_v01", "archive-terrace-module__mat_v02", "archive-terrace-module__mat_v03", "archive-terrace-module__mat_v04"]
+    },
+    {
+      "familyId": "lantern-metropolis-tower",
+      "realm": "the-weight-of-remembering",
+      "runtimeSystem": "LanternMetropolis",
+      "sourceDescriptor": "assets/dimensions/procedural-source/lantern-metropolis-tower.asset.json",
+      "defaultRuntimeInstances": 84,
+      "description": "Vertical city towers with lantern windows, bridges, buttresses, crowns, inhabited recesses, and varied height profiles.",
+      "geometryItems": ["lantern-metropolis-tower__geo_v01", "lantern-metropolis-tower__geo_v02", "lantern-metropolis-tower__geo_v03", "lantern-metropolis-tower__geo_v04", "lantern-metropolis-tower__geo_v05", "lantern-metropolis-tower__geo_v06", "lantern-metropolis-tower__geo_v07", "lantern-metropolis-tower__geo_v08", "lantern-metropolis-tower__geo_v09", "lantern-metropolis-tower__geo_v10", "lantern-metropolis-tower__geo_v11", "lantern-metropolis-tower__geo_v12"],
+      "materialItems": ["lantern-metropolis-tower__mat_v01", "lantern-metropolis-tower__mat_v02", "lantern-metropolis-tower__mat_v03", "lantern-metropolis-tower__mat_v04", "lantern-metropolis-tower__mat_v05"]
+    },
+    {
+      "familyId": "memory-filament-weave",
+      "realm": "the-weight-of-remembering",
+      "runtimeSystem": "SecondaryThreadWeave",
+      "sourceDescriptor": "assets/dimensions/procedural-source/memory-filament-weave.asset.json",
+      "defaultRuntimeInstances": 10,
+      "description": "Braided emissive memory-energy pathways with controlled curvature, knots, intersections, pulse channels, and attachment termini.",
+      "geometryItems": ["memory-filament-weave__geo_v01", "memory-filament-weave__geo_v02", "memory-filament-weave__geo_v03", "memory-filament-weave__geo_v04", "memory-filament-weave__geo_v05", "memory-filament-weave__geo_v06"],
+      "materialItems": ["memory-filament-weave__mat_v01", "memory-filament-weave__mat_v02", "memory-filament-weave__mat_v03", "memory-filament-weave__mat_v04", "memory-filament-weave__mat_v05", "memory-filament-weave__mat_v06"]
+    },
+    {
+      "familyId": "foreground-chain-strand",
+      "realm": "the-weight-of-remembering",
+      "runtimeSystem": "ForegroundChainField",
+      "sourceDescriptor": "assets/dimensions/procedural-source/foreground-chain-strand.asset.json",
+      "defaultRuntimeInstances": 9,
+      "description": "Foreground chain assemblies with alternating links, anchor brackets, drape segments, dark worn metal, and violet emissive traces.",
+      "geometryItems": ["foreground-chain-strand__geo_v01", "foreground-chain-strand__geo_v02", "foreground-chain-strand__geo_v03", "foreground-chain-strand__geo_v04", "foreground-chain-strand__geo_v05", "foreground-chain-strand__geo_v06"],
+      "materialItems": ["foreground-chain-strand__mat_v01", "foreground-chain-strand__mat_v02", "foreground-chain-strand__mat_v03", "foreground-chain-strand__mat_v04"]
+    },
+    {
+      "familyId": "possibility-lattice-node",
+      "realm": "parallel-remembrance",
+      "runtimeSystem": "PossibilityLattice",
+      "sourceDescriptor": "assets/dimensions/procedural-source/possibility-lattice-node.asset.json",
+      "defaultRuntimeInstances": 14,
+      "description": "Dimensional lattice nodes and connectors with nested rings, branching knots, voids, and controlled rotational asymmetry.",
+      "geometryItems": ["possibility-lattice-node__geo_v01", "possibility-lattice-node__geo_v02", "possibility-lattice-node__geo_v03", "possibility-lattice-node__geo_v04"],
+      "materialItems": ["possibility-lattice-node__mat_v01", "possibility-lattice-node__mat_v02", "possibility-lattice-node__mat_v03"]
+    },
+    {
+      "familyId": "unwritten-archive-megastructure",
+      "realm": "parallel-remembrance",
+      "runtimeSystem": "ArchiveMegastructure",
+      "sourceDescriptor": "assets/dimensions/procedural-source/unwritten-archive-megastructure.asset.json",
+      "defaultRuntimeInstances": 1,
+      "description": "Large archive massing built from interlocked volumes, spires, illuminated markings, bridges, and voided chambers.",
+      "geometryItems": ["unwritten-archive-megastructure__geo_v01", "unwritten-archive-megastructure__geo_v02", "unwritten-archive-megastructure__geo_v03"],
+      "materialItems": ["unwritten-archive-megastructure__mat_v01", "unwritten-archive-megastructure__mat_v02", "unwritten-archive-megastructure__mat_v03", "unwritten-archive-megastructure__mat_v04"]
+    },
+    {
+      "familyId": "echo-bridge-span",
+      "realm": "parallel-remembrance",
+      "runtimeSystem": "EchoBridgeNetwork",
+      "sourceDescriptor": "assets/dimensions/procedural-source/echo-bridge-span.asset.json",
+      "defaultRuntimeInstances": 9,
+      "description": "Bridge modules with rails, trusses, echo ribs, suspended supports, and readable alternate-memory crossing surfaces.",
+      "geometryItems": ["echo-bridge-span__geo_v01", "echo-bridge-span__geo_v02", "echo-bridge-span__geo_v03", "echo-bridge-span__geo_v04", "echo-bridge-span__geo_v05"],
+      "materialItems": ["echo-bridge-span__mat_v01", "echo-bridge-span__mat_v02", "echo-bridge-span__mat_v03"]
+    },
+    {
+      "familyId": "unlived-garden-growth",
+      "realm": "parallel-remembrance",
+      "runtimeSystem": "UnlivedGardenCanopy",
+      "sourceDescriptor": "assets/dimensions/procedural-source/unlived-garden-growth.asset.json",
+      "defaultRuntimeInstances": 116,
+      "description": "Organic growth forms including blooms, tendrils, stalks, seed pods, canopy clusters, and multiple growth-state silhouettes.",
+      "geometryItems": ["unlived-garden-growth__geo_v01", "unlived-garden-growth__geo_v02", "unlived-garden-growth__geo_v03", "unlived-garden-growth__geo_v04", "unlived-garden-growth__geo_v05", "unlived-garden-growth__geo_v06", "unlived-garden-growth__geo_v07", "unlived-garden-growth__geo_v08", "unlived-garden-growth__geo_v09", "unlived-garden-growth__geo_v10", "unlived-garden-growth__geo_v11", "unlived-garden-growth__geo_v12"],
+      "materialItems": ["unlived-garden-growth__mat_v01", "unlived-garden-growth__mat_v02", "unlived-garden-growth__mat_v03", "unlived-garden-growth__mat_v04", "unlived-garden-growth__mat_v05"]
+    },
+    {
+      "familyId": "probability-monolith",
+      "realm": "parallel-remembrance",
+      "runtimeSystem": "ProbabilityMonolithField",
+      "sourceDescriptor": "assets/dimensions/procedural-source/probability-monolith.asset.json",
+      "defaultRuntimeInstances": 38,
+      "description": "Standing probability-state monoliths with fractured faces, embedded glow seams, inscriptions, stepped profiles, and erosion variants.",
+      "geometryItems": ["probability-monolith__geo_v01", "probability-monolith__geo_v02", "probability-monolith__geo_v03", "probability-monolith__geo_v04", "probability-monolith__geo_v05", "probability-monolith__geo_v06", "probability-monolith__geo_v07", "probability-monolith__geo_v08"],
+      "materialItems": ["probability-monolith__mat_v01", "probability-monolith__mat_v02", "probability-monolith__mat_v03", "probability-monolith__mat_v04", "probability-monolith__mat_v05"]
+    },
+    {
+      "familyId": "timeline-fragment",
+      "realm": "parallel-remembrance",
+      "runtimeSystem": "TimelineDebris",
+      "sourceDescriptor": "assets/dimensions/procedural-source/timeline-fragment.asset.json",
+      "defaultRuntimeInstances": 148,
+      "description": "Floating timeline remnants with fractured planes, broken architectural traces, emissive fault lines, and scatter-ready silhouettes.",
+      "geometryItems": ["timeline-fragment__geo_v01", "timeline-fragment__geo_v02", "timeline-fragment__geo_v03", "timeline-fragment__geo_v04", "timeline-fragment__geo_v05", "timeline-fragment__geo_v06", "timeline-fragment__geo_v07", "timeline-fragment__geo_v08", "timeline-fragment__geo_v09", "timeline-fragment__geo_v10", "timeline-fragment__geo_v11", "timeline-fragment__geo_v12"],
+      "materialItems": ["timeline-fragment__mat_v01", "timeline-fragment__mat_v02", "timeline-fragment__mat_v03", "timeline-fragment__mat_v04"]
+    }
+  ]
+}
