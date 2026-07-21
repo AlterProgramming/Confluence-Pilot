@@ -1,89 +1,85 @@
-# World and dimension authoring runtime
+# Independent dimension runtime and authoring vertical
 
 ## Intent
 
-**The Weight of Remembering** is a first-class world. It is not owned by Room 02. The approved landscape artwork remains its visual seed, while the runtime adds independent spatial structure: depth layers, anchor nodes, filament paths, memory fragments, a lantern basin, portal geometry, destination realms, procedural light, particles, selection, inspection, camera traversal, and live draft authoring.
+**The Weight of Remembering** is a first-class world. Its semantic world ID owns the scene definition; rooms and routes only register optional entrances. The approved artwork remains the visual seed, while the runtime reconstructs the realm as layered, navigable, procedural architecture.
 
-Rooms and routes may register entrances into the world. Those entrances reference the world by semantic ID; they do not define it.
-
-## Registry contract
+## Initialization contract
 
 ```ts
 const dimension = new Dimension('the-weight-of-remembering');
 const scene = dimension.buildScene();
 ```
 
-The semantic world ID is the required constructor input. Unknown world IDs fail explicitly.
-
-An optional entrance can resolve the same independent world:
+Optional Room 02 entry:
 
 ```ts
 const dimension = Dimension.fromEntrance('room', '02');
 ```
 
-The current registry exposes two entrances:
+Room 02 does not own, define, or constrain the dimension.
 
-- `standalone-dimension-route`: direct `/dimension` entry.
-- `room-02-memory-threshold`: compatibility entrance from Room 02 through `portal-horizon`.
-
-## Runtime and authoring routes
+## Runtime routes
 
 - `/dimension`
 - `/dimension?world=the-weight-of-remembering`
+- `/dimension?room=02`
 - `/dimension/authoring`
 - `/dimension?world=the-weight-of-remembering&authoring=1`
-- `/dimension?room=02` — optional compatibility entrance
-- `/?dimension=1&world=the-weight-of-remembering`
 
-## World authoring surface
+## Primary-world procedural architecture
 
-The authoring workspace operates on an isolated draft cloned from the registry definition. It supports:
+The authored scene grammar is supplemented by six synchronized procedural systems:
 
-1. Editing the world title, subtitle, and governing law.
-2. Selecting anchors from the world graph.
-3. Editing anchor labels, descriptions, and three-dimensional coordinates live.
-4. Inspecting registered entrances and their source surfaces.
-5. Inspecting portal-to-destination and return-portal relationships.
-6. Running draft validation for identity, topology, portal, destination, and coordinate defects.
-7. Resetting the draft to the registry definition.
-8. Exporting the complete draft as semantic-ID-addressed JSON.
+1. **Celestial mechanism** — eight intersecting orbital mechanisms and twenty-eight luminous constellation shards.
+2. **Memory-shell ribs** — an articulated wire shell, eleven rotating ribs, and sixteen carried-memory satellites.
+3. **Archive terraces** — seven architectural tiers and fifty-four individually varied archive volumes.
+4. **Lantern metropolis** — eighty-four instanced towers and lights plus concentric civic rings.
+5. **Secondary thread weave** — ten curved filaments crossing the authored memory paths at different depths.
+6. **Foreground chain field** — one hundred twenty-six instanced links distributed across nine hanging strands.
 
-The authoring surface is intentionally non-destructive. Editing the live draft does not mutate the checked-in registry until an exported draft is reviewed and committed.
+The complexity layer is rendered in a transparent synchronized WebGL surface. It follows the runtime's reported camera position, target, focus transitions, and active realm while remaining completely transparent to pointer input.
 
-## Scene grammar
+## Parallel Remembrance procedural architecture
 
-1. Seed backdrop: the approved landscape art establishes composition and palette.
-2. Depth stack: sky vault, memory shell, thread realm, lantern basin, foreground chain field.
-3. Anchors: memory shell, heart-light, beloved anchor, photo constellations, archive terraces, lantern city, portal horizon.
-4. Paths: primary memory filament, archive current, lantern descent, portal drift.
-5. Portal graph: Portal Horizon connects the world to Parallel Remembrance and defines a safe return path.
-6. Interaction: orbit/zoom, pointer parallax, selectable anchor lights, guided camera movement, inspection, portal crossing, and destination-node traversal.
-7. Reduced-motion behavior: CSS transitions are removed; the world and authoring controls remain inspectable.
+The destination realm has six distinct procedural systems rather than reusing the primary world's grammar:
 
-## Visual review vertical
+1. **Possibility lattice** — fourteen rotating dimensional rings and thirty-two possibility knots.
+2. **Archive megastructure** — one hundred thirty-two instanced volumes, illuminated markings, and nine archive spires.
+3. **Echo Bridge network** — nine parallel bridge spans and sixteen structural echo ribs.
+4. **Unlived-garden canopy** — one hundred sixteen instanced stems and seeds plus twenty-two multi-petal canopy blooms.
+5. **Probability monolith field** — thirty-eight marked monoliths creating distant architectural depth.
+6. **Timeline debris** — one hundred forty-eight drifting fragments orbiting the destination center.
 
-`validation/design/dimension-visual-review.json` defines the permanent screenshot contract:
+## Authoring contract
 
-- exact viewport and minimum file integrity requirements;
-- stable IDs for runtime, authoring, portal, and destination states;
-- human review intent for each state;
-- candidate or approved baseline fingerprints.
+The authoring workspace supports:
 
-The browser evidence lane captures both the Room 02 compatibility entrance and the standalone semantic world route. `scripts/validate_dimension_visual_review.mjs` verifies the expected screenshot set, PNG dimensions, file size, runtime reports, SHA-256 fingerprints, and approved-baseline drift. It emits `validation/dimension-scene/visual-review.json` into the workflow artifact.
+- world title, subtitle, and governing-law edits;
+- anchor labels, descriptions, and XYZ placement;
+- live scene reaction;
+- entrance and portal-graph inspection;
+- topology validation;
+- reset to the checked-in registry definition;
+- JSON draft export.
+
+Exported drafts remain review candidates. The browser does not promote arbitrary changes into source control.
+
+## Visual review contract
+
+`validation/design/dimension-visual-review.json` defines nine named captures at 1680×1050. CI captures runtime, authoring, portal, and destination states; checks image integrity; records SHA-256 fingerprints; and produces a candidate baseline manifest.
 
 ## Validation gates
 
-- `Dimension` resolves semantic world IDs rather than room codes.
-- Room 02 exists only as an optional entrance record.
-- Registry scene clones isolate layers, anchors, paths, portals, destinations, nodes, and entrances.
-- The standalone world route reports no room ownership.
-- The authoring workspace can perform a live anchor edit, keep the draft valid, and reset to registry state.
-- Unknown worlds and unknown room entrances fail explicitly.
-- The seeded artwork is packaged in the repository.
-- The full portal and destination lifecycle remains browser-valid.
-- Nine named screenshot states satisfy the visual review contract.
-- Typecheck, lint, source validation, production build, browser evidence, and visual review pass in CI.
+- Semantic world registry and independent constructor exist.
+- Room 02 is an optional entrance only.
+- Both procedural architecture files are required.
+- Six named complexity systems exist in each realm.
+- Instanced geometry is used for high-density repeated structures.
+- The complexity surface follows runtime camera metadata.
+- The overlay cannot intercept pointer interaction.
+- Typecheck, lint, source validation, production build, browser journeys, authoring workflow, and visual review all pass.
 
 ## Deliberate boundary
 
-This vertical exports draft JSON but does not automatically write that draft back to source control. A later promotion gate can ingest an approved export, create a registry revision, and attach reviewer identity and baseline approval without granting the browser arbitrary repository write access.
+The browser exports authoring drafts but does not automatically write them into the registry. A later approval-controlled promotion gate can ingest a reviewed export, record reviewer identity, update the registry, and approve a new visual baseline.
