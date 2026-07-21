@@ -1,9 +1,16 @@
+.dimension-complexity-overlay,
+.dimension-complexity-overlay canvas,
+.dimension-complexity-overlay * {
+  pointer-events: none !important;
+}
+
 .dimension-complexity-overlay {
   position: fixed !important;
   inset: 0;
   z-index: 2;
-  pointer-events: none;
   mix-blend-mode: screen;
+  touch-action: none;
+  user-select: none;
 }
 
 .dimension-authoring-open ~ .dimension-complexity-overlay {
