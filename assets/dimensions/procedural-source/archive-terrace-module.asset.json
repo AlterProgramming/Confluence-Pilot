@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "id": "archive-terrace-module",
+  "title": "Archive Terrace Module",
+  "realm": "the-weight-of-remembering",
+  "category": "architectural-module",
+  "revision": 1,
+  "description": "A stepped architectural module that stores remembered scenes as physical volumes. The module combines a broad ceremonial stair, recessed archive cells, projecting reading balconies, and a luminous indexing spine. Multiple modules can terrace across a slope, rotate around a basin, or stack into a fragmented amphitheater without losing a clear public approach.",
+  "narrativeFunction": "Archive terraces translate memory storage into traversable civic architecture. They provide mid-ground mass, platforms for lanterns and figures, repeated scale cues, and a transition between intimate memory anchors and the enormous shell systems.",
+  "designKeywords": ["stepped archive", "civic reliquary", "reading balcony", "index spine", "memory volumes", "weathered basalt", "warm interior light", "modular amphitheater"],
+  "scale": {"unit": "meter", "bounds": {"width": 5.4, "height": 2.45, "depth": 4.8}, "heroScale": 1, "modularScale": 0.5},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "+Z",
+    "pivot": [0, 0, 0],
+    "originMeaning": "The origin sits at the center of the lowest front step on ground level so snapping modules preserves terrace rise, public orientation, and walkable alignment."
+  },
+  "silhouette": {
+    "primary": "A broad three-step wedge rising toward the rear, with one tall off-center indexing spine breaking an otherwise horizontal skyline.",
+    "secondary": "Deep archive recesses create a rhythm of dark vertical slots while two projecting reading balconies interrupt the stepped mass at different heights.",
+    "tertiary": "Shelf lips, inscription bands, lantern niches, drainage channels, book-like memory volumes, repair blocks, rails, and access ladders concentrate detail along reachable edges.",
+    "negativeSpace": "Archive recesses are true deep voids rather than dark decals. The gaps below reading balconies and the narrow cut beside the indexing spine remain essential secondary spaces.",
+    "recognitionTest": "From a distance the module reads as a stepped archive or fragmented amphitheater with one vertical index marker, never as a generic staircase, ziggurat, or solid retaining wall."
+  },
+  "materials": [
+    {
+      "id": "terrace-stone",
+      "role": "Primary architectural mass",
+      "baseColor": "#2E2B36",
+      "metallic": 0.08,
+      "roughness": 0.76,
+      "emission": {"color": "#271B33", "strength": 0.02},
+      "surfaceDescription": "Dark violet-gray basalt with broad worn planes, chipped stair noses, mineral veining, patched blocks, and polished paths where visitors repeatedly walked."
+    },
+    {
+      "id": "archive-metal",
+      "role": "Frames, rails, and indexing spine",
+      "baseColor": "#75634A",
+      "metallic": 0.72,
+      "roughness": 0.38,
+      "emission": {"color": "#D6A85D", "strength": 0.25},
+      "surfaceDescription": "Aged bronze with blackened recesses, crisp engraved catalog lines, polished hand-contact surfaces, and occasional turquoise oxidation."
+    },
+    {
+      "id": "memory-volume",
+      "role": "Stored luminous recollections",
+      "baseColor": "#654C62",
+      "metallic": 0.03,
+      "roughness": 0.48,
+      "emission": {"color": "#F2B978", "strength": 1.45},
+      "surfaceDescription": "Translucent book-like blocks in amber, muted rose, and dim violet with internal depth and moving bands rather than flat glowing panels."
+    }
+  ],
+  "components": [
+    {
+      "id": "lower-terrace",
+      "primitive": "box",
+      "role": "Primary stepped stone body establishing the module footprint and public approach.",
+      "dimensions": {"width": 5.4, "height": 0.52, "depth": 4.8},
+      "transform": {"position": [0, 0.26, -2.4], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "terrace-stone",
+      "detail": "Carve a broad public stair into the forward half, preserve worn load-bearing edges, and introduce two irregular repair patches without disrupting walkability.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "upper-tiers",
+      "primitive": "box",
+      "role": "Two receding upper platforms producing the stepped archive silhouette.",
+      "dimensions": {"width": 4.4, "height": 0.5, "depth": 1.45},
+      "transform": {"position": [0, 0.76, -3.15], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "terrace-stone",
+      "detail": "Tier faces contain deep cell cuts and never align perfectly with the lower platform; rear edges step laterally by several centimeters.",
+      "repeat": {"mode": "linear", "count": 2, "step": [0, 0.5, -0.55]}
+    },
+    {
+      "id": "archive-cells",
+      "primitive": "box",
+      "role": "Deep framed openings containing individually varied memory volumes.",
+      "dimensions": {"width": 0.48, "height": 0.72, "depth": 0.42},
+      "transform": {"position": [-1.75, 0.66, -1.92], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "memory-volume",
+      "detail": "Each cell has a bronze frame, uneven shelf depth, and zero to four stored volumes with different size, color, and emission intensity.",
+      "repeat": {"mode": "grid", "count": 18, "columns": 6, "spacing": [0.7, 0.62, -0.08]}
+    },
+    {
+      "id": "index-spine",
+      "primitive": "box",
+      "role": "Tall off-center catalog marker and vertical circulation landmark.",
+      "dimensions": {"width": 0.38, "height": 2.35, "depth": 0.62},
+      "transform": {"position": [1.7, 1.18, -3.9], "rotation": [0, 0, -2], "scale": [1, 1, 1]},
+      "material": "archive-metal",
+      "detail": "Taper the spine upward, split its front face with a luminous catalog channel, and model engraved level bands and one service hatch.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "reading-balconies",
+      "primitive": "box",
+      "role": "Projecting ledges for figures, reading stands, and lantern clusters.",
+      "dimensions": {"width": 1.55, "height": 0.16, "depth": 0.9},
+      "transform": {"position": [-1.3, 1.18, -1.45], "rotation": [0, -3, 0], "scale": [1, 1, 1]},
+      "material": "archive-metal",
+      "detail": "Each balcony uses two underside ribs, one solid parapet section, one open rail section, and a visible drainage slot.",
+      "repeat": {"mode": "linear", "count": 2, "step": [2.35, 0.42, -0.72]}
+    }
+  ],
+  "generation": {
+    "seed": 3197,
+    "deterministic": true,
+    "assemblyOrder": ["Block primary stepped mass", "Cut archive-cell voids", "Insert varied memory volumes and bronze frames", "Add index spine and light channel", "Attach reading balconies, rails, niches, and access details"],
+    "deformationRules": [
+      "Stair and platform planes remain planar, but exposed front edges may erode inward by up to eight centimeters in irregular patches.",
+      "The indexing spine leans two degrees away from the public approach and narrows twelve percent toward the top.",
+      "Reading balconies project at slightly different angles so repeated modules do not create perfectly parallel bands."
+    ],
+    "variationRules": [
+      "Archive-cell occupancy varies from thirty to ninety percent while every module retains at least two completely dark empty cells.",
+      "Memory-volume emission alternates warm amber, muted rose, and dim violet without creating a regular checkerboard.",
+      "Modules may mirror or rotate around a basin, but the indexing spine remains on an exterior-facing side."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready modular architecture with separate walkable terraces, cell inserts, balcony assemblies, index spine, and replaceable memory-volume props.",
+    "bevel": "Use broad worn stone bevels on public edges, tighter bronze bevels on frames and rails, and intentionally chipped sections only where they preserve collision continuity.",
+    "subdivision": "No global subdivision. Use local smoothing only on worn stone repairs and rounded rail grips while preserving architectural planes.",
+    "normals": "Weighted normals keep large terrace planes calm and make stair noses, balcony ribs, and index-spine cuts carry controlled highlights.",
+    "uv": "Use a shared basalt material scale, bronze trim sheet, unique emissive UVs for catalog marks, and reusable memory-volume atlas regions.",
+    "watertightParts": ["lower terrace mass", "upper tier masses", "index spine", "balcony slabs"]
+  },
+  "animation": {
+    "channels": ["memory-volume.emission_scroll", "index-spine.catalog_pulse", "balcony-lantern.secondary_flicker"],
+    "loopLengthSeconds": 18,
+    "motionCharacter": "Architecture remains fixed. Soft bands move inside stored volumes at different rates, the index spine responds in delayed catalog pulses, and balcony lanterns flicker independently.",
+    "constraints": ["No structural object moves during idle animation.", "Emission remains below twice the base intensity.", "Empty archive cells stay fully dark."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 64000, "preserve": ["deep cell geometry", "balcony supports", "index engravings", "stone wear"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 18000, "preserve": ["three terrace levels", "cell rhythm", "two balconies", "index spine"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 3600, "preserve": ["stepped wedge", "index spine", "four luminous openings"]}
+  ],
+  "collision": {
+    "mode": "compound",
+    "description": "Use one stepped compound collider matching walkable tiers plus simplified balcony boxes. Archive recesses, rails, memory volumes, and small niches remain non-colliding."
+  },
+  "sockets": [
+    {"id": "module-snap-left", "purpose": "Horizontal connection to an adjacent terrace module.", "position": [-2.7, 0, -2.4], "rotation": [0, 0, 0]},
+    {"id": "module-snap-right", "purpose": "Horizontal connection to an adjacent terrace module.", "position": [2.7, 0, -2.4], "rotation": [0, 180, 0]},
+    {"id": "upper-stack", "purpose": "Placement surface for a smaller rotated archive module or hero prop.", "position": [0, 1.5, -4.15], "rotation": [0, 0, 0]},
+    {"id": "public-entry", "purpose": "Navigation and camera target at the lower stair approach.", "position": [0, 0, 0], "rotation": [0, 180, 0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show three stepped levels, deep archive slots, two uneven balconies, and the indexing spine offset to the viewer's right.",
+    "side": "Make the wedge profile, terrace depth, balcony projection, and slight rear lean of the spine legible.",
+    "top": "Reveal the public stair approach, irregular cell depths, balcony footprints, and left/right modular snapping edges.",
+    "threeQuarter": "Use a low public-approach angle that exposes worn stair surfaces, glowing cell interiors, underside balcony structure, and the spine against open sky.",
+    "scaleCue": "Include one human on the lower stair and another reading on an upper balcony."
+  },
+  "validation": [
+    "The module contains three readable elevation levels and one off-center index spine.",
+    "At least six archive cells have visibly modeled depth from the hero view.",
+    "Two reading balconies project from different levels and do not align vertically.",
+    "The lower stair remains continuously walkable using the simplified collision shape.",
+    "Memory-volume emission varies without flattening the dark stone architecture.",
+    "LOD2 preserves the stepped mass, index spine, and four luminous openings.",
+    "Left and right sockets align when two default modules are placed adjacent without overlap."
+  ]
+}

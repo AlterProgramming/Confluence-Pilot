@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "id": "memory-filament-weave",
+  "title": "Memory Filament Weave",
+  "realm": "the-weight-of-remembering",
+  "category": "energy-filament",
+  "revision": 1,
+  "description": "A braided three-dimensional energy conduit formed from one dominant luminous thread, two dimmer companion strands, intermittent memory beads, structural guide rings, split fibers, and endpoint flares. It is designed to cross large distances, bend through architecture, and connect anchors without reading as a simple glowing tube or electrical cable.",
+  "narrativeFunction": "The filament is the connective tissue of the world. It makes relationships among memories spatially visible, guides the camera, carries pulses toward active anchors, and adds layered depth wherever paths cross. Individual assets can join into networks while preserving direction, hierarchy, and visible flow.",
+  "designKeywords": ["luminous braid", "memory conduit", "guided curve", "pulse beads", "ritual cable", "depth crossing", "soft emission", "directional flow"],
+  "scale": {"unit": "meter", "bounds": {"width": 7.5, "height": 2.8, "depth": 3.8}, "heroScale": 1, "modularScale": 0.12},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0, 0, 0],
+    "originMeaning": "The origin is the first endpoint of the dominant strand. The final endpoint and every guide control are stored relative to this source socket for deterministic network assembly."
+  },
+  "silhouette": {
+    "primary": "One long sweeping S-curve changing depth and elevation, with a broad central gesture readable even when its emission is disabled.",
+    "secondary": "Two thinner companion strands diverge and rejoin around the primary curve, creating a braided envelope and several open loops.",
+    "tertiary": "Memory beads, guide rings, split fibers, tiny sparks, short trailing threads, and endpoint flares cluster near bends and anchor approaches.",
+    "negativeSpace": "Companion strands separate enough to create visible windows through the braid. The largest loop occupies at least one tenth of the asset's projected area.",
+    "recognitionTest": "At distance the asset reads as a directional braided memory path with one dominant warm strand and cooler answering strands, not as a laser, rope, hose, or generic particle trail."
+  },
+  "materials": [
+    {
+      "id": "primary-thread",
+      "role": "Main directional memory flow",
+      "baseColor": "#B86E4F",
+      "metallic": 0,
+      "roughness": 0.2,
+      "emission": {"color": "#FFB178", "strength": 3.1},
+      "surfaceDescription": "Dense warm luminous fiber with a bright central core, softer colored halo, longitudinal flow texture, and slight intensity thickening at turns."
+    },
+    {
+      "id": "companion-thread",
+      "role": "Secondary relational strands",
+      "baseColor": "#6657A8",
+      "metallic": 0,
+      "roughness": 0.28,
+      "emission": {"color": "#A897FF", "strength": 1.65},
+      "surfaceDescription": "Cool violet translucent filaments with intermittent dim sections, finer internal fibers, and a less stable outline than the dominant strand."
+    },
+    {
+      "id": "guide-metal",
+      "role": "Guide rings and endpoint hardware",
+      "baseColor": "#594C46",
+      "metallic": 0.7,
+      "roughness": 0.4,
+      "emission": {"color": "#D7A869", "strength": 0.18},
+      "surfaceDescription": "Dark warm metal with engraved directional marks, localized polished contact surfaces, open clasp details, and minor oxidation around mounting screws."
+    }
+  ],
+  "components": [
+    {
+      "id": "primary-curve",
+      "primitive": "curve-tube",
+      "role": "Dominant directional strand carrying the primary memory pulse.",
+      "dimensions": {"points": [[0,0,0],[1.15,0.65,-0.4],[2.8,-0.15,-1.25],[4.5,1,-2],[6.1,0.45,-3.1],[7.5,1.3,-3.8]], "radius": 0.055, "resolution": 24, "bevelResolution": 5},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "primary-thread",
+      "detail": "Maintain a broad smooth S-gesture with tighter curvature only near the destination. Add a narrow bright core and a wider translucent halo as separate render layers.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "companion-curves",
+      "primitive": "curve-tube",
+      "role": "Two cooler strands braiding around and reconnecting with the primary path.",
+      "dimensions": {"points": [[0,0.08,0.1],[1.1,0.85,-0.2],[2.75,-0.38,-1],[4.6,0.78,-2.25],[6.2,0.7,-3],[7.5,1.25,-3.75]], "radius": 0.026, "resolution": 20, "bevelResolution": 4},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "companion-thread",
+      "detail": "Offset phase and depth so each companion crosses the primary in a different third of the route and creates visibly open braided windows.",
+      "repeat": {"mode": "linear", "count": 2, "step": [0,-0.16,0.18]}
+    },
+    {
+      "id": "memory-beads",
+      "primitive": "icosphere",
+      "role": "Small stored moments carried along the conduit.",
+      "dimensions": {"radius": 0.085, "subdivisions": 2},
+      "transform": {"position": [0.55,0.25,-0.15], "rotation": [0,0,0], "scale": [1.3,0.72,0.72]},
+      "material": "primary-thread",
+      "detail": "Beads flatten along the local tangent, contain a faint internal glyph, vary in scale, and avoid perfectly even arc-length placement.",
+      "repeat": {"mode": "linear", "count": 14, "step": [0.49,0.065,-0.25]}
+    },
+    {
+      "id": "guide-rings",
+      "primitive": "torus",
+      "role": "Mechanical ritual guides organizing the braid near strong bends.",
+      "dimensions": {"majorRadius": 0.18, "minorRadius": 0.018, "majorSegments": 24, "minorSegments": 7},
+      "transform": {"position": [1.4,0.55,-0.45], "rotation": [78,20,12], "scale": [1,1,1]},
+      "material": "guide-metal",
+      "detail": "Each ring aligns approximately to the local curve tangent, includes one open clasp segment, and carries one engraved direction arrow.",
+      "repeat": {"mode": "linear", "count": 5, "step": [1.25,0.12,-0.66]}
+    },
+    {
+      "id": "endpoint-flares",
+      "primitive": "torus",
+      "role": "Transition geometry where the braided conduit enters an anchor socket.",
+      "dimensions": {"majorRadius": 0.12, "minorRadius": 0.02, "majorSegments": 24, "minorSegments": 7},
+      "transform": {"position": [0,0,0], "rotation": [90,0,0], "scale": [1,1,1]},
+      "material": "guide-metal",
+      "detail": "Flares contain layered rings and a short narrowing funnel so strands appear gathered into the anchor rather than cut off.",
+      "repeat": {"mode": "linear", "count": 2, "step": [7.5,1.3,-3.8]}
+    }
+  ],
+  "generation": {
+    "seed": 5347,
+    "deterministic": true,
+    "assemblyOrder": ["Author primary S-curve between endpoint sockets", "Create phase-offset companion strands", "Place guide rings at high-curvature regions", "Distribute memory beads along arc length", "Add split fibers, endpoint funnels, and pulse masks"],
+    "deformationRules": [
+      "Endpoints remain fixed while intermediate controls move only inside a one-meter authoring envelope.",
+      "Companion strands maintain at least six centimeters of separation except at intentional braid crossings.",
+      "All strand radii narrow by thirty percent near endpoint funnels to suggest tension entering anchors."
+    ],
+    "variationRules": [
+      "Memory-bead count ranges from ten to eighteen and avoids uniform spacing.",
+      "One companion may fade for up to fifteen percent of the route but must return before the destination.",
+      "Guide-ring count varies with curvature and no ring may be placed on a perfectly straight section."
+    ]
+  },
+  "topology": {
+    "target": "Curve-native procedural topology with clean adjustable radii, separate glow shells, tangent-aware guide hardware, and endpoint modules suitable for runtime deformation.",
+    "bevel": "Use smooth circular strand bevels, narrow metal-ring bevels, and softened bead facets without losing their elongated directional form.",
+    "subdivision": "Curve resolution controls strand smoothness. Use low subdivision only on hero beads and endpoint hardware; background variants remain curve-driven.",
+    "normals": "Curves use smooth normals while guide rings and endpoint funnels use weighted hard-surface normals for controlled highlights.",
+    "uv": "Generate arc-length UVs for directional flow, separate halo UVs, reusable metal trim UVs, and unique bead glyph masks.",
+    "watertightParts": ["guide rings", "endpoint funnels", "memory beads"]
+  },
+  "animation": {
+    "channels": ["primary-thread.flow_offset", "companion-thread.counterflow", "memory-beads.travel_pulse", "endpoint-flares.intensity"],
+    "loopLengthSeconds": 9,
+    "motionCharacter": "Energy moves as directional waves rather than a uniformly scrolling texture. Warm pulses travel toward the destination, violet companions answer in reverse, and beads brighten briefly as waves pass through them.",
+    "constraints": ["Endpoint positions remain exact.", "Flow direction stays readable throughout the loop.", "No moving bead passes through guide-ring geometry."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 36000, "preserve": ["three-strand braid", "bead variation", "guide clasps", "dual glow layers"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 9500, "preserve": ["dominant curve", "two companion strands", "selected beads", "guide ring rhythm"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 1200, "preserve": ["primary S-curve", "one companion line", "endpoint flare"]}
+  ],
+  "collision": {
+    "mode": "none",
+    "description": "The filament is visual and navigational only. Gameplay collision belongs to anchors or architecture rather than the energy conduit."
+  },
+  "sockets": [
+    {"id": "source", "purpose": "Start connection to a memory anchor or upstream filament.", "position": [0,0,0], "rotation": [0,0,0]},
+    {"id": "destination", "purpose": "End connection to a memory anchor or downstream filament.", "position": [7.5,1.3,-3.8], "rotation": [0,0,0]},
+    {"id": "branch-a", "purpose": "Optional secondary filament branch at the central crossing.", "position": [3.85,0.45,-1.65], "rotation": [0,28,-8]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show the large S-curve, companion separation, bead rhythm, and guide-ring interruptions without flattening all depth changes into one line.",
+    "side": "Reveal substantial depth travel and ensure companion strands cross at distinct positions rather than overlapping for the complete length.",
+    "top": "Make endpoint direction, broad bends, branch socket, and the largest negative-space loop explicit for path planning.",
+    "threeQuarter": "Use a dark neutral background and show warm primary core, cooler companions, metallic guide rings, and real three-dimensional braid crossings.",
+    "scaleCue": "Place one human near a guide ring only as a world-scale reference; the filament is not intended as a walkable object."
+  },
+  "validation": [
+    "The primary strand forms one continuous six-control-point S-curve between named endpoint sockets.",
+    "Two companion strands create at least three visible braid crossings.",
+    "At least one open negative-space loop remains visible from the hero view.",
+    "Memory beads avoid perfectly uniform spacing and identical scale.",
+    "Guide rings align to local curve direction and include visible clasp openings.",
+    "LOD2 preserves primary curve, one companion line, and endpoint flare.",
+    "Animated pulse direction remains source-to-destination across the complete loop."
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "confluence-dimension-procedural-source-assets",
+  "title": "Confluence Dimension Procedural Source Asset Catalog",
+  "description": "Canonical machine-readable source assets for generating the three-dimensional architecture used by The Weight of Remembering and Parallel Remembrance.",
+  "coordinateSystem": {
+    "unit": "meter",
+    "upAxis": "+Y",
+    "defaultForwardAxis": "-Z",
+    "rotationUnit": "degree"
+  },
+  "generator": {
+    "type": "blender-python",
+    "path": "../../../tools/blender/generate_dimension_asset.py",
+    "minimumBlenderVersion": "4.2",
+    "outputs": ["blend", "gltf", "glb"]
+  },
+  "assets": [
+    {
+      "id": "celestial-memory-mechanism",
+      "path": "celestial-memory-mechanism.asset.json",
+      "realm": "the-weight-of-remembering",
+      "category": "celestial-mechanism",
+      "runtimeSystem": "CelestialMechanism",
+      "defaultInstances": 8,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "articulated-memory-shell-rib",
+      "path": "articulated-memory-shell-rib.asset.json",
+      "realm": "the-weight-of-remembering",
+      "category": "structural-rib",
+      "runtimeSystem": "MemoryShellRibs",
+      "defaultInstances": 11,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "archive-terrace-module",
+      "path": "archive-terrace-module.asset.json",
+      "realm": "the-weight-of-remembering",
+      "category": "architectural-module",
+      "runtimeSystem": "ArchiveTerraces",
+      "defaultInstances": 7,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "lantern-metropolis-tower",
+      "path": "lantern-metropolis-tower.asset.json",
+      "realm": "the-weight-of-remembering",
+      "category": "city-tower",
+      "runtimeSystem": "LanternMetropolis",
+      "defaultInstances": 84,
+      "productionPriority": "modular"
+    },
+    {
+      "id": "memory-filament-weave",
+      "path": "memory-filament-weave.asset.json",
+      "realm": "the-weight-of-remembering",
+      "category": "energy-filament",
+      "runtimeSystem": "SecondaryThreadWeave",
+      "defaultInstances": 10,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "foreground-chain-strand",
+      "path": "foreground-chain-strand.asset.json",
+      "realm": "the-weight-of-remembering",
+      "category": "chain-assembly",
+      "runtimeSystem": "ForegroundChainField",
+      "defaultInstances": 9,
+      "productionPriority": "modular"
+    },
+    {
+      "id": "possibility-lattice-node",
+      "path": "possibility-lattice-node.asset.json",
+      "realm": "parallel-remembrance",
+      "category": "dimensional-lattice",
+      "runtimeSystem": "PossibilityLattice",
+      "defaultInstances": 14,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "unwritten-archive-megastructure",
+      "path": "unwritten-archive-megastructure.asset.json",
+      "realm": "parallel-remembrance",
+      "category": "archive-megastructure",
+      "runtimeSystem": "ArchiveMegastructure",
+      "defaultInstances": 1,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "echo-bridge-span",
+      "path": "echo-bridge-span.asset.json",
+      "realm": "parallel-remembrance",
+      "category": "bridge-span",
+      "runtimeSystem": "EchoBridgeNetwork",
+      "defaultInstances": 9,
+      "productionPriority": "hero"
+    },
+    {
+      "id": "unlived-garden-growth",
+      "path": "unlived-garden-growth.asset.json",
+      "realm": "parallel-remembrance",
+      "category": "organic-growth",
+      "runtimeSystem": "UnlivedGardenCanopy",
+      "defaultInstances": 116,
+      "productionPriority": "modular"
+    },
+    {
+      "id": "probability-monolith",
+      "path": "probability-monolith.asset.json",
+      "realm": "parallel-remembrance",
+      "category": "monolith",
+      "runtimeSystem": "ProbabilityMonolithField",
+      "defaultInstances": 38,
+      "productionPriority": "modular"
+    },
+    {
+      "id": "timeline-fragment",
+      "path": "timeline-fragment.asset.json",
+      "realm": "parallel-remembrance",
+      "category": "timeline-debris",
+      "runtimeSystem": "TimelineDebris",
+      "defaultInstances": 148,
+      "productionPriority": "modular"
+    }
+  ],
+  "qualityGates": {
+    "minimumMaterialsPerAsset": 2,
+    "minimumComponentsPerAsset": 3,
+    "minimumValidationRulesPerAsset": 6,
+    "requiredLodNames": ["LOD0", "LOD1", "LOD2"],
+    "requiredSocketsPerAsset": 2,
+    "requireDeterministicGeneration": true,
+    "requireOrthographicGuidance": true,
+    "requireNarrativeFunction": true,
+    "requireRuntimeSystemBinding": true
+  }
+}

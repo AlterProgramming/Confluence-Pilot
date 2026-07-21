@@ -1,0 +1,130 @@
+name: Dimension scene
+
+on:
+  push:
+    branches:
+      - 'agent/dimension-scene-runtime'
+    paths:
+      - 'src/dimension/**'
+      - 'public/reference/dimensions/**'
+      - 'assets/dimensions/procedural-source/**'
+      - 'tools/blender/generate_dimension_asset.py'
+      - 'scripts/validate_dimension_scene.mjs'
+      - 'scripts/validate_dimension_source_assets.mjs'
+      - 'scripts/validate_world_fabric.mjs'
+      - 'scripts/validate_image_world_compiler.mjs'
+      - 'scripts/capture_dimension_scene.mjs'
+      - 'scripts/capture_dimension_authoring.mjs'
+      - 'scripts/capture_image_world_compiler.mjs'
+      - 'scripts/validate_dimension_visual_review.mjs'
+      - 'validation/design/dimension-*.json'
+      - 'validation/design/dimension-scene.md'
+      - 'validation/design/world-fabric.md'
+      - 'validation/design/image-world-compiler.md'
+      - 'src/App.tsx'
+      - 'package.json'
+      - '.github/workflows/dimension-scene.yml'
+  pull_request:
+    paths:
+      - 'src/dimension/**'
+      - 'public/reference/dimensions/**'
+      - 'assets/dimensions/procedural-source/**'
+      - 'tools/blender/generate_dimension_asset.py'
+      - 'scripts/validate_dimension_scene.mjs'
+      - 'scripts/validate_dimension_source_assets.mjs'
+      - 'scripts/validate_world_fabric.mjs'
+      - 'scripts/validate_image_world_compiler.mjs'
+      - 'scripts/capture_dimension_scene.mjs'
+      - 'scripts/capture_dimension_authoring.mjs'
+      - 'scripts/capture_image_world_compiler.mjs'
+      - 'scripts/validate_dimension_visual_review.mjs'
+      - 'validation/design/dimension-*.json'
+      - 'validation/design/dimension-scene.md'
+      - 'validation/design/world-fabric.md'
+      - 'validation/design/image-world-compiler.md'
+      - 'src/App.tsx'
+      - 'package.json'
+      - '.github/workflows/dimension-scene.yml'
+
+concurrency:
+  group: dimension-scene-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-dimension:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate source contract
+        run: |
+          mkdir -p validation/dimension-scene validation/image-world-compiler
+          set -o pipefail
+          npm run typecheck 2>&1 | tee validation/dimension-scene/typecheck.log
+          npm run lint 2>&1 | tee validation/dimension-scene/lint.log
+          python -m py_compile tools/blender/generate_dimension_asset.py 2>&1 | tee validation/dimension-scene/blender-generator-compile.log
+          npm run validate:dimension 2>&1 | tee validation/dimension-scene/source-validation.log
+          npm run validate:dimension:assets 2>&1 | tee validation/dimension-scene/source-assets-validation.log
+
+      - name: Build production bundle
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee validation/dimension-scene/build.log
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4178 > /tmp/confluence-dimension-preview.log 2>&1 &
+          echo $! > /tmp/confluence-dimension-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail 'http://127.0.0.1:4178/dimension?world=the-weight-of-remembering' > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cp /tmp/confluence-dimension-preview.log validation/dimension-scene/preview.log
+          exit 1
+
+      - name: Capture runtime journey evidence
+        run: node scripts/capture_dimension_scene.mjs http://127.0.0.1:4178
+
+      - name: Capture world authoring evidence
+        run: node scripts/capture_dimension_authoring.mjs http://127.0.0.1:4178
+
+      - name: Capture image world compiler evidence
+        run: node scripts/capture_image_world_compiler.mjs http://127.0.0.1:4178
+
+      - name: Validate visual review contract
+        run: npm run validate:dimension:visual
+
+      - name: Preserve preview log
+        if: always()
+        run: |
+          if [ -f /tmp/confluence-dimension-preview.log ]; then
+            cp /tmp/confluence-dimension-preview.log validation/dimension-scene/preview.log
+          fi
+
+      - name: Upload dimension evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dimension-scene-evidence
+          path: |
+            validation/dimension-scene
+            validation/dimension-assets
+            validation/image-world-compiler
+          if-no-files-found: warn
+          retention-days: 14

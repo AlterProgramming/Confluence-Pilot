@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "celestial-memory-mechanism",
+  "title": "Celestial Memory Mechanism",
+  "realm": "the-weight-of-remembering",
+  "category": "celestial-mechanism",
+  "revision": 1,
+  "description": "A suspended astronomical instrument built from eight interlocking orbital frames, a dim central memory lens, and fractured constellation shards. It combines cathedral-scale engineering with the delicacy of a hand-held astrolabe. The object should appear older than any civilization in the realm while still actively calculating relationships among remembered events.",
+  "narrativeFunction": "The mechanism visualizes memory as a celestial system. Stable recollections occupy durable orbits while unstable fragments drift between rings. It establishes upper-world scale, provides a slow-moving orientation landmark, and gives the sky a mechanical hierarchy visible from every authored camera path.",
+  "designKeywords": ["astrolabe", "cathedral engineering", "orbital asymmetry", "memory lens", "constellation shards", "aged brass", "violet emission", "ritual mathematics"],
+  "scale": {
+    "unit": "meter",
+    "bounds": {"width": 8.6, "height": 8.2, "depth": 3.4},
+    "heroScale": 1,
+    "modularScale": 0.35
+  },
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0, 0, 0],
+    "originMeaning": "The origin is the exact center of the memory lens; every orbital rotation, suspension point, and attachment socket is measured from this focus."
+  },
+  "silhouette": {
+    "primary": "A broad circular celestial crown made from several offset rings, wider than it is deep, with one visibly broken quadrant that prevents the asset from reading as a perfect target.",
+    "secondary": "Thin radial arms connect selected rings to a dark central lens while three eccentric counterweight arcs extend beyond the primary circumference and create a deliberately unbalanced clockwork profile.",
+    "tertiary": "Needle-like constellation markers, engraved calibration vanes, suspended shard cages, tiny luminous rivets, and exposed hinge plates concentrate detail near intersections rather than coating every surface uniformly.",
+    "negativeSpace": "Open spaces between orbital rings remain dominant. The central lens occupies less than one fifth of the frontal area, and the broken quadrant creates a memorable wedge of empty sky.",
+    "recognitionTest": "At thumbnail size the asset reads as an incomplete celestial instrument with several eccentric orbits and one dark eye, never as a flat halo, decorative target, or generic atom symbol."
+  },
+  "materials": [
+    {
+      "id": "frame",
+      "role": "Primary orbital metal",
+      "baseColor": "#6F5A42",
+      "metallic": 0.82,
+      "roughness": 0.32,
+      "emission": {"color": "#7D4C21", "strength": 0.08},
+      "surfaceDescription": "Dark aged brass with rubbed edges, shallow engraved calibrations, oxidation around rivets, and visible assembly scars where orbital sections were repaired."
+    },
+    {
+      "id": "lens",
+      "role": "Central memory glass",
+      "baseColor": "#231B35",
+      "metallic": 0.08,
+      "roughness": 0.12,
+      "emission": {"color": "#B78CFF", "strength": 2.4},
+      "surfaceDescription": "Smoked violet glass with deep internal refraction, a cloudy core, and a bright narrow rim suggesting stored pressure beneath the surface."
+    },
+    {
+      "id": "shard",
+      "role": "Constellation fragments",
+      "baseColor": "#D8C7A1",
+      "metallic": 0.35,
+      "roughness": 0.46,
+      "emission": {"color": "#E8D6FF", "strength": 1.2},
+      "surfaceDescription": "Pale ceramic-metal fragments with chipped edges, sparse gold inlay, and emissive glyphs carved into their depth rather than printed onto the face."
+    }
+  ],
+  "components": [
+    {
+      "id": "primary-orbit",
+      "primitive": "torus",
+      "role": "Largest load-bearing orbit and dominant silhouette ring.",
+      "dimensions": {"majorRadius": 3.4, "minorRadius": 0.11, "majorSegments": 96, "minorSegments": 12},
+      "transform": {"position": [0, 0, 0], "rotation": [78, 0, 8], "scale": [1, 1, 1]},
+      "material": "frame",
+      "detail": "The ring carries engraved degree marks, six hinge plates, uneven reinforcement, and one intentionally missing forty-degree segment with modeled mechanical termination ends.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "eccentric-orbits",
+      "primitive": "torus",
+      "role": "Seven secondary orbital frames crossing at different non-symmetrical inclinations.",
+      "dimensions": {"majorRadius": 2.55, "minorRadius": 0.065, "majorSegments": 72, "minorSegments": 10},
+      "transform": {"position": [0, 0, 0], "rotation": [24, 17, 11], "scale": [1, 1, 1]},
+      "material": "frame",
+      "detail": "Each ring varies slightly in thickness, tilt, and engraved index so the mechanism feels accumulated and repaired rather than manufactured in one pass.",
+      "repeat": {"mode": "radial", "count": 7, "radius": 0, "axis": "Y", "angleOffsetDegrees": 11}
+    },
+    {
+      "id": "memory-lens",
+      "primitive": "sphere",
+      "role": "Dark optical volume acting as the visual and animation pivot.",
+      "dimensions": {"radius": 0.68, "segments": 48, "rings": 24},
+      "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 0.38]},
+      "material": "lens",
+      "detail": "The sphere is flattened into a thick lens with an uninterrupted front surface, a brighter edge, and enough depth to support animated internal refraction.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "radial-arms",
+      "primitive": "box",
+      "role": "Mechanical spokes connecting selected orbital structures to the lens cage.",
+      "dimensions": {"width": 0.09, "height": 2.75, "depth": 0.12},
+      "transform": {"position": [0, 1.5, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]},
+      "material": "frame",
+      "detail": "Arms taper toward the lens and terminate in visible forked joints rather than disappearing into ring geometry; not every ring receives a spoke.",
+      "repeat": {"mode": "radial", "count": 12, "radius": 0, "axis": "Z"}
+    },
+    {
+      "id": "constellation-shards",
+      "primitive": "icosphere",
+      "role": "Faceted memory markers distributed throughout the outer orbital volume.",
+      "dimensions": {"radius": 0.11, "subdivisions": 1},
+      "transform": {"position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 0.42, 0.16]},
+      "material": "shard",
+      "detail": "Markers become thin irregular shards oriented toward nearby orbit intersections and clustered into readable constellations rather than uniform noise.",
+      "repeat": {"mode": "scatter", "count": 28, "bounds": [4, 3.8, 1.4], "scaleMin": 0.65, "scaleMax": 1.55}
+    }
+  ],
+  "generation": {
+    "seed": 1108,
+    "deterministic": true,
+    "assemblyOrder": ["Create central lens and cage", "Build broken primary orbit", "Add eccentric orbital family", "Connect selected rings with radial arms", "Distribute constellation shards and calibration details"],
+    "deformationRules": [
+      "Flatten the central lens to thirty-eight percent depth while preserving a circular frontal profile.",
+      "Remove one forty-degree section from the primary orbit and bend adjacent ends outward by six degrees to expose the fracture.",
+      "Apply no more than two degrees of handcrafted warp to secondary rings so they feel ancient without appearing soft."
+    ],
+    "variationRules": [
+      "Ring inclination may vary by twelve degrees, but no two rings may become coplanar.",
+      "Shard scale varies from sixty-five to one hundred fifty-five percent and clusters near orbital intersections.",
+      "Calibration engravings may change per instance while preserving the same density hierarchy."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready hard-surface topology with editable modular ring sections, clean circular deformation, and continuous shading across hero-facing orbital surfaces.",
+    "bevel": "Use physically meaningful bevel widths on metal rings, arm forks, lens cage, and shard edges; avoid razor-thin highlights.",
+    "subdivision": "Reserve subdivision for the lens and selected ceremonial ring transitions; preserve intentionally faceted shards and calibration hardware.",
+    "normals": "Use weighted normals on metal structures so broad surfaces remain calm while bevels and engraved cuts carry highlights.",
+    "uv": "Use trim-sheet-aligned orbital UVs, unique lens UVs, and a dedicated emissive-mask channel for calibration glyphs and shard marks.",
+    "watertightParts": ["memory-lens", "primary-orbit sections", "radial-arm joints"]
+  },
+  "animation": {
+    "channels": ["primary-orbit.rotation_local_z", "eccentric-orbits.rotation_local_axis", "memory-lens.emission_pulse", "constellation-shards.drift"],
+    "loopLengthSeconds": 48,
+    "motionCharacter": "Extremely slow ceremonial movement with independent orbital rates. Nothing spins like a powered machine; it should feel as though gravity, memory, and time negotiate every rotation.",
+    "constraints": ["The broken orbit never intersects adjacent rings.", "The lens remains fixed at the origin.", "Shard drift amplitude remains below twelve centimeters."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 78000, "preserve": ["all orbital intersections", "engraved frame hierarchy", "lens depth", "hero shards"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 22000, "preserve": ["broken primary orbit", "four eccentric rings", "lens", "major arm forks"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 4200, "preserve": ["broken crown silhouette", "central dark lens", "three eccentric directions"]}
+  ],
+  "collision": {
+    "mode": "compound",
+    "description": "Use one thin toroidal proxy for the primary orbit and one flattened sphere for the lens; decorative rings, arms, and shards remain non-colliding."
+  },
+  "sockets": [
+    {"id": "ceiling-suspension", "purpose": "World-space suspension or chain attachment above the mechanism.", "position": [0, 4.05, 0], "rotation": [0, 0, 0]},
+    {"id": "lens-focus", "purpose": "Camera, light, or interaction focus at the center of the memory lens.", "position": [0, 0, 0.32], "rotation": [0, 0, 0]},
+    {"id": "shard-emitter", "purpose": "Particle source aligned with the broken orbital quadrant.", "position": [2.7, 1.5, 0.4], "rotation": [0, 18, -32]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show the broad circular crown, broken upper-right quadrant, central dark lens, and eccentric counterweights clearly. At least five ring intersections remain visible without tangencies.",
+    "side": "Emphasize shallow total depth, layered orbital offsets, flattened lens volume, and staggered arm joints; the asset must not collapse into one thin line.",
+    "top": "Reveal the family of ring inclinations and selective spoke connections while preserving open passages among orbital layers.",
+    "threeQuarter": "Use the broken quadrant as the leading edge and show both lens depth and counterweight arcs extending beyond the main crown.",
+    "scaleCue": "Include a two-meter human silhouette beneath the mechanism; the main crown should appear approximately four human heights across."
+  },
+  "validation": [
+    "Primary silhouette reads as an incomplete multi-orbit astrolabe from fifty meters.",
+    "At least thirty-five percent of the frontal projection remains open negative space.",
+    "The central lens is the darkest contiguous shape and remains distinct from the frame.",
+    "No two secondary rings share identical inclination and motion rate.",
+    "Broken ring ends contain modeled mechanical termination details rather than raw open topology.",
+    "LOD2 preserves the broken quadrant, central lens, and three eccentric ring directions.",
+    "All sockets export with stable names and correct world orientation."
+  ]
+}

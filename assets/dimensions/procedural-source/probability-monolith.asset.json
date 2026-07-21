@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "id": "probability-monolith",
+  "title": "Probability Monolith",
+  "realm": "parallel-remembrance",
+  "category": "monolith",
+  "revision": 1,
+  "description": "A tall faceted marker recording the likelihood of an unrealized outcome. The monolith is a dark asymmetrical slab split by one vertical probability aperture, surrounded by smaller calibrated cuts, a buried luminous core, and a thin hovering capstone that never quite settles.",
+  "narrativeFunction": "Probability monoliths create distant architectural depth and a readable field of alternate outcomes. Their apertures can display changing likelihood, align into routes, frame destination nodes, and provide a severe geometric counterpoint to the unlived garden.",
+  "designKeywords": ["probability marker", "faceted slab", "vertical aperture", "hovering capstone", "calibrated cuts", "dark violet stone", "cyan core", "severe geometry"],
+  "scale": {"unit": "meter", "bounds": {"width": 1.25, "height": 5.6, "depth": 0.9}, "heroScale": 1, "modularScale": 0.22},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0,-2.8,0],
+    "originMeaning": "The origin sits at the center of the planted base plane. The hovering capstone, aperture animation, and field-alignment socket move relative to this fixed foundation."
+  },
+  "silhouette": {
+    "primary": "A tall narrow slab leaning slightly to one side, wider through the lower third, and ending in a broken angled crown below a detached capstone.",
+    "secondary": "One vertical aperture cuts through most of the height and divides the slab into unequal left and right masses.",
+    "tertiary": "Probability ticks, edge notches, recessed glyphs, hairline luminous fractures, calibration inserts, and eroded base fragments provide close detail around the aperture.",
+    "negativeSpace": "The vertical aperture remains genuine open space or a deep transmissive volume. The air gap beneath the capstone forms the second essential void.",
+    "recognitionTest": "At distance the asset reads as a severe probability marker with one tall luminous cut and floating crown, not as a tombstone, ordinary obelisk, rectangular pillar, or portal frame."
+  },
+  "materials": [
+    {
+      "id": "monolith-stone",
+      "role": "Primary slab",
+      "baseColor": "#262333",
+      "metallic": 0.12,
+      "roughness": 0.72,
+      "emission": {"color": "#392E50", "strength": 0.06},
+      "surfaceDescription": "Dense dark violet stone with broad faceted planes, chipped lower edges, geological banding, and fine cracks bending around the aperture."
+    },
+    {
+      "id": "probability-aperture",
+      "role": "Internal state channel",
+      "baseColor": "#477487",
+      "metallic": 0.01,
+      "roughness": 0.14,
+      "emission": {"color": "#83E2F5", "strength": 2.35},
+      "surfaceDescription": "Deep cyan transmissive light with moving density bands, brighter probability ticks, a darker center, and visible depth rather than a flat glowing stripe."
+    },
+    {
+      "id": "capstone-metal",
+      "role": "Hovering crown and calibration inserts",
+      "baseColor": "#5C5575",
+      "metallic": 0.62,
+      "roughness": 0.3,
+      "emission": {"color": "#C0A9FF", "strength": 0.72},
+      "surfaceDescription": "Dark violet alloy with sharp bevels, engraved decimal marks, pale emission along its lower hovering face, and small magnetic alignment pins."
+    }
+  ],
+  "components": [
+    {
+      "id": "main-slab",
+      "primitive": "box",
+      "role": "Primary asymmetrical monolith body.",
+      "dimensions": {"width": 1.18, "height": 5.1, "depth": 0.78},
+      "transform": {"position": [0,2.55,0], "rotation": [0,0,-2.5], "scale": [1,1,1]},
+      "material": "monolith-stone",
+      "detail": "Cut the crown on an angle, taper one side inward, facet the front into three unequal planes, and model a wider lower third with chipped footing corners.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "aperture-core",
+      "primitive": "box",
+      "role": "Tall luminous probability channel running through the slab.",
+      "dimensions": {"width": 0.17, "height": 3.85, "depth": 0.86},
+      "transform": {"position": [0.12,2.55,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "probability-aperture",
+      "detail": "The channel widens near the upper third, narrows toward the base, contains layered depth, and either passes through the stone or sits deeply recessed.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "probability-ticks",
+      "primitive": "box",
+      "role": "Calibration marks stepping along one edge of the aperture.",
+      "dimensions": {"width": 0.12, "height": 0.035, "depth": 0.03},
+      "transform": {"position": [0.28,0.9,-0.42], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "capstone-metal",
+      "detail": "Tick lengths encode a nonlinear probability sequence, use irregular spacing, and alternate between engraved metal and small emissive indicators.",
+      "repeat": {"mode": "linear", "count": 13, "step": [0,0.28,0]}
+    },
+    {
+      "id": "hovering-capstone",
+      "primitive": "box",
+      "role": "Detached angled crown suspended above the broken slab.",
+      "dimensions": {"width": 0.86, "height": 0.22, "depth": 0.64},
+      "transform": {"position": [-0.08,5.43,0], "rotation": [4,0,7], "scale": [1,1,1]},
+      "material": "capstone-metal",
+      "detail": "The capstone mirrors part of the broken crown profile, includes two alignment pins, and remains visibly separated by a twelve-centimeter air gap.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "base-fragments",
+      "primitive": "icosphere",
+      "role": "Small faceted stone fragments and probability debris near the footing.",
+      "dimensions": {"radius": 0.09, "subdivisions": 1},
+      "transform": {"position": [0,0.08,0], "rotation": [0,0,0], "scale": [1,0.65,0.8]},
+      "material": "monolith-stone",
+      "detail": "Fragments cluster on the leaning side, appear chipped from the same geological material, and leave the route-alignment socket unobstructed.",
+      "repeat": {"mode": "scatter", "count": 9, "bounds": [0.75,0.12,0.58], "scaleMin": 0.5, "scaleMax": 1.35}
+    }
+  ],
+  "generation": {
+    "seed": 11969,
+    "deterministic": true,
+    "assemblyOrder": ["Block asymmetrical leaning slab", "Cut or insert full-height probability aperture", "Add nonlinear tick sequence", "Model broken crown and detached capstone", "Scatter base fragments and secondary markings"],
+    "deformationRules": [
+      "The whole slab leans one to four degrees while its base remains planted.",
+      "Front and side faces use broad intentional facets rather than noise displacement.",
+      "Aperture width may change forty percent over height but never closes completely."
+    ],
+    "variationRules": [
+      "Monolith height ranges from sixty-five to one hundred forty percent across a field.",
+      "Aperture hue and fill level encode local probability while staying inside the cyan-violet family.",
+      "Capstone rotation and gap height vary, but every instance retains a detached crown."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready hard-surface stone and metal topology with a separate capstone, deep aperture volume, replaceable calibration ticks, and scalable field instancing.",
+    "bevel": "Use broad stone bevels on the major slab, tighter capstone and tick bevels, and crisp aperture edges catching cyan light.",
+    "subdivision": "Avoid global subdivision. Preserve broad facets and use local smoothing only on aperture glass and selected eroded base transitions.",
+    "normals": "Weighted normals maintain calm slab planes and clean capstone highlights while modeled facets provide deliberate shading breaks.",
+    "uv": "Use triplanar stone mapping, unique aperture density coordinates, reusable calibration trim UVs, and an emission mask for cracks and tick states.",
+    "watertightParts": ["main slab", "hovering capstone", "aperture insert", "base-fragment source mesh"]
+  },
+  "animation": {
+    "channels": ["probability-aperture.fill_level", "probability-aperture.density_flow", "hovering-capstone.float", "tick-mark.sequence"],
+    "loopLengthSeconds": 24,
+    "motionCharacter": "Stone remains still while probability moves inside it. The aperture fills and drains slowly, ticks answer in sequence, and the capstone floats only a few centimeters.",
+    "constraints": ["The base remains fixed.", "The capstone air gap never closes.", "The aperture remains visually continuous from lower to upper termination."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 42000, "preserve": ["faceted slab", "deep aperture", "all calibration marks", "capstone pins", "base erosion"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 11000, "preserve": ["leaning slab", "aperture depth", "tick rhythm", "detached crown"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 1600, "preserve": ["slab silhouette", "vertical luminous cut", "floating capstone"]}
+  ],
+  "collision": {
+    "mode": "box",
+    "description": "Use one slightly tapered box collider covering the main slab only. Capstone, ticks, aperture effects, and base fragments remain excluded."
+  },
+  "sockets": [
+    {"id": "ground-placement", "purpose": "Field placement at the planted base center.", "position": [0,0,0], "rotation": [0,0,0]},
+    {"id": "aperture-focus", "purpose": "Camera or interaction focus at the probability channel midpoint.", "position": [0.12,2.65,-0.44], "rotation": [0,0,0]},
+    {"id": "route-alignment", "purpose": "Optional path or lattice alignment marker on the forward side.", "position": [0,0.35,-0.48], "rotation": [0,0,0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show unequal slab halves divided by the vertical aperture, leaning outline, broken angled crown, and persistent capstone gap.",
+    "side": "Reveal slab depth, planted footing, capstone offset, and whether the aperture is a true cut or deep transmissive channel.",
+    "top": "Make asymmetrical front facets, slight rotation, off-center aperture placement, and route socket direction readable.",
+    "threeQuarter": "Use low grazing light to emphasize broad stone facets, cyan aperture depth, engraved ticks, and the detached crown.",
+    "scaleCue": "Place a human beside the base; the default monolith stands approximately three times human height."
+  },
+  "validation": [
+    "The vertical aperture remains the dominant internal feature from fifty meters.",
+    "The slab halves are visibly unequal and use a nonrectangular crown profile.",
+    "The capstone remains detached by a persistent visible air gap.",
+    "Probability ticks use nonuniform spacing and at least three lengths.",
+    "Field variations preserve family recognition despite height and lean changes.",
+    "LOD2 retains leaning slab, aperture cut, and detached crown.",
+    "Ground and focus sockets remain aligned after whole-instance scaling."
+  ]
+}

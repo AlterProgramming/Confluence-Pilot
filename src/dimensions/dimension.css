@@ -1,0 +1,334 @@
+.dimension-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #070812;
+  color: #f4e7d0;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.dimension-canvas,
+.dimension-film {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dimension-canvas {
+  display: block;
+  cursor: crosshair;
+}
+
+.dimension-film {
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(3, 4, 10, 0.56), transparent 34%, transparent 69%, rgba(4, 4, 12, 0.34)),
+    linear-gradient(180deg, rgba(2, 3, 9, 0.46), transparent 23%, transparent 73%, rgba(2, 3, 8, 0.56));
+  mix-blend-mode: multiply;
+}
+
+.dimension-header {
+  position: absolute;
+  z-index: 4;
+  top: clamp(1rem, 3vw, 2.6rem);
+  left: clamp(1rem, 3vw, 3.2rem);
+  right: clamp(1rem, 3vw, 3.2rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  pointer-events: none;
+}
+
+.dimension-header > div:first-child {
+  max-width: min(48rem, 58vw);
+  text-shadow: 0 0.2rem 1.5rem #03040a;
+}
+
+.dimension-kicker,
+.dimension-law > span,
+.dimension-zone-card > span,
+.dimension-map header span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #ddb978;
+  font-size: 0.67rem;
+  font-weight: 750;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.dimension-header h1 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 5.1vw, 5.2rem);
+  font-weight: 450;
+  line-height: 0.93;
+  letter-spacing: -0.045em;
+}
+
+.dimension-header p {
+  margin: 0.7rem 0 0;
+  color: #c8bfd7;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(0.78rem, 1.3vw, 1.15rem);
+  font-style: italic;
+}
+
+.dimension-actions {
+  display: flex;
+  gap: 0.55rem;
+  pointer-events: auto;
+}
+
+.dimension-actions button,
+.dimension-zones button,
+.dimension-map-field button {
+  border: 1px solid rgba(242, 194, 118, 0.32);
+  border-radius: 999px;
+  background: rgba(7, 8, 18, 0.58);
+  color: #eadfcf;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.dimension-actions button {
+  padding: 0.65rem 0.9rem;
+  font-size: 0.72rem;
+}
+
+.dimension-actions button.active,
+.dimension-zones button.active,
+.dimension-map-field button.active {
+  border-color: rgba(255, 218, 151, 0.85);
+  background: rgba(112, 70, 112, 0.58);
+  box-shadow: 0 0 1.5rem rgba(255, 188, 99, 0.17);
+}
+
+.dimension-law {
+  position: absolute;
+  z-index: 4;
+  top: 24%;
+  right: clamp(1rem, 3vw, 3.2rem);
+  width: min(16rem, 26vw);
+  padding: 0.9rem 1rem;
+  border-right: 2px solid rgba(236, 184, 104, 0.65);
+  text-align: right;
+  text-shadow: 0 0.2rem 1rem #04050b;
+}
+
+.dimension-law blockquote {
+  margin: 0;
+  color: #eee2d2;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(0.82rem, 1.25vw, 1.08rem);
+  font-style: italic;
+  line-height: 1.42;
+}
+
+.dimension-zones {
+  position: absolute;
+  z-index: 5;
+  left: clamp(1rem, 3vw, 3.2rem);
+  bottom: 4.2rem;
+  display: flex;
+  width: min(58rem, calc(100% - 6rem));
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.dimension-zones button {
+  display: grid;
+  grid-template-columns: auto max-content;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.45rem 0.68rem;
+  white-space: nowrap;
+}
+
+.dimension-zones small {
+  color: #d0a866;
+  font-family: ui-monospace, monospace;
+  font-size: 0.58rem;
+}
+
+.dimension-zones span {
+  font-size: 0.65rem;
+}
+
+.dimension-zone-card {
+  position: absolute;
+  z-index: 4;
+  right: clamp(1rem, 3vw, 3.2rem);
+  bottom: 4.2rem;
+  width: min(18rem, 28vw);
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(228, 179, 111, 0.22);
+  border-radius: 0.75rem;
+  background: rgba(6, 7, 16, 0.58);
+  backdrop-filter: blur(14px);
+}
+
+.dimension-zone-card h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.2rem;
+}
+
+.dimension-zone-card p {
+  margin: 0.4rem 0 0.6rem;
+  color: #c5b8d0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.dimension-zone-card div {
+  color: #a99eb9;
+  font-size: 0.62rem;
+}
+
+.dimension-zone-card b {
+  color: #f3c37e;
+}
+
+.dimension-status {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(4, 5, 12, 0.62);
+  color: #a9a0b7;
+  font-size: 0.61rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.dimension-status b {
+  color: #f3c887;
+}
+
+.dimension-map {
+  position: absolute;
+  z-index: 8;
+  inset: clamp(5.8rem, 13vh, 8rem) clamp(2rem, 7vw, 8rem) 6.6rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid rgba(240, 193, 119, 0.38);
+  border-radius: 1rem;
+  background: rgba(5, 6, 15, 0.86);
+  box-shadow: 0 2rem 8rem rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(22px);
+}
+
+.dimension-map header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 0.35rem;
+}
+
+.dimension-map header strong {
+  color: #c2b4cc;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.8rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.dimension-map-field {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.75rem;
+  background: radial-gradient(circle at 36% 52%, rgba(245, 173, 92, 0.12), transparent 28%), radial-gradient(circle at 75% 35%, rgba(127, 104, 219, 0.13), transparent 32%), #080a16;
+}
+
+.dimension-map-field svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.dimension-map-field polyline {
+  fill: none;
+  stroke-width: 0.45;
+  stroke-dasharray: 1.5 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.dimension-map-field button {
+  position: absolute;
+  translate: -50% -50%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.56rem;
+}
+
+.dimension-map ol {
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.dimension-map li {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dimension-map li b {
+  color: #e7d8c2;
+  font-size: 0.67rem;
+}
+
+.dimension-map li span {
+  color: #91869e;
+  font-size: 0.56rem;
+}
+
+@media (max-width: 900px) {
+  .dimension-law,
+  .dimension-zone-card {
+    display: none;
+  }
+
+  .dimension-header {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .dimension-header > div:first-child {
+    max-width: 92vw;
+  }
+
+  .dimension-zones {
+    right: 1rem;
+    width: auto;
+  }
+
+  .dimension-map {
+    inset: 8.5rem 1rem 6rem;
+    grid-template-columns: 1fr;
+  }
+
+  .dimension-map ol {
+    display: none;
+  }
+}

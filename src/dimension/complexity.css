@@ -1,0 +1,30 @@
+.dimension-complexity-overlay,
+.dimension-complexity-overlay canvas,
+.dimension-complexity-overlay * {
+  pointer-events: none !important;
+}
+
+.dimension-complexity-overlay {
+  position: fixed !important;
+  inset: 0;
+  z-index: 2;
+  mix-blend-mode: screen;
+  touch-action: none;
+  user-select: none;
+}
+
+.dimension-authoring-open ~ .dimension-complexity-overlay {
+  opacity: 0.92;
+}
+
+@media (max-width: 900px) {
+  .dimension-complexity-overlay {
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dimension-complexity-overlay {
+    transition: none;
+  }
+}

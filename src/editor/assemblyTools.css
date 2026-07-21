@@ -1,0 +1,163 @@
+.editor-assembly-tools {
+  position: fixed;
+  z-index: 17;
+  top: 5.35rem;
+  right: 20rem;
+  display: grid;
+  width: 15.8rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.72rem;
+  color: #eef3fb;
+  background: rgba(8, 11, 16, 0.86);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.editor-assembly-tools > header {
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.62rem 0.7rem 0.55rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.editor-assembly-tools > header span {
+  color: var(--editor-accent, #ff7a45);
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.editor-assembly-tools > header strong {
+  overflow: hidden;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-assembly-tools > header small {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.54rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assembly-tool-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.32rem;
+  padding: 0.42rem;
+}
+
+.assembly-tool-actions button {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.48rem;
+  padding: 0.42rem 0.28rem;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+}
+
+.assembly-tool-actions button:hover:not(:disabled) {
+  border-color: rgba(255, 122, 69, 0.38);
+  color: #fff;
+  background: rgba(255, 122, 69, 0.09);
+}
+
+.assembly-tool-actions button:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.assembly-tool-actions button > span {
+  color: var(--editor-accent, #ff7a45);
+  font-size: 0.95rem;
+}
+
+.assembly-tool-actions button strong {
+  overflow: hidden;
+  width: 100%;
+  font-size: 0.56rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assembly-tool-actions button small {
+  overflow: hidden;
+  width: 100%;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.46rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assembly-health {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.46rem 0.62rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.assembly-health > span {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.assembly-health > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+}
+
+.assembly-health strong,
+.assembly-health small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assembly-health strong {
+  font-size: 0.57rem;
+}
+
+.assembly-health small {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.49rem;
+}
+
+.assembly-health.clean > span {
+  color: #b8f3c9;
+  background: rgba(98, 200, 130, 0.15);
+}
+
+.assembly-health.warning > span {
+  color: #ffd39c;
+  background: rgba(239, 170, 76, 0.16);
+}
+
+@media (max-width: 1320px) {
+  .editor-assembly-tools {
+    right: 18rem;
+    width: 14rem;
+  }
+}
+
+@media (max-width: 1050px) {
+  .editor-assembly-tools {
+    display: none;
+  }
+}

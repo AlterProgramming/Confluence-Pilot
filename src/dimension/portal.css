@@ -1,0 +1,83 @@
+.dimension-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: radial-gradient(circle at 74% 42%, rgba(141, 113, 255, 0), rgba(6, 4, 19, 0));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms ease, background 500ms ease;
+}
+
+.dimension-threshold-open::after {
+  background:
+    radial-gradient(circle at 74% 42%, rgba(197, 184, 255, 0.19), transparent 18%),
+    radial-gradient(circle at 74% 42%, rgba(95, 72, 197, 0.18), transparent 34%),
+    linear-gradient(90deg, rgba(3, 7, 18, 0.12), rgba(13, 6, 32, 0.28));
+  opacity: 1;
+}
+
+.dimension-threshold-open .dimension-title-panel,
+.dimension-threshold-open .dimension-anchor-rail {
+  opacity: 0.5;
+}
+
+.dimension-threshold-open .dimension-anchor-label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dimension-threshold-open .dimension-inspector {
+  border-color: rgba(171, 146, 255, 0.52);
+  background: linear-gradient(145deg, rgba(7, 6, 23, 0.9), rgba(30, 14, 57, 0.78));
+  box-shadow: 0 1.2rem 5rem rgba(36, 18, 82, 0.52);
+}
+
+.dimension-portal-action {
+  width: 100%;
+  margin: 1rem 0 0;
+  padding: 0.72rem 0.85rem;
+  border: 1px solid rgba(143, 195, 255, 0.48);
+  border-radius: 0.28rem;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(171, 146, 255, 0.2), transparent 72%),
+    rgba(73, 52, 130, 0.16);
+  color: #e9e2ff;
+  font-size: 0.67rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+.dimension-portal-action:hover,
+.dimension-portal-action:focus-visible,
+.dimension-portal-action[aria-pressed='true'] {
+  border-color: rgba(210, 225, 255, 0.88);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(203, 187, 255, 0.32), transparent 72%),
+    rgba(91, 65, 158, 0.24);
+  box-shadow: 0 0 2rem rgba(122, 96, 220, 0.28);
+  color: #fff;
+  outline: none;
+}
+
+.dimension-threshold-open .dimension-portal-action {
+  animation: threshold-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes threshold-pulse {
+  0%, 100% { box-shadow: 0 0 1.1rem rgba(122, 96, 220, 0.18); }
+  50% { box-shadow: 0 0 2.4rem rgba(143, 116, 238, 0.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dimension-shell::after,
+  .dimension-portal-action {
+    transition: none;
+  }
+
+  .dimension-threshold-open .dimension-portal-action {
+    animation: none;
+  }
+}

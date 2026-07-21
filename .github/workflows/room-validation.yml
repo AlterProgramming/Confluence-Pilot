@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - 'agent/**'
+  workflow_dispatch:
 
 concurrency:
   group: room-validation-${{ github.event.pull_request.number || github.ref }}
@@ -16,11 +16,18 @@ permissions:
 
 jobs:
   validate:
+    name: Structural gate
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      room_matrix: ${{ steps.room-matrix.outputs.matrix }}
+      full_evidence: ${{ steps.scope.outputs.full_evidence }}
+      changed_files: ${{ steps.scope.outputs.changed_files }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -31,23 +38,59 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate semantic heroes
-        run: npm run generate:semantic-heroes
+      - name: Determine validation scope
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${BASE_SHA:-}" && "$BASE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+            CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            CHANGED_FILES="$(git diff --name-only HEAD^ HEAD)"
+          else
+            CHANGED_FILES="$(git show --pretty='' --name-only HEAD)"
+          fi
 
-      - name: Typecheck
-        run: npm run typecheck
+          FULL_EVIDENCE=false
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" || "${PR_DRAFT:-false}" != "true" ]]; then
+            FULL_EVIDENCE=true
+          elif grep -Eq '^(src/(App\.tsx|components/|scenes/|state/|data/)|public/|validation/|scripts/(capture_room_evidence|capture_runtime_smoke|smoke_room_runtime|probe_hero_camera|generate_semantic_heroes|validate_hero_camera)\.mjs|\.github/workflows/room-validation\.yml|package(-lock)?\.json|vite\.config\.ts)' <<< "$CHANGED_FILES"; then
+            FULL_EVIDENCE=true
+          fi
 
-      - name: Lint
-        run: npm run lint
+          {
+            echo "full_evidence=$FULL_EVIDENCE"
+            echo "changed_files<<EOF"
+            echo "$CHANGED_FILES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Validate room manifests
-        run: npm run validate:rooms
-
-      - name: Validate hero camera contract
-        run: npm run validate:hero-camera
+      - name: Validate types, rooms, and hero-camera contract
+        run: npm run validate
 
       - name: Build production bundle
         run: npm run build
+
+      - name: Build evidence matrix from room registry
+        id: room-matrix
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const registry = JSON.parse(readFileSync('validation/rooms.json', 'utf8'));
+          const semanticOverrides = {
+            '02': '/assets/room-02-semantic.glb',
+            '06': '/assets/room-06-semantic.glb',
+          };
+          const include = registry.rooms.map((room) => ({
+            id: room.id,
+            number: Number(room.id),
+            asset: semanticOverrides[room.id] ?? room.signatureAssets?.[0] ?? `/assets/room-${room.id}-asset.glb`,
+          }));
+          appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({ include })}\n`);
+          NODE
 
       - name: Upload production bundle
         uses: actions/upload-artifact@v4
@@ -57,122 +100,23 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      - name: Explain validation boundary
+        run: |
+          {
+            echo '## Structural gate'
+            echo
+            echo '- TypeScript, lint, room-registry, hero-camera, and production-build validation completed.'
+            echo '- A green structural gate does **not** promote a room beyond `phase-1`.'
+            echo '- Candidate or validated status still requires runtime evidence, manual criteria, and human approval.'
+            echo "- Full runtime evidence requested for this run: **${{ steps.scope.outputs.full_evidence }}**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   browser-smoke:
+    name: Shared browser smoke
     needs: validate
+    if: needs.validate.outputs.full_evidence == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download production bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: production-bundle
-          path: dist
-
-      - name: Start diagnostic preview
-        run: |
-          npm run preview -- --host 127.0.0.1 --port 4175 > /tmp/confluence-browser-smoke-preview.log 2>&1 &
-          echo $! > /tmp/confluence-browser-smoke-preview.pid
-          for attempt in {1..45}; do
-            if curl --silent --fail http://127.0.0.1:4175/ > /dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          cat /tmp/confluence-browser-smoke-preview.log
-          exit 1
-
-      - name: Prove browser runtime readiness
-        run: node scripts/smoke_room_runtime.mjs http://127.0.0.1:4175
-
-      - name: Upload browser smoke evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: browser-smoke-evidence
-          path: validation/browser-smoke
-          if-no-files-found: error
-          retention-days: 14
-
-  hero-camera:
-    needs: [validate, browser-smoke]
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download production bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: production-bundle
-          path: dist
-
-      - name: Start production preview
-        run: |
-          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/confluence-hero-camera-preview.log 2>&1 &
-          echo $! > /tmp/confluence-hero-camera-preview.pid
-          for attempt in {1..45}; do
-            if curl --silent --fail http://127.0.0.1:4174/ > /dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          cat /tmp/confluence-hero-camera-preview.log
-          exit 1
-
-      - name: Prove progressive hero-camera synchronization
-        run: node scripts/probe_hero_camera.mjs http://127.0.0.1:4174
-
-      - name: Upload hero-camera evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hero-camera-validation-evidence
-          path: validation/hero-camera
-          if-no-files-found: error
-          retention-days: 14
-
-  evidence:
-    needs: [validate, browser-smoke, hero-camera]
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { id: '01', number: 1, asset: '/assets/room-01-kiosk.glb' }
-          - { id: '02', number: 2, asset: '/assets/room-02-semantic.glb' }
-          - { id: '03', number: 3, asset: '/assets/room-03-fabricator.glb' }
-          - { id: '04', number: 4, asset: '/assets/room-04-building-node.glb' }
-          - { id: '05', number: 5, asset: '/assets/room-05-city-model.glb' }
-          - { id: '06', number: 6, asset: '/assets/room-06-semantic.glb' }
-          - { id: '07', number: 7, asset: '/assets/room-07-secure-vault.glb' }
-          - { id: '08', number: 8, asset: '/assets/room-08-delivery-drone.glb' }
-          - { id: '09', number: 9, asset: '/assets/room-09-satellite-terminal.glb' }
-          - { id: '10', number: 10, asset: '/assets/room-10-coldchain-unit.glb' }
-          - { id: '11', number: 11, asset: '/assets/room-11-fintech-vault.glb' }
-          - { id: '12', number: 12, asset: '/assets/room-12-mainstreet-terminal.glb' }
+    timeout-minutes: 12
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -202,7 +146,125 @@ jobs:
             fi
             sleep 1
           done
-          cat /tmp/confluence-preview.log
+          mkdir -p validation/evidence/browser-smoke validation/browser-smoke
+          cp /tmp/confluence-preview.log validation/evidence/browser-smoke/preview.log
+          cp /tmp/confluence-preview.log validation/browser-smoke/preview.log
+          exit 1
+
+      - name: Verify Room 02 browser runtime
+        run: node scripts/capture_runtime_smoke.mjs http://127.0.0.1:4173
+
+      - name: Verify shared room runtime readiness
+        run: node scripts/smoke_room_runtime.mjs http://127.0.0.1:4173
+
+      - name: Upload browser-smoke diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: room-validation-browser-smoke
+          path: |
+            validation/evidence/browser-smoke
+            validation/browser-smoke
+          if-no-files-found: warn
+          retention-days: 14
+
+  hero-camera:
+    name: Progressive hero-camera synchronization
+    needs:
+      - validate
+      - browser-smoke
+    if: needs.browser-smoke.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
+      - name: Start hero-camera preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/confluence-hero-camera-preview.log 2>&1 &
+          echo $! > /tmp/confluence-hero-camera-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4174/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          mkdir -p validation/hero-camera
+          cp /tmp/confluence-hero-camera-preview.log validation/hero-camera/preview.log
+          exit 1
+
+      - name: Prove progressive hero-camera synchronization
+        run: node scripts/probe_hero_camera.mjs http://127.0.0.1:4174
+
+      - name: Upload hero-camera evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hero-camera-validation-evidence
+          path: validation/hero-camera
+          if-no-files-found: error
+          retention-days: 14
+
+  evidence:
+    name: Evidence (${{ matrix.id }})
+    needs:
+      - validate
+      - browser-smoke
+      - hero-camera
+    if: needs.hero-camera.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.validate.outputs.room_matrix) }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/confluence-preview.log 2>&1 &
+          echo $! > /tmp/confluence-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          mkdir -p validation/evidence/room-${{ matrix.id }}
+          cp /tmp/confluence-preview.log validation/evidence/room-${{ matrix.id }}/preview.log
           exit 1
 
       - name: Capture Room ${{ matrix.id }} validation evidence
@@ -227,3 +289,34 @@ jobs:
           path: validation/evidence/room-${{ matrix.id }}
           if-no-files-found: error
           retention-days: 14
+
+  gate-summary:
+    name: Validation summary
+    needs:
+      - validate
+      - browser-smoke
+      - hero-camera
+      - evidence
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish gate summary
+        run: |
+          {
+            echo '## Room validation gate summary'
+            echo
+            echo '| Gate | Result |'
+            echo '|---|---|'
+            echo '| Structural gate | `${{ needs.validate.result }}` |'
+            echo '| Shared browser smoke | `${{ needs.browser-smoke.result }}` |'
+            echo '| Progressive hero camera | `${{ needs.hero-camera.result }}` |'
+            echo '| Twelve-room evidence | `${{ needs.evidence.result }}` |'
+            echo
+            if [[ '${{ needs.validate.outputs.full_evidence }}' != 'true' ]]; then
+              echo 'Full runtime evidence was intentionally deferred because this is a draft PR and the latest commit did not alter production-room or validation infrastructure.'
+            else
+              echo 'Full runtime evidence was requested. Failed or skipped downstream gates are blocking until explained and corrected.'
+            fi
+            echo
+            echo 'CI success is evidence availability, not automatic human validation. Room status remains governed by `validation/rooms.json` and explicit human review.'
+          } >> "$GITHUB_STEP_SUMMARY"

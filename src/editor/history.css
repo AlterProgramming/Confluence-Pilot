@@ -1,0 +1,104 @@
+.editor-history-controls {
+  position: fixed;
+  z-index: 18;
+  top: 5.35rem;
+  left: 18.45rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0.32rem;
+  padding: 0.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.72rem;
+  background: rgba(8, 11, 16, 0.84);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.editor-history-controls button {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.4rem;
+  min-width: 8.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.52rem;
+  padding: 0.42rem 0.5rem;
+  color: rgba(255, 255, 255, 0.76);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.editor-history-controls button:hover:not(:disabled) {
+  border-color: rgba(255, 122, 69, 0.42);
+  color: #fff;
+  background: rgba(255, 122, 69, 0.1);
+}
+
+.editor-history-controls button:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+
+.editor-history-controls button > span {
+  grid-row: 1 / span 2;
+  color: var(--editor-accent, #ff7a45);
+  font-size: 1.05rem;
+}
+
+.editor-history-controls strong {
+  font-size: 0.64rem;
+}
+
+.editor-history-controls small {
+  max-width: 7.2rem;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.51rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-history-controls kbd {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.28rem;
+  padding: 0.08rem 0.25rem;
+  color: rgba(255, 255, 255, 0.34);
+  background: rgba(0, 0, 0, 0.2);
+  font: 600 0.5rem/1.2 ui-monospace, monospace;
+}
+
+.editor-history-controls output {
+  display: grid;
+  min-width: 2rem;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.32);
+  font: 600 0.52rem/1 ui-monospace, monospace;
+}
+
+@media (max-width: 1320px) {
+  .editor-history-controls {
+    left: 15.95rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .editor-history-controls {
+    top: 7.9rem;
+    left: 0.8rem;
+  }
+
+  .editor-history-controls button {
+    min-width: 2.6rem;
+  }
+
+  .editor-history-controls button strong,
+  .editor-history-controls button small,
+  .editor-history-controls button kbd,
+  .editor-history-controls output {
+    display: none;
+  }
+}

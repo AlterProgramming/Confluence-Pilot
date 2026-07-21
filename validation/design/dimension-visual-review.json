@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "worldId": "the-weight-of-remembering",
+  "viewport": {
+    "width": 1680,
+    "height": 1050,
+    "deviceScaleFactor": 1
+  },
+  "minimumPngBytes": 50000,
+  "shots": [
+    {
+      "id": "world-standalone-overview",
+      "file": "dimension-world-standalone-overview.png",
+      "surface": "runtime",
+      "state": "overview",
+      "review": "The dimension is presented as an independent world with no Room 02 ownership language."
+    },
+    {
+      "id": "world-authoring-overview",
+      "file": "dimension-world-authoring-overview.png",
+      "surface": "authoring",
+      "state": "registry-and-topology",
+      "review": "World identity, validation, entrances, and portal graph are visible beside the live scene."
+    },
+    {
+      "id": "world-authoring-draft-edit",
+      "file": "dimension-world-authoring-draft-edit.png",
+      "surface": "authoring",
+      "state": "live-anchor-edit",
+      "review": "A live anchor label and position edit is reflected by the runtime while the draft remains valid."
+    },
+    {
+      "id": "room-entrance-overview",
+      "file": "dimension-room-02-overview.png",
+      "surface": "compatibility-entrance",
+      "state": "overview",
+      "review": "Room 02 remains a supported entrance without acting as the world's registry key."
+    },
+    {
+      "id": "lantern-city-focus",
+      "file": "dimension-room-02-lantern-city.png",
+      "surface": "runtime",
+      "state": "anchor-focus",
+      "review": "Guided camera focus preserves world readability around Lantern City."
+    },
+    {
+      "id": "portal-horizon-focus",
+      "file": "dimension-room-02-portal-horizon.png",
+      "surface": "runtime",
+      "state": "portal-focus",
+      "review": "Portal Horizon reads as a threshold inside the world rather than replacing it."
+    },
+    {
+      "id": "portal-open",
+      "file": "dimension-room-02-portal-open.png",
+      "surface": "runtime",
+      "state": "portal-open",
+      "review": "The open threshold remains compositionally bounded and exposes a clear crossing action."
+    },
+    {
+      "id": "parallel-remembrance-overview",
+      "file": "dimension-parallel-remembrance-overview.png",
+      "surface": "destination",
+      "state": "overview",
+      "review": "The destination realm is visibly distinct while preserving navigation and return affordances."
+    },
+    {
+      "id": "parallel-remembrance-echo-bridge",
+      "file": "dimension-parallel-remembrance-echo-bridge.png",
+      "surface": "destination",
+      "state": "node-focus",
+      "review": "Echo Bridge selection exposes destination-node inspection and journey controls."
+    }
+  ],
+  "baseline": {
+    "state": "candidate",
+    "fingerprints": {}
+  }
+}

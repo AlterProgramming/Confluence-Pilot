@@ -1,0 +1,321 @@
+.motion-authoring-panel {
+  --motion-accent: #f5d36f;
+  position: absolute;
+  z-index: 18;
+  right: 19.5rem;
+  bottom: 2.35rem;
+  left: 18rem;
+  overflow: hidden;
+  border: 1px solid rgba(245, 211, 111, 0.28);
+  border-radius: 0.8rem;
+  color: #f4f6f8;
+  background: rgba(10, 13, 18, 0.94);
+  box-shadow: 0 1.2rem 3.5rem rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
+}
+
+.motion-authoring-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.4rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(90deg, rgba(245, 211, 111, 0.09), rgba(14, 18, 24, 0.96) 38%);
+}
+
+.motion-authoring-panel.collapsed > header {
+  border-bottom: 0;
+}
+
+.motion-authoring-panel > header > div:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.12rem;
+}
+
+.motion-authoring-panel > header strong,
+.motion-authoring-panel > header small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.motion-authoring-panel > header strong {
+  font-size: 0.76rem;
+}
+
+.motion-authoring-panel > header small {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.58rem;
+}
+
+.motion-kicker {
+  color: var(--motion-accent);
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.motion-header-actions,
+.motion-transport,
+.motion-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.motion-authoring-panel button,
+.motion-authoring-panel input,
+.motion-authoring-panel select {
+  font: inherit;
+}
+
+.motion-authoring-panel button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.45rem;
+  padding: 0.43rem 0.55rem;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  font-size: 0.62rem;
+}
+
+.motion-authoring-panel button:hover:not(:disabled),
+.motion-authoring-panel button.active {
+  color: #fff;
+  border-color: rgba(245, 211, 111, 0.45);
+  background: rgba(245, 211, 111, 0.12);
+}
+
+.motion-authoring-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.motion-header-actions > button:first-child,
+.motion-transport [data-testid="motion-play"] {
+  color: #16130a;
+  border-color: #f5d36f;
+  background: #f5d36f;
+  font-weight: 800;
+}
+
+.motion-collapse {
+  min-width: 2rem;
+  color: #fff !important;
+}
+
+.motion-panel-body {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  min-height: 11.5rem;
+  max-height: 15.5rem;
+}
+
+.motion-track-column {
+  display: grid;
+  align-content: start;
+  gap: 0.48rem;
+  overflow-y: auto;
+  padding: 0.7rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.motion-track-column > label,
+.motion-transport label,
+.motion-waypoint-list label {
+  display: grid;
+  gap: 0.2rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motion-track-column input,
+.motion-track-column select,
+.motion-transport select,
+.motion-waypoint-list input {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.36rem;
+  padding: 0.38rem 0.42rem;
+  color: rgba(255, 255, 255, 0.82);
+  background: #121821;
+  font-size: 0.6rem;
+}
+
+.motion-toggle-row {
+  justify-content: space-between;
+  padding: 0.25rem 0;
+}
+
+.motion-toggle-row label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.58rem;
+}
+
+.motion-toggle-row input {
+  accent-color: #f5d36f;
+}
+
+.motion-danger {
+  margin-top: 0.15rem;
+  color: #ff9c8f !important;
+  border-color: rgba(255, 111, 92, 0.22) !important;
+}
+
+.motion-timeline-column {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-width: 0;
+  padding: 0.7rem;
+}
+
+.motion-transport {
+  min-width: 0;
+}
+
+.motion-transport label {
+  grid-template-columns: auto auto;
+  align-items: center;
+  margin-left: auto;
+}
+
+.motion-transport output {
+  min-width: 6.4rem;
+  color: #f5d36f;
+  text-align: right;
+  font: 700 0.62rem/1.2 ui-monospace, monospace;
+}
+
+.motion-scrubber {
+  position: relative;
+  padding: 0.7rem 0 1.2rem;
+}
+
+.motion-scrubber > input {
+  width: 100%;
+  accent-color: #f5d36f;
+}
+
+.motion-waypoint-ruler {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.2rem;
+  left: 0.35rem;
+  height: 1rem;
+}
+
+.motion-waypoint-ruler button {
+  position: absolute;
+  display: grid;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  place-items: center;
+  transform: translateX(-50%);
+  border-color: rgba(245, 211, 111, 0.5);
+  border-radius: 50%;
+  color: #1c1708;
+  background: #f5d36f;
+  font-size: 0.5rem;
+  font-weight: 900;
+}
+
+.motion-waypoint-list {
+  display: flex;
+  gap: 0.42rem;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0.2rem 0 0.1rem;
+}
+
+.motion-waypoint-list article {
+  display: grid;
+  grid-template-columns: auto repeat(4, minmax(3.1rem, 1fr)) auto;
+  flex: 0 0 22rem;
+  align-items: end;
+  gap: 0.3rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.motion-waypoint-list article.active {
+  border-color: rgba(245, 211, 111, 0.45);
+  background: rgba(245, 211, 111, 0.075);
+}
+
+.waypoint-index {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 !important;
+  place-items: center;
+  color: #181307 !important;
+  border-color: #f5d36f !important;
+  border-radius: 50% !important;
+  background: #f5d36f !important;
+  font-weight: 900;
+}
+
+.waypoint-delete {
+  min-width: 1.75rem;
+  color: #ff9c8f !important;
+}
+
+.motion-empty {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.25rem;
+  min-height: 5rem;
+  color: rgba(255, 255, 255, 0.44);
+  text-align: center;
+}
+
+.motion-empty strong {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.72rem;
+}
+
+.motion-empty span {
+  max-width: 44ch;
+  font-size: 0.6rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1320px) {
+  .motion-authoring-panel {
+    right: 17.5rem;
+    left: 15.5rem;
+  }
+
+  .motion-panel-body {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .motion-authoring-panel {
+    right: 0.6rem;
+    left: 0.6rem;
+  }
+
+  .motion-panel-body {
+    grid-template-columns: 1fr;
+  }
+
+  .motion-track-column {
+    display: none;
+  }
+}

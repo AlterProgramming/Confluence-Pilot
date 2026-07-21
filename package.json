@@ -14,6 +14,9 @@
     "perf": "node scripts/perf_harness.mjs",
     "evidence:room01": "node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 1 /assets/room-01-kiosk.glb",
     "evidence:rooms02-12": "node scripts/capture_rooms_02_12.mjs http://127.0.0.1:4173",
+    "evidence:dimension-authoring": "node scripts/capture_dimension_authoring.mjs http://127.0.0.1:4178",
+    "evidence:image-world-compiler": "node scripts/capture_image_world_compiler.mjs http://127.0.0.1:4178",
+    "evidence:dimension-lite": "node scripts/capture_weight_dimension.mjs http://127.0.0.1:4179",
     "audio:generate": "node scripts/generate_audio.mjs",
     "audio:generate:sfx": "node scripts/generate_audio.mjs --skip-music sfx",
     "generate:semantic-heroes": "node scripts/generate_semantic_heroes.mjs",
@@ -21,7 +24,12 @@
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
     "validate:hero-camera": "node scripts/validate_hero_camera.mjs",
     "assets:inventory": "node scripts/asset_inventory.mjs",
-    "validate": "npm run generate:semantic-heroes && npm run typecheck && npm run lint && npm run validate:rooms && npm run validate:hero-camera"
+    "validate": "npm run generate:semantic-heroes && npm run typecheck && npm run lint && npm run validate:rooms && npm run validate:hero-camera",
+    "validate:dimension": "node scripts/validate_dimension_scene.mjs && node scripts/validate_world_fabric.mjs && node scripts/validate_image_world_compiler.mjs",
+    "validate:dimension:assets": "node scripts/validate_dimension_source_assets.mjs",
+    "validate:world-fabric": "node scripts/validate_world_fabric.mjs",
+    "validate:image-world-compiler": "node scripts/validate_image_world_compiler.mjs",
+    "validate:dimension:visual": "node scripts/validate_dimension_visual_review.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
