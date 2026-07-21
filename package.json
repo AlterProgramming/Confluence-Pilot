@@ -17,7 +17,8 @@
     "validate:rooms": "node scripts/validate_rooms.mjs",
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
     "assets:inventory": "node scripts/asset_inventory.mjs",
-    "validate": "npm run typecheck && npm run lint && npm run validate:rooms"
+    "validate": "npm run typecheck && npm run lint && npm run validate:rooms",
+    "validate:dimension": "node scripts/validate_dimension_scene.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
