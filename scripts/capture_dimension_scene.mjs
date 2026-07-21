@@ -66,9 +66,9 @@ try {
 
   await page.goto(`${baseUrl}/dimension?room=02`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
   await page.waitForSelector('[data-testid="dimension-runtime"]', { visible: true, timeout: 90_000 });
-  await page.waitForSelector('canvas.dimension-canvas', { visible: true, timeout: 30_000 });
+  await page.waitForSelector('.dimension-canvas canvas', { visible: true, timeout: 30_000 });
   await page.waitForFunction(() => {
-    const canvas = document.querySelector('canvas.dimension-canvas');
+    const canvas = document.querySelector('.dimension-canvas canvas');
     return canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0;
   }, { timeout: 30_000 });
   await delay(4500);
