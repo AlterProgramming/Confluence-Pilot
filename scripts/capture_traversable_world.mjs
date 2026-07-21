@@ -37,6 +37,7 @@ const report = {
   initial: null,
   interaction: null,
   jump: null,
+  movementAttempts: [],
   moved: null,
   screenshots: [],
   consoleErrors: [],
@@ -66,6 +67,21 @@ async function readRuntime(page) {
     canvasMounted: Boolean(element.querySelector('[data-testid="traversable-world-canvas"] canvas')),
     telemetryMounted: Boolean(element.querySelector('[data-testid="traversable-world-telemetry"]')),
   }));
+}
+
+function displacementFromInitial(initial, state) {
+  if (!initial || !state) return 0;
+  return Math.hypot(state.playerX - initial.playerX, state.playerZ - initial.playerZ);
+}
+
+async function runMovementAttempt(page, key, milliseconds = 1750) {
+  await page.keyboard.down('Shift');
+  await page.keyboard.down(key);
+  await delay(milliseconds);
+  await page.keyboard.up(key);
+  await page.keyboard.up('Shift');
+  await delay(650);
+  return readRuntime(page);
 }
 
 try {
@@ -120,24 +136,27 @@ try {
   const landed = await readRuntime(page);
   report.jump = { airborne, landed };
 
-  await page.keyboard.down('w');
-  await page.keyboard.down('Shift');
-  await delay(1900);
-  await page.keyboard.up('Shift');
-  await page.keyboard.up('w');
-  await delay(900);
-  report.moved = await readRuntime(page);
+  for (const key of ['w', 'a', 'd', 's']) {
+    const state = await runMovementAttempt(page, key);
+    const displacement = displacementFromInitial(report.initial, state);
+    report.movementAttempts.push({
+      key,
+      displacement,
+      currentCellId: state.currentCellId,
+      grounded: state.grounded,
+    });
+    report.moved = state;
+    const crossedCell = Boolean(report.initial?.currentCellId)
+      && Boolean(state.currentCellId)
+      && report.initial.currentCellId !== state.currentCellId;
+    if (displacement > 0.8 && crossedCell && state.grounded === 'true') break;
+  }
 
   const movedScreenshot = path.join(outputDirectory, 'first-footstep-moved.png');
   await page.screenshot({ path: movedScreenshot, captureBeyondViewport: false });
   report.screenshots.push(path.basename(movedScreenshot));
 
-  const displacement = report.initial && report.moved
-    ? Math.hypot(
-        report.moved.playerX - report.initial.playerX,
-        report.moved.playerZ - report.initial.playerZ,
-      )
-    : 0;
+  const displacement = displacementFromInitial(report.initial, report.moved);
   const finiteTelemetry = report.moved
     ? [report.moved.playerX, report.moved.playerY, report.moved.playerZ].every(Number.isFinite)
     : false;
