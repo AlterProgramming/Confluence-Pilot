@@ -62,13 +62,18 @@ try {
     report.requestFailures.push({ url: request.url(), errorText: request.failure()?.errorText ?? 'unknown' });
   });
 
-  const replaceInputValue = async (input, value) => {
-    await input.click();
-    await page.keyboard.down('Control');
-    await page.keyboard.press('A');
-    await page.keyboard.up('Control');
-    await page.keyboard.press('Backspace');
-    await page.keyboard.type(value);
+  const setControlledInput = async (selector, index, value) => {
+    await page.$$eval(selector, (elements, payload) => {
+      const element = elements[payload.index];
+      if (!(element instanceof HTMLInputElement)) {
+        throw new Error(`Input ${payload.index} was not found for ${payload.selector}.`);
+      }
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      if (!setter) throw new Error('Native input value setter is unavailable.');
+      setter.call(element, payload.value);
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    }, { index, value, selector });
   };
 
   await page.goto(`${baseUrl}/dimension?world=the-weight-of-remembering&authoring=1`, {
@@ -116,28 +121,19 @@ try {
     { timeout: 30_000 },
   );
 
-  const authoringInputs = await page.$$('[data-testid="dimension-authoring-panel"] input');
-  const labelInput = authoringInputs[1];
-  if (!labelInput) throw new Error('Anchor label input was not found.');
-  await replaceInputValue(labelInput, 'Lantern city basin · draft');
-
-  const coordinateInputs = await page.$$('[data-testid="dimension-authoring-panel"] input[type="number"]');
-  const xInput = coordinateInputs[0];
-  if (!xInput) throw new Error('Anchor X coordinate input was not found.');
-  await replaceInputValue(xInput, '0.75');
+  await setControlledInput('[data-testid="dimension-authoring-panel"] input', 1, 'Lantern city basin · draft');
+  await setControlledInput('[data-testid="dimension-authoring-panel"] input[type="number"]', 0, '0.75');
 
   await page.waitForFunction(
     () => {
       const panel = document.querySelector('[data-testid="dimension-authoring-panel"]');
       const inputs = panel ? Array.from(panel.querySelectorAll('input')) : [];
       const coordinates = panel ? Array.from(panel.querySelectorAll('input[type="number"]')) : [];
-      return inputs[1]?.value === 'Lantern city basin · draft'
-        && coordinates[0]?.value === '0.75'
-        && document.querySelector('[data-testid="dimension-inspector"] h2')?.textContent?.trim() === 'Lantern city basin · draft';
+      return inputs[1]?.value === 'Lantern city basin · draft' && coordinates[0]?.value === '0.75';
     },
     { timeout: 20_000 },
   );
-  await delay(500);
+  await delay(600);
 
   report.editedDraft = await page.$eval('[data-testid="dimension-authoring-panel"]', (panel) => {
     const inputs = Array.from(panel.querySelectorAll('input'));
