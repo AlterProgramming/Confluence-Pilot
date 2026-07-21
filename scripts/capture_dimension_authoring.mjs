@@ -170,7 +170,7 @@ try {
     validationState: panel.querySelector('.dimension-authoring-validation')?.getAttribute('data-validation-state'),
   }));
 
-  await page.click('[data-testid="toggle-dimension-authoring"]');
+  await page.click('[data-testid="dimension-authoring-panel"] [aria-label="Close world authoring"]');
   await page.waitForFunction(
     () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-authoring-state') === 'closed',
     { timeout: 20_000 },
