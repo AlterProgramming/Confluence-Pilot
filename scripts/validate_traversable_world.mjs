@@ -61,6 +61,16 @@ checks.push(
       && player.includes('groundedRef'),
   },
   {
+    id: 'latched-player-actions',
+    pass: player.includes('interactionRequestedRef')
+      && player.includes('jumpRequestedRef')
+      && player.includes("key === 'e'")
+      && player.includes("key === ' '")
+      && player.includes('!event.repeat')
+      && player.includes('if (interactionRequestedRef.current)')
+      && player.includes('if (groundedRef.current && jumpRequestedRef.current)'),
+  },
+  {
     id: 'terrain-bound-movement',
     pass: player.includes('sampleTerrainHeight(fabric')
       && player.includes('maximumRise')
@@ -82,8 +92,6 @@ checks.push(
   {
     id: 'interaction-contract',
     pass: player.includes('INTERACTION_RADIUS')
-      && player.includes("if (key === 'e') interactionRequestedRef.current = true")
-      && player.includes('if (interactionRequestedRef.current)')
       && app.includes('data-interaction-anchor-id'),
   },
   {
