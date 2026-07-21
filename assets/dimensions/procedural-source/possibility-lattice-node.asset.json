@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "id": "possibility-lattice-node",
+  "title": "Possibility Lattice Node",
+  "realm": "parallel-remembrance",
+  "category": "dimensional-lattice",
+  "revision": 1,
+  "description": "A floating junction where unrealized timelines intersect. The node is built from nested non-coplanar rings, a crystalline probability core, directional branch sockets, and orbiting decision markers. It must feel mathematically precise from a distance while revealing impossible spatial relationships and subtle instability up close.",
+  "narrativeFunction": "The lattice node gives Parallel Remembrance a navigable topology. Nodes connect alternate outcomes, frame the destination's major regions, carry animated probability flow, and provide attachment points for bridges, archive conduits, garden threads, and drifting timeline fragments.",
+  "designKeywords": ["alternate timelines", "non-euclidean ring", "probability core", "branch junction", "violet crystal", "cyan vectors", "impossible geometry", "dimensional navigation"],
+  "scale": {"unit": "meter", "bounds": {"width": 3.2, "height": 3, "depth": 3.2}, "heroScale": 1, "modularScale": 0.2},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0,0,0],
+    "originMeaning": "The origin is the center of the probability core and the intersection of all branch vectors. Ring animation, network placement, and focus behavior use this exact point."
+  },
+  "silhouette": {
+    "primary": "A compact spherical knot made from four large rings at conflicting orientations surrounding one bright faceted core.",
+    "secondary": "Six branch arms terminate in small socket halos and create an uneven star-like extension around the central knot.",
+    "tertiary": "Decision markers, probability ticks, orbiting splinters, vector arrows, interference bands, and small crossing clamps gather near ring intersections.",
+    "negativeSpace": "Open windows between rings are fundamental. The core occupies less than one quarter of the node diameter, leaving multiple visible routes through the object.",
+    "recognitionTest": "At distance the object reads as a dimensional junction with nested rings and directional branches, not as a decorative atom, ordinary gyroscope, spherical portal, or simple star."
+  },
+  "materials": [
+    {
+      "id": "lattice-frame",
+      "role": "Dimensional ring structure",
+      "baseColor": "#4B4268",
+      "metallic": 0.48,
+      "roughness": 0.32,
+      "emission": {"color": "#9C87FF", "strength": 0.72},
+      "surfaceDescription": "Dark violet alloy with shifting anisotropic highlights, fine coordinate engravings, localized emission at intersections, and subtle color phase changes along each ring."
+    },
+    {
+      "id": "probability-core",
+      "role": "Central faceted state volume",
+      "baseColor": "#7560B5",
+      "metallic": 0.04,
+      "roughness": 0.12,
+      "emission": {"color": "#D6C7FF", "strength": 3},
+      "surfaceDescription": "Translucent crystalline core with layered internal facets, bright caustic edges, cloudy density pockets, and changing internal depth rather than uniform glow."
+    },
+    {
+      "id": "branch-vector",
+      "role": "Directional branch hardware",
+      "baseColor": "#3D7185",
+      "metallic": 0.32,
+      "roughness": 0.28,
+      "emission": {"color": "#7DE6FF", "strength": 1.65},
+      "surfaceDescription": "Cool cyan-violet metal-glass rods with animated vector markings, brighter socket halos, translucent direction fins, and crisp engraved indices."
+    }
+  ],
+  "components": [
+    {
+      "id": "dimensional-rings",
+      "primitive": "torus",
+      "role": "Four large rings defining incompatible coordinate planes.",
+      "dimensions": {"majorRadius": 1.12, "minorRadius": 0.035, "majorSegments": 64, "minorSegments": 8},
+      "transform": {"position": [0,0,0], "rotation": [68,12,0], "scale": [1,1,1]},
+      "material": "lattice-frame",
+      "detail": "Each ring includes one discontinuity, unequal thickness near crossings, a unique coordinate engraving, and one brighter intersection segment.",
+      "repeat": {"mode": "radial", "count": 4, "radius": 0, "axis": "Y", "angleOffsetDegrees": 17}
+    },
+    {
+      "id": "probability-core",
+      "primitive": "icosphere",
+      "role": "Faceted central state volume and visual focus.",
+      "dimensions": {"radius": 0.42, "subdivisions": 2},
+      "transform": {"position": [0,0,0], "rotation": [11,4,7], "scale": [1,0.88,1.08]},
+      "material": "probability-core",
+      "detail": "Stretch selected facets into an irregular dodecahedral-like volume and preserve visible nested internal shells for changing state density.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "branch-arms",
+      "primitive": "cylinder",
+      "role": "Six directional network arms extending from the core cage.",
+      "dimensions": {"radius": 0.055, "height": 1.2, "segments": 12},
+      "transform": {"position": [0,0.72,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "branch-vector",
+      "detail": "Arms taper away from the core, bend slightly near their tips, and contain one illuminated arrow indicating active probability flow.",
+      "repeat": {"mode": "radial", "count": 6, "radius": 0, "axis": "Z", "angleOffsetDegrees": 8}
+    },
+    {
+      "id": "socket-halos",
+      "primitive": "torus",
+      "role": "Small luminous rings marking connection directions.",
+      "dimensions": {"majorRadius": 0.16, "minorRadius": 0.018, "majorSegments": 28, "minorSegments": 7},
+      "transform": {"position": [0,1.28,0], "rotation": [90,0,0], "scale": [1,1,1]},
+      "material": "branch-vector",
+      "detail": "Every halo has a broken segment facing away from the core, one vector tick, and a darker inactive state distinct from disconnected geometry.",
+      "repeat": {"mode": "radial", "count": 6, "radius": 0, "axis": "Z", "angleOffsetDegrees": 8}
+    },
+    {
+      "id": "decision-markers",
+      "primitive": "icosphere",
+      "role": "Orbiting markers representing unresolved state choices.",
+      "dimensions": {"radius": 0.065, "subdivisions": 1},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1.35,0.55,0.55]},
+      "material": "probability-core",
+      "detail": "Markers vary in aspect ratio, carry one dim state glyph, and orbit on paths that do not match any of the four large rings.",
+      "repeat": {"mode": "scatter", "count": 12, "bounds": [1.45,1.35,1.45], "scaleMin": 0.6, "scaleMax": 1.4}
+    }
+  ],
+  "generation": {
+    "seed": 7523,
+    "deterministic": true,
+    "assemblyOrder": ["Create faceted probability core", "Build four non-coplanar broken rings", "Add six directional branch arms", "Attach socket halos and vector markings", "Distribute decision markers on independent orbits"],
+    "deformationRules": [
+      "No pair of dimensional rings may become coplanar or share the same major radius.",
+      "The probability core may breathe by four percent but remains centered at the origin.",
+      "Branch arms bend outward by up to eight degrees near sockets to avoid a perfectly radial star."
+    ],
+    "variationRules": [
+      "Active connections brighten their branch arms and halos while inactive branches remain structurally visible but dim.",
+      "Decision-marker count ranges from eight to fourteen and orbit planes vary by node.",
+      "One ring discontinuity aligns approximately with the dominant outgoing branch but never exactly."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready modular hard-surface and crystal topology with separable ring sections, independent branch sockets, a riggable core shell, and instanced decision markers.",
+    "bevel": "Use narrow ring and branch bevels, crisp halo edges, and softened irregular crystal facets that preserve the core's angular identity.",
+    "subdivision": "Use controlled subdivision only on the probability core's internal shells and selected ring transitions; keep decision markers deliberately faceted.",
+    "normals": "Weighted normals stabilize metal rings and branch arms while smooth crystal normals retain distinct facet breaks through geometry rather than shading artifacts.",
+    "uv": "Use directional ring UVs, one vector-mark trim, unique core refraction coordinates, and an emissive mask per branch state.",
+    "watertightParts": ["probability core outer shell", "branch arms", "socket halos", "decision markers"]
+  },
+  "animation": {
+    "channels": ["dimensional-rings.independent_rotation", "probability-core.faceted_breath", "decision-markers.orbit", "branch-vector.flow"],
+    "loopLengthSeconds": 28,
+    "motionCharacter": "Rings rotate at incommensurate slow rates. The core changes internal density instead of simply scaling, and decision markers occasionally reverse as though a state has been reconsidered.",
+    "constraints": ["Branch sockets retain stable world-facing orientation.", "Rings never clip the core.", "Active flow reaches connected sockets without discontinuity."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 56000, "preserve": ["four ring planes", "core internal layering", "six socket halos", "decision markers"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 15000, "preserve": ["core", "four ring directions", "six branches", "major markers"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 2600, "preserve": ["bright core", "two crossing ring directions", "three branch vectors"]}
+  ],
+  "collision": {
+    "mode": "sphere",
+    "description": "Use one simple spherical interaction volume centered on the probability core. Rings, branch arms, halos, and markers remain non-colliding."
+  },
+  "sockets": [
+    {"id": "branch-north", "purpose": "Primary network connection toward archive structures.", "position": [0,1.32,0], "rotation": [0,0,0]},
+    {"id": "branch-east", "purpose": "Bridge or filament connection toward positive X.", "position": [1.25,0,0], "rotation": [0,0,-90]},
+    {"id": "branch-west", "purpose": "Bridge or filament connection toward negative X.", "position": [-1.25,0,0], "rotation": [0,0,90]},
+    {"id": "focus", "purpose": "Camera and interaction target at the probability core.", "position": [0,0,0], "rotation": [0,0,0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show four distinguishable ring orientations, six branch directions, open windows, and the bright core without excessive tangencies.",
+    "side": "Confirm equal depth complexity and prevent the node from collapsing into a flat emblem.",
+    "top": "Reveal branch hierarchy, ring discontinuities, and decision-marker orbits that differ from the main rings.",
+    "threeQuarter": "Use a slightly elevated angle showing the core through multiple ring windows and at least three socket halos projecting toward the viewer.",
+    "scaleCue": "Include a human one meter from the node; the complete knot is larger than a person but still approachable as an interactive junction."
+  },
+  "validation": [
+    "The node contains four clearly non-coplanar large rings and one central faceted core.",
+    "At least four open windows through the ring structure remain visible from hero view.",
+    "Six branch arms terminate in separately modeled broken socket halos.",
+    "Decision markers use independent orbit planes rather than following the main rings.",
+    "Active branch highlighting does not illuminate the complete node uniformly.",
+    "LOD2 preserves the core, two crossing ring directions, and three major branch vectors.",
+    "Focus and network sockets retain stable orientation while rings animate."
+  ]
+}
