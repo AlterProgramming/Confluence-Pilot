@@ -5,6 +5,7 @@ import { InputController } from './components/InputController';
 import { PerformanceTelemetry } from './components/PerformanceTelemetry';
 import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
+import { DimensionApp } from './dimensions/DimensionApp';
 import { MotionAuthoringPanel } from './editor/MotionAuthoringPanel';
 import { PlacementAssemblyTools } from './editor/PlacementAssemblyTools';
 import { PlacementEditor } from './editor/PlacementEditor';
@@ -62,6 +63,9 @@ function EditorApp() {
 
 export default function App() {
   const params = new URLSearchParams(window.location.search);
-  const editorMode = params.get('editor') === '1' || window.location.pathname.replace(/\/$/, '').endsWith('/editor');
+  const path = window.location.pathname.replace(/\/$/, '');
+  const dimensionMode = params.get('dimension') === 'weight-of-remembering' || path.endsWith('/dimension');
+  const editorMode = params.get('editor') === '1' || path.endsWith('/editor');
+  if (dimensionMode) return <DimensionApp />;
   return editorMode ? <EditorApp /> : <ExperienceApp />;
 }
