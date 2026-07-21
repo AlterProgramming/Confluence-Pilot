@@ -197,7 +197,10 @@ try {
     uniqueIds: ids.size === report.assetCount,
     allAssetsPass: report.assets.length === 12 && report.assets.every((asset) => asset.passed),
     allRuntimeSystemsBound: runtimeBindingChecks.every((binding) => binding.pass),
-    blenderGeneratorReadsCatalog: /--catalog/.test(generatorSource) && /create_asset/.test(generatorSource) && /save_blend/.test(generatorSource),
+    blenderGeneratorReadsCatalog: /--catalog/.test(generatorSource) && /create_asset/.test(generatorSource) && /export_output/.test(generatorSource),
+    blenderCoordinateConversion: /ASSET_TO_BLENDER_3/.test(generatorSource) && /asset_rotation_to_blender/.test(generatorSource) && /source_coordinate_system/.test(generatorSource),
+    blenderExportFormats: /GLB/.test(generatorSource) && /GLTF_SEPARATE/.test(generatorSource) && /\.blend/.test(generatorSource),
+    customProfileGeometry: /create_custom_profile/.test(generatorSource) && /mesh\.from_pydata/.test(generatorSource),
     schemaPresent: schemaText.includes('Dimension Procedural Source Asset'),
   };
 
