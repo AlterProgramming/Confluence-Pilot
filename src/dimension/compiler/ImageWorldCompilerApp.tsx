@@ -83,7 +83,10 @@ export function ImageWorldCompilerApp() {
   }, [seed, sourceName, sourceUrl, styleBias]);
 
   useEffect(() => {
-    void runCompiler();
+    const timer = window.setTimeout(() => {
+      void runCompiler();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [runCompiler]);
 
   useEffect(() => () => {
