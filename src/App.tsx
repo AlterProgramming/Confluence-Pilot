@@ -64,7 +64,9 @@ function EditorApp() {
 export default function App() {
   const params = new URLSearchParams(window.location.search);
   const normalizedPath = window.location.pathname.replace(/\/$/, '');
-  const dimensionMode = params.get('dimension') === '1' || normalizedPath.endsWith('/dimension');
+  const dimensionMode = params.get('dimension') === '1'
+    || normalizedPath === '/dimension'
+    || normalizedPath.startsWith('/dimension/');
   const editorMode = params.get('editor') === '1' || normalizedPath.endsWith('/editor');
 
   if (dimensionMode) return <DimensionApp />;
