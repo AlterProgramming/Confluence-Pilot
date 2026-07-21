@@ -28,15 +28,8 @@ async function loadPuppeteer() {
   }
 }
 
-function findChrome(puppeteer) {
+function findChrome() {
   if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
-  try {
-    const bundled = puppeteer.executablePath?.();
-    if (bundled && existsSync(bundled)) return bundled;
-  } catch {
-    // Fall through to common system paths.
-  }
-
   const candidates = [
     'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
@@ -78,7 +71,7 @@ async function openRoomPage(browser, view = 'canonical') {
     view,
   });
   const startedAt = Date.now();
-  await page.goto(`${BASE_URL}/?${query}`, { waitUntil: 'networkidle2', timeout: 90_000 });
+  await page.goto(`${BASE_URL}/?${query}`, { waitUntil: 'domcontentloaded', timeout: 90_000 });
   await page.waitForFunction(
     (expectedRoomId) => {
       const state = window.__CONFLUENCE_VALIDATION__;
@@ -223,14 +216,14 @@ async function captureTraversal(browser) {
 }
 
 const puppeteer = await loadPuppeteer();
-const executablePath = findChrome(puppeteer);
+const executablePath = findChrome();
 if (!executablePath) {
   throw new Error('No Chrome or Chromium executable was found for room evidence capture.');
 }
 
 const browser = await puppeteer.launch({
   executablePath,
-  headless: 'new',
+  headless: true,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',

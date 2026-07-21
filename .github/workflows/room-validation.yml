@@ -31,8 +31,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate room manifests and types
-        run: npm run validate
+      - name: Generate semantic heroes
+        run: npm run generate:semantic-heroes
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Validate room manifests
+        run: npm run validate:rooms
+
+      - name: Validate hero camera contract
+        run: npm run validate:hero-camera
 
       - name: Build production bundle
         run: npm run build
@@ -45,8 +57,104 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  evidence:
+  browser-smoke:
     needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
+      - name: Start diagnostic preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4175 > /tmp/confluence-browser-smoke-preview.log 2>&1 &
+          echo $! > /tmp/confluence-browser-smoke-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4175/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/confluence-browser-smoke-preview.log
+          exit 1
+
+      - name: Prove browser runtime readiness
+        run: node scripts/smoke_room_runtime.mjs http://127.0.0.1:4175
+
+      - name: Upload browser smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-evidence
+          path: validation/browser-smoke
+          if-no-files-found: error
+          retention-days: 14
+
+  hero-camera:
+    needs: [validate, browser-smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: production-bundle
+          path: dist
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/confluence-hero-camera-preview.log 2>&1 &
+          echo $! > /tmp/confluence-hero-camera-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4174/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/confluence-hero-camera-preview.log
+          exit 1
+
+      - name: Prove progressive hero-camera synchronization
+        run: node scripts/probe_hero_camera.mjs http://127.0.0.1:4174
+
+      - name: Upload hero-camera evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hero-camera-validation-evidence
+          path: validation/hero-camera
+          if-no-files-found: error
+          retention-days: 14
+
+  evidence:
+    needs: [validate, browser-smoke, hero-camera]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -54,11 +162,11 @@ jobs:
       matrix:
         include:
           - { id: '01', number: 1, asset: '/assets/room-01-kiosk.glb' }
-          - { id: '02', number: 2, asset: '/assets/room-02-credential-stack.glb' }
+          - { id: '02', number: 2, asset: '/assets/room-02-semantic.glb' }
           - { id: '03', number: 3, asset: '/assets/room-03-fabricator.glb' }
           - { id: '04', number: 4, asset: '/assets/room-04-building-node.glb' }
           - { id: '05', number: 5, asset: '/assets/room-05-city-model.glb' }
-          - { id: '06', number: 6, asset: '/assets/room-06-survey-rover.glb' }
+          - { id: '06', number: 6, asset: '/assets/room-06-semantic.glb' }
           - { id: '07', number: 7, asset: '/assets/room-07-secure-vault.glb' }
           - { id: '08', number: 8, asset: '/assets/room-08-delivery-drone.glb' }
           - { id: '09', number: 9, asset: '/assets/room-09-satellite-terminal.glb' }
@@ -84,9 +192,6 @@ jobs:
           name: production-bundle
           path: dist
 
-      - name: Install evidence browser
-        run: npm install --no-save --package-lock=false puppeteer@24.16.0
-
       - name: Start production preview
         run: |
           npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/confluence-preview.log 2>&1 &
@@ -101,7 +206,18 @@ jobs:
           exit 1
 
       - name: Capture Room ${{ matrix.id }} validation evidence
-        run: node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 ${{ matrix.number }} ${{ matrix.asset }}
+        shell: bash
+        run: |
+          set +e
+          mkdir -p validation/evidence/room-${{ matrix.id }}
+          node scripts/capture_room_evidence.mjs \
+            http://127.0.0.1:4173 \
+            ${{ matrix.number }} \
+            ${{ matrix.asset }} \
+            > validation/evidence/room-${{ matrix.id }}/runner.log 2>&1
+          status=$?
+          cat validation/evidence/room-${{ matrix.id }}/runner.log
+          exit $status
 
       - name: Upload Room ${{ matrix.id }} evidence
         if: always()
