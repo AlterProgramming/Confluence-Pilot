@@ -12,12 +12,15 @@ on:
       - 'scripts/validate_dimension_scene.mjs'
       - 'scripts/validate_dimension_source_assets.mjs'
       - 'scripts/validate_world_fabric.mjs'
+      - 'scripts/validate_image_world_compiler.mjs'
       - 'scripts/capture_dimension_scene.mjs'
       - 'scripts/capture_dimension_authoring.mjs'
+      - 'scripts/capture_image_world_compiler.mjs'
       - 'scripts/validate_dimension_visual_review.mjs'
       - 'validation/design/dimension-*.json'
       - 'validation/design/dimension-scene.md'
       - 'validation/design/world-fabric.md'
+      - 'validation/design/image-world-compiler.md'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -30,12 +33,15 @@ on:
       - 'scripts/validate_dimension_scene.mjs'
       - 'scripts/validate_dimension_source_assets.mjs'
       - 'scripts/validate_world_fabric.mjs'
+      - 'scripts/validate_image_world_compiler.mjs'
       - 'scripts/capture_dimension_scene.mjs'
       - 'scripts/capture_dimension_authoring.mjs'
+      - 'scripts/capture_image_world_compiler.mjs'
       - 'scripts/validate_dimension_visual_review.mjs'
       - 'validation/design/dimension-*.json'
       - 'validation/design/dimension-scene.md'
       - 'validation/design/world-fabric.md'
+      - 'validation/design/image-world-compiler.md'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -50,7 +56,7 @@ permissions:
 jobs:
   validate-dimension:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -66,7 +72,7 @@ jobs:
 
       - name: Validate source contract
         run: |
-          mkdir -p validation/dimension-scene
+          mkdir -p validation/dimension-scene validation/image-world-compiler
           set -o pipefail
           npm run typecheck 2>&1 | tee validation/dimension-scene/typecheck.log
           npm run lint 2>&1 | tee validation/dimension-scene/lint.log
@@ -98,6 +104,9 @@ jobs:
       - name: Capture world authoring evidence
         run: node scripts/capture_dimension_authoring.mjs http://127.0.0.1:4178
 
+      - name: Capture image world compiler evidence
+        run: node scripts/capture_image_world_compiler.mjs http://127.0.0.1:4178
+
       - name: Validate visual review contract
         run: npm run validate:dimension:visual
 
@@ -116,5 +125,6 @@ jobs:
           path: |
             validation/dimension-scene
             validation/dimension-assets
+            validation/image-world-compiler
           if-no-files-found: warn
           retention-days: 14
