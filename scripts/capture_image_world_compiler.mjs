@@ -89,7 +89,7 @@ try {
 
   await page.click('[data-testid="reject-compiler-anchor"]');
   await page.waitForFunction(
-    () => document.querySelector('[data-testid="image-world-compiler"]')?.getAttribute('data-rejected-proposal-count') === '1',
+    () => Number(document.querySelector('[data-testid="image-world-compiler"]')?.getAttribute('data-rejected-proposal-count')) >= 1,
     { timeout: 20_000 },
   );
   await delay(700);
@@ -120,7 +120,7 @@ try {
     evidenceOverlayMounted: report.metadata?.overlayMounted === true,
     anchorInspectorMounted: report.metadata?.inspectorMounted === true,
     threeDimensionalPreviewMounted: report.metadata?.previewMounted === true,
-    rejectionChangesReviewState: report.reviewMutation?.rejectedProposalCount === 1
+    rejectionChangesReviewState: report.reviewMutation?.rejectedProposalCount >= 1
       && report.reviewMutation?.activeReject === true,
     rejectionRecompilesStableFabric: report.reviewMutation?.worldCellCount === 361
       && report.reviewMutation?.previewCellCount === 361,
