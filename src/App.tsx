@@ -7,6 +7,7 @@ import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
 import { ComplexDimensionRuntime } from './dimension/ComplexDimensionRuntime';
 import { ImageWorldCompilerApp } from './dimension/compiler/ImageWorldCompilerApp';
+import { PerceptionReviewApp } from './dimension/perception/PerceptionReviewApp';
 import { CompilerEnterWorldOverlay } from './dimension/play/CompilerEnterWorldOverlay';
 import { TraversableWorldApp } from './dimension/play/TraversableWorldApp';
 import { DimensionApp as LightweightDimensionApp } from './dimensions/DimensionApp';
@@ -70,6 +71,8 @@ export default function App() {
   const normalizedPath = window.location.pathname.replace(/\/$/, '');
   const playMode = params.get('playWorld') === '1'
     || normalizedPath === '/dimension/play';
+  const perceptionMode = params.get('perception') === '1'
+    || normalizedPath === '/dimension/perception';
   const compilerMode = params.get('worldCompiler') === '1'
     || normalizedPath === '/dimension/compiler';
   const lightweightDimensionMode = params.get('dimension') === 'weight-of-remembering-lite'
@@ -80,6 +83,7 @@ export default function App() {
   const editorMode = params.get('editor') === '1' || normalizedPath.endsWith('/editor');
 
   if (playMode) return <TraversableWorldApp />;
+  if (perceptionMode) return <PerceptionReviewApp />;
   if (compilerMode) {
     return (
       <>
