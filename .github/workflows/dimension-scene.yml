@@ -9,6 +9,10 @@ on:
       - 'public/reference/dimensions/**'
       - 'scripts/validate_dimension_scene.mjs'
       - 'scripts/capture_dimension_scene.mjs'
+      - 'scripts/capture_dimension_authoring.mjs'
+      - 'scripts/validate_dimension_visual_review.mjs'
+      - 'validation/design/dimension-*.json'
+      - 'validation/design/dimension-scene.md'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -18,6 +22,10 @@ on:
       - 'public/reference/dimensions/**'
       - 'scripts/validate_dimension_scene.mjs'
       - 'scripts/capture_dimension_scene.mjs'
+      - 'scripts/capture_dimension_authoring.mjs'
+      - 'scripts/validate_dimension_visual_review.mjs'
+      - 'validation/design/dimension-*.json'
+      - 'validation/design/dimension-scene.md'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -64,7 +72,7 @@ jobs:
           npm run preview -- --host 127.0.0.1 --port 4178 > /tmp/confluence-dimension-preview.log 2>&1 &
           echo $! > /tmp/confluence-dimension-preview.pid
           for attempt in {1..45}; do
-            if curl --silent --fail http://127.0.0.1:4178/dimension?room=02 > /dev/null; then
+            if curl --silent --fail 'http://127.0.0.1:4178/dimension?world=the-weight-of-remembering' > /dev/null; then
               exit 0
             fi
             sleep 1
@@ -72,8 +80,14 @@ jobs:
           cp /tmp/confluence-dimension-preview.log validation/dimension-scene/preview.log
           exit 1
 
-      - name: Capture browser evidence
+      - name: Capture runtime journey evidence
         run: node scripts/capture_dimension_scene.mjs http://127.0.0.1:4178
+
+      - name: Capture world authoring evidence
+        run: node scripts/capture_dimension_authoring.mjs http://127.0.0.1:4178
+
+      - name: Validate visual review contract
+        run: npm run validate:dimension:visual
 
       - name: Preserve preview log
         if: always()
