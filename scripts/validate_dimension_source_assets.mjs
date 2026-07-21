@@ -197,7 +197,9 @@ try {
     uniqueIds: ids.size === report.assetCount,
     allAssetsPass: report.assets.length === 12 && report.assets.every((asset) => asset.passed),
     allRuntimeSystemsBound: runtimeBindingChecks.every((binding) => binding.pass),
-    blenderGeneratorReadsCatalog: /--catalog/.test(generatorSource) && /create_asset/.test(generatorSource) && /save_blend/.test(generatorSource),
+    blenderGeneratorReadsCatalog: /--catalog/.test(generatorSource)
+      && /create_asset/.test(generatorSource)
+      && /(save_blend|export_output)/.test(generatorSource),
     schemaPresent: schemaText.includes('Dimension Procedural Source Asset'),
   };
 
