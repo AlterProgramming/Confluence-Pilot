@@ -12,13 +12,15 @@
     "perf": "node scripts/perf_harness.mjs",
     "evidence:room01": "node scripts/capture_room_evidence.mjs http://127.0.0.1:4173 1 /assets/room-01-kiosk.glb",
     "evidence:rooms02-12": "node scripts/capture_rooms_02_12.mjs http://127.0.0.1:4173",
+    "evidence:dimension-authoring": "node scripts/capture_dimension_authoring.mjs http://127.0.0.1:4178",
     "audio:generate": "node scripts/generate_audio.mjs",
     "audio:generate:sfx": "node scripts/generate_audio.mjs --skip-music sfx",
     "validate:rooms": "node scripts/validate_rooms.mjs",
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
     "assets:inventory": "node scripts/asset_inventory.mjs",
     "validate": "npm run typecheck && npm run lint && npm run validate:rooms",
-    "validate:dimension": "node scripts/validate_dimension_scene.mjs"
+    "validate:dimension": "node scripts/validate_dimension_scene.mjs",
+    "validate:dimension:visual": "node scripts/validate_dimension_visual_review.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -36,9 +38,6 @@
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
     "@eslint/js": "^9.39.5",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
