@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Dimension } from './Dimension';
+import { Dimension, type DimensionEntrance } from './Dimension';
 import { DimensionScene, type CameraTravelState } from './DimensionScene';
 import { ParallelRemembranceScene } from './ParallelRemembranceScene';
 import './dimension.css';
@@ -7,9 +7,19 @@ import './journey.css';
 import './portal.css';
 import './destination.css';
 
-function resolveRoomCode() {
+const DEFAULT_DIMENSION_ID = 'the-weight-of-remembering';
+
+interface DimensionRuntimeRequest {
+  dimensionId: string | null;
+  roomEntranceId: string | null;
+}
+
+function resolveRuntimeRequest(): DimensionRuntimeRequest {
   const params = new URLSearchParams(window.location.search);
-  return params.get('room') ?? '02';
+  return {
+    dimensionId: params.get('world') ?? params.get('dimensionId'),
+    roomEntranceId: params.get('room'),
+  };
 }
 
 function formatCameraPosition(position: [number, number, number]) {
@@ -22,18 +32,28 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 export function DimensionApp() {
-  const roomCode = resolveRoomCode();
+  const request = useMemo(resolveRuntimeRequest, []);
   const result = useMemo(() => {
     try {
-      const dimension = new Dimension(roomCode);
-      return { dimension, error: null };
+      const dimension = request.dimensionId
+        ? new Dimension(request.dimensionId)
+        : request.roomEntranceId
+          ? Dimension.fromEntrance('room', request.roomEntranceId)
+          : new Dimension(DEFAULT_DIMENSION_ID);
+      const entrance = request.roomEntranceId
+        ? Dimension.entrancesFor(dimension.id).find(
+            (candidate) => candidate.kind === 'room' && candidate.sourceId === request.roomEntranceId,
+          ) ?? null
+        : Dimension.entrancesFor(dimension.id).find((candidate) => candidate.kind === 'route') ?? null;
+      return { dimension, entrance, error: null };
     } catch (error) {
       return {
         dimension: null,
+        entrance: null as DimensionEntrance | null,
         error: error instanceof Error ? error.message : 'Unable to initialize the dimension.',
       };
     }
-  }, [roomCode]);
+  }, [request.dimensionId, request.roomEntranceId]);
   const scene = useMemo(() => result.dimension?.buildScene() ?? null, [result.dimension]);
   const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>(null);
   const [portalOpen, setPortalOpen] = useState(false);
@@ -107,7 +127,12 @@ export function DimensionApp() {
 
   if (!result.dimension || !scene) {
     return (
-      <main className="dimension-error" data-testid="dimension-error" data-room-code={roomCode}>
+      <main
+        className="dimension-error"
+        data-testid="dimension-error"
+        data-requested-dimension={request.dimensionId ?? ''}
+        data-requested-room-entrance={request.roomEntranceId ?? ''}
+      >
         <span>Dimension initialization failed</span>
         <h1>{result.error}</h1>
         <a href="/">Return to Confluence</a>
@@ -181,17 +206,25 @@ export function DimensionApp() {
   const title = activeDestination?.title ?? scene.title;
   const subtitle = activeDestination?.subtitle ?? scene.subtitle;
   const law = activeDestination?.law ?? scene.law;
+  const registryLabel = activeDestination
+    ? `World ${scene.id} · ${activeDestination.id}`
+    : result.entrance?.kind === 'room'
+      ? `World ${scene.id} · entered through ${result.entrance.label}`
+      : `World registry · ${scene.id}`;
 
   return (
     <main
       className={`dimension-shell${selectedAnchor ? ' dimension-focused' : ''}${portalOpen && !activeDestination ? ' dimension-threshold-open' : ''}${activeDestination ? ' dimension-destination-active' : ''}`}
       data-testid="dimension-runtime"
       data-dimension-id={scene.id}
-      data-room-code={result.dimension.roomCode}
+      data-entry-kind={result.entrance?.kind ?? 'standalone'}
+      data-entry-source={result.entrance?.sourceId ?? '/dimension'}
+      data-room-code={result.entrance?.kind === 'room' ? result.entrance.sourceId : ''}
       data-anchor-count={scene.anchors.length}
       data-path-count={scene.paths.length}
       data-layer-count={scene.layers.length}
       data-destination-count={scene.destinations.length}
+      data-entrance-count={scene.entrances.length}
       data-realm-id={activeDestination?.id ?? scene.id}
       data-focus-mode={focusMode}
       data-portal-state={portalState}
@@ -216,9 +249,7 @@ export function DimensionApp() {
       )}
 
       <header className={`dimension-title-panel${activeDestination ? ' dimension-destination-title' : ''}`}>
-        <span className="dimension-room-code">
-          {activeDestination ? `Beyond room ${scene.roomCode} · ${activeDestination.id}` : `Dimension initialized from room ${scene.roomCode}`}
-        </span>
+        <span className="dimension-room-code">{registryLabel}</span>
         <h1>{title}</h1>
         <p>{subtitle}</p>
         <blockquote>{law}</blockquote>
