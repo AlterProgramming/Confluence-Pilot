@@ -38,6 +38,32 @@ export interface DimensionPortal {
   destination: string;
 }
 
+export interface DimensionDestinationNode {
+  id: string;
+  label: string;
+  position: [number, number, number];
+  radius: number;
+  description: string;
+}
+
+export interface DimensionDestination {
+  id: string;
+  title: string;
+  subtitle: string;
+  law: string;
+  returnPortalId: string;
+  camera: {
+    position: [number, number, number];
+    target: [number, number, number];
+  };
+  palette: {
+    primary: string;
+    secondary: string;
+    ambient: string;
+  };
+  nodes: DimensionDestinationNode[];
+}
+
 export interface DimensionSceneSpec {
   id: string;
   title: string;
@@ -60,6 +86,7 @@ export interface DimensionSceneSpec {
   anchors: DimensionAnchor[];
   paths: DimensionPath[];
   portals: DimensionPortal[];
+  destinations: DimensionDestination[];
 }
 
 const rememberingSpec: Omit<DimensionSceneSpec, 'roomCode'> = {
@@ -208,6 +235,47 @@ const rememberingSpec: Omit<DimensionSceneSpec, 'roomCode'> = {
       destination: 'parallel-remembrance',
     },
   ],
+  destinations: [
+    {
+      id: 'parallel-remembrance',
+      title: 'Parallel Remembrance',
+      subtitle: 'A realm where every memory continues along paths not taken',
+      law: 'What might have been is not false. It is simply unchosen.',
+      returnPortalId: 'portal-horizon',
+      camera: {
+        position: [6.55, 0.6, -11.8],
+        target: [6.55, 0.0, -15.2],
+      },
+      palette: {
+        primary: '#bda7ff',
+        secondary: '#79d8ff',
+        ambient: '#150d34',
+      },
+      nodes: [
+        {
+          id: 'unwritten-archive',
+          label: 'Unwritten archive',
+          position: [4.4, 1.25, -15.1],
+          radius: 0.22,
+          description: 'Pages for memories that never became history, preserved without pretending they occurred.',
+        },
+        {
+          id: 'echo-bridge',
+          label: 'Echo bridge',
+          position: [6.55, -0.75, -16.4],
+          radius: 0.2,
+          description: 'A crossing between what was lived and what was possible, stable only while both truths remain distinct.',
+        },
+        {
+          id: 'unlived-garden',
+          label: 'Unlived garden',
+          position: [8.75, 0.9, -15.4],
+          radius: 0.22,
+          description: 'A growing field of futures released from obligation, where possibility can exist without becoming a demand.',
+        },
+      ],
+    },
+  ],
 };
 
 const sceneByRoomCode: Record<string, Omit<DimensionSceneSpec, 'roomCode'>> = {
@@ -234,6 +302,18 @@ function cloneSceneSpec(spec: DimensionSceneSpec): DimensionSceneSpec {
     portals: spec.portals.map((portal) => ({
       ...portal,
       position: [...portal.position] as [number, number, number],
+    })),
+    destinations: spec.destinations.map((destination) => ({
+      ...destination,
+      camera: {
+        position: [...destination.camera.position] as [number, number, number],
+        target: [...destination.camera.target] as [number, number, number],
+      },
+      palette: { ...destination.palette },
+      nodes: destination.nodes.map((node) => ({
+        ...node,
+        position: [...node.position] as [number, number, number],
+      })),
     })),
   };
 }
