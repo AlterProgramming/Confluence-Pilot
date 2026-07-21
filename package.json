@@ -20,6 +20,7 @@
     "assets:inventory": "node scripts/asset_inventory.mjs",
     "validate": "npm run typecheck && npm run lint && npm run validate:rooms",
     "validate:dimension": "node scripts/validate_dimension_scene.mjs",
+    "validate:dimension:assets": "node scripts/validate_dimension_source_assets.mjs",
     "validate:dimension:visual": "node scripts/validate_dimension_visual_review.mjs"
   },
   "dependencies": {
