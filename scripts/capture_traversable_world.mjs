@@ -74,14 +74,32 @@ function displacementFromInitial(initial, state) {
   return Math.hypot(state.playerX - initial.playerX, state.playerZ - initial.playerZ);
 }
 
-async function runMovementAttempt(page, key, milliseconds = 1750) {
+function crossedWorldCell(initial, state) {
+  return Boolean(initial?.currentCellId)
+    && Boolean(state?.currentCellId)
+    && initial.currentCellId !== state.currentCellId;
+}
+
+async function runMovementAttempt(page, key, initial, maxMilliseconds = 6500) {
+  let state = await readRuntime(page);
+  const startedAt = Date.now();
   await page.keyboard.down('Shift');
   await page.keyboard.down(key);
-  await delay(milliseconds);
-  await page.keyboard.up(key);
-  await page.keyboard.up('Shift');
-  await delay(650);
-  return readRuntime(page);
+  try {
+    while (Date.now() - startedAt < maxMilliseconds) {
+      await delay(500);
+      state = await readRuntime(page);
+      const displacement = displacementFromInitial(initial, state);
+      if (displacement > 0.8 && crossedWorldCell(initial, state) && state.grounded === 'true') {
+        return state;
+      }
+    }
+    return state;
+  } finally {
+    await page.keyboard.up(key);
+    await page.keyboard.up('Shift');
+    await delay(650);
+  }
 }
 
 try {
@@ -137,7 +155,7 @@ try {
   report.jump = { airborne, landed };
 
   for (const key of ['w', 'a', 'd', 's']) {
-    const state = await runMovementAttempt(page, key);
+    const state = await runMovementAttempt(page, key, report.initial);
     const displacement = displacementFromInitial(report.initial, state);
     report.movementAttempts.push({
       key,
@@ -146,10 +164,7 @@ try {
       grounded: state.grounded,
     });
     report.moved = state;
-    const crossedCell = Boolean(report.initial?.currentCellId)
-      && Boolean(state.currentCellId)
-      && report.initial.currentCellId !== state.currentCellId;
-    if (displacement > 0.8 && crossedCell && state.grounded === 'true') break;
+    if (displacement > 0.8 && crossedWorldCell(report.initial, state) && state.grounded === 'true') break;
   }
 
   const movedScreenshot = path.join(outputDirectory, 'first-footstep-moved.png');
@@ -173,9 +188,7 @@ try {
     jumpLeavesGround: report.jump?.airborne?.grounded === 'false',
     gravityReturnsPlayer: report.jump?.landed?.grounded === 'true',
     movementChangesPosition: displacement > 0.8,
-    movementCrossesCell: Boolean(report.initial?.currentCellId)
-      && Boolean(report.moved?.currentCellId)
-      && report.initial.currentCellId !== report.moved.currentCellId,
+    movementCrossesCell: crossedWorldCell(report.initial, report.moved),
     playerRemainsGroundedAfterMovement: report.moved?.grounded === 'true',
     telemetryRemainsFinite: finiteTelemetry,
     evidenceCaptured: report.screenshots.length === 2,
