@@ -31,7 +31,7 @@ const browser = await puppeteer.launch({
 });
 
 const report = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   generatedAt: new Date().toISOString(),
   route: '/dimension?room=02',
   passed: false,
@@ -40,6 +40,9 @@ const report = {
   interaction: null,
   journeyStep: null,
   portalOpen: null,
+  destinationArrival: null,
+  destinationJourney: null,
+  destinationReturn: null,
   portalClosed: null,
   returnToOverview: null,
   seedRequest: null,
@@ -83,10 +86,12 @@ try {
 
   report.metadata = await page.$eval('[data-testid="dimension-runtime"]', (element) => ({
     dimensionId: element.getAttribute('data-dimension-id'),
+    realmId: element.getAttribute('data-realm-id'),
     roomCode: element.getAttribute('data-room-code'),
     anchorCount: Number(element.getAttribute('data-anchor-count')),
     pathCount: Number(element.getAttribute('data-path-count')),
     layerCount: Number(element.getAttribute('data-layer-count')),
+    destinationCount: Number(element.getAttribute('data-destination-count')),
     canvasCount: element.querySelectorAll('canvas').length,
     focusMode: element.getAttribute('data-focus-mode'),
     portalState: element.getAttribute('data-portal-state'),
@@ -169,17 +174,101 @@ try {
   await delay(900);
   report.portalOpen = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
     portalState: runtime.getAttribute('data-portal-state'),
+    realmId: runtime.getAttribute('data-realm-id'),
     focusMode: runtime.getAttribute('data-focus-mode'),
     cameraFocus: runtime.getAttribute('data-camera-focus'),
     cameraPosition: runtime.getAttribute('data-camera-position'),
     cameraTarget: runtime.getAttribute('data-camera-target'),
     thresholdClass: runtime.classList.contains('dimension-threshold-open'),
-    closeControl: Boolean(document.querySelector('[data-testid="close-dimension-portal"]')),
+    crossControl: Boolean(document.querySelector('[data-testid="cross-dimension-portal"]')),
   }));
 
   const portalOpenPath = path.join(outputDirectory, 'dimension-room-02-portal-open.png');
   await page.screenshot({ path: portalOpenPath, captureBeyondViewport: false });
   report.screenshots.push(path.basename(portalOpenPath));
+
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-portal-state') === 'crossed',
+    { timeout: 20_000 },
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-realm-id') === 'parallel-remembrance',
+    { timeout: 20_000 },
+  );
+  await page.waitForSelector('.dimension-destination-canvas canvas', { visible: true, timeout: 30_000 });
+  await page.waitForSelector('[data-testid="dimension-destination-inspector"]', { visible: true, timeout: 20_000 });
+  await delay(1800);
+
+  report.destinationArrival = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => {
+    const inspector = document.querySelector('[data-testid="dimension-destination-inspector"]');
+    return {
+      realmId: runtime.getAttribute('data-realm-id'),
+      portalState: runtime.getAttribute('data-portal-state'),
+      focusMode: runtime.getAttribute('data-focus-mode'),
+      cameraFocus: runtime.getAttribute('data-camera-focus'),
+      cameraPosition: runtime.getAttribute('data-camera-position'),
+      cameraTarget: runtime.getAttribute('data-camera-target'),
+      destinationCanvasCount: runtime.querySelectorAll('.dimension-destination-canvas canvas').length,
+      destinationNodeCount: runtime.querySelectorAll('[data-destination-node-id]').length,
+      selectedNode: inspector?.getAttribute('data-selected-destination-node') ?? '',
+      heading: inspector?.querySelector('h2')?.textContent?.trim() ?? '',
+      returnControl: Boolean(inspector?.querySelector('[data-testid="return-through-dimension-portal"]')),
+    };
+  });
+
+  const destinationPath = path.join(outputDirectory, 'dimension-parallel-remembrance-overview.png');
+  await page.screenshot({ path: destinationPath, captureBeyondViewport: false });
+  report.screenshots.push(path.basename(destinationPath));
+
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-destination-inspector"]')?.getAttribute('data-selected-destination-node') === 'unwritten-archive',
+    { timeout: 20_000 },
+  );
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-destination-inspector"]')?.getAttribute('data-selected-destination-node') === 'echo-bridge',
+    { timeout: 20_000 },
+  );
+  await delay(650);
+
+  report.destinationJourney = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => {
+    const inspector = document.querySelector('[data-testid="dimension-destination-inspector"]');
+    return {
+      realmId: runtime.getAttribute('data-realm-id'),
+      selectedNode: inspector?.getAttribute('data-selected-destination-node') ?? '',
+      nodeIndex: Number(inspector?.getAttribute('data-destination-node-index')),
+      heading: inspector?.querySelector('h2')?.textContent?.trim() ?? '',
+      description: inspector?.querySelector('p')?.textContent?.trim() ?? '',
+      previousControl: Boolean(inspector?.querySelector('[data-testid="previous-destination-node"]')),
+      nextControl: Boolean(inspector?.querySelector('[data-testid="next-destination-node"]')),
+    };
+  });
+
+  const destinationNodePath = path.join(outputDirectory, 'dimension-parallel-remembrance-echo-bridge.png');
+  await page.screenshot({ path: destinationNodePath, captureBeyondViewport: false });
+  report.screenshots.push(path.basename(destinationNodePath));
+
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-realm-id') === 'the-weight-of-remembering',
+    { timeout: 20_000 },
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-portal-state') === 'open',
+    { timeout: 20_000 },
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'portal-horizon:open',
+    { timeout: 30_000 },
+  );
+  report.destinationReturn = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
+    realmId: runtime.getAttribute('data-realm-id'),
+    portalState: runtime.getAttribute('data-portal-state'),
+    selectedAnchor: document.querySelector('[data-testid="dimension-inspector"]')?.getAttribute('data-selected-anchor') ?? '',
+    cameraFocus: runtime.getAttribute('data-camera-focus'),
+  }));
 
   await page.keyboard.press('Escape');
   await page.waitForFunction(
@@ -206,6 +295,7 @@ try {
     { timeout: 30_000 },
   );
   report.returnToOverview = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
+    realmId: runtime.getAttribute('data-realm-id'),
     focusMode: runtime.getAttribute('data-focus-mode'),
     portalState: runtime.getAttribute('data-portal-state'),
     cameraFocus: runtime.getAttribute('data-camera-focus'),
@@ -225,10 +315,12 @@ try {
 
   report.checks = {
     roomCodeInitialized: report.metadata?.roomCode === '02',
-    expectedDimensionLoaded: report.metadata?.dimensionId === 'the-weight-of-remembering',
+    expectedDimensionLoaded: report.metadata?.dimensionId === 'the-weight-of-remembering'
+      && report.metadata?.realmId === 'the-weight-of-remembering',
     sceneGrammarPresent: report.metadata?.anchorCount === 7
       && report.metadata?.pathCount === 4
-      && report.metadata?.layerCount === 5,
+      && report.metadata?.layerCount === 5
+      && report.metadata?.destinationCount === 1,
     webglCanvasMounted: report.metadata?.canvasCount === 1,
     seededArtworkFetched: report.seedRequest?.ok === true && report.seedRequest?.status === 200,
     overviewCameraReported: report.metadata?.focusMode === 'overview'
@@ -253,23 +345,44 @@ try {
       && report.journeyStep?.cameraFocus === 'portal-horizon'
       && report.journeyStep?.openControl === true,
     portalOpenedByKeyboard: report.portalOpen?.portalState === 'open'
+      && report.portalOpen?.realmId === 'the-weight-of-remembering'
       && report.portalOpen?.focusMode === 'anchor'
       && report.portalOpen?.cameraFocus === 'portal-horizon:open'
       && report.portalOpen?.cameraPosition !== report.journeyStep?.cameraPosition
       && report.portalOpen?.cameraTarget !== report.journeyStep?.cameraTarget
       && report.portalOpen?.thresholdClass === true
-      && report.portalOpen?.closeControl === true,
-    firstEscapeClosedPortalOnly: report.portalClosed?.portalState === 'closed'
+      && report.portalOpen?.crossControl === true,
+    destinationCrossedByKeyboard: report.destinationArrival?.realmId === 'parallel-remembrance'
+      && report.destinationArrival?.portalState === 'crossed'
+      && report.destinationArrival?.focusMode === 'destination'
+      && report.destinationArrival?.cameraFocus === 'parallel-remembrance'
+      && report.destinationArrival?.destinationCanvasCount === 1
+      && report.destinationArrival?.destinationNodeCount === 3
+      && report.destinationArrival?.heading === 'Parallel Remembrance'
+      && report.destinationArrival?.returnControl === true,
+    destinationJourneyWorks: report.destinationJourney?.realmId === 'parallel-remembrance'
+      && report.destinationJourney?.selectedNode === 'echo-bridge'
+      && report.destinationJourney?.nodeIndex === 1
+      && report.destinationJourney?.heading === 'Echo bridge'
+      && report.destinationJourney?.description.length > 40
+      && report.destinationJourney?.previousControl === true
+      && report.destinationJourney?.nextControl === true,
+    escapeReturnedThroughPortal: report.destinationReturn?.realmId === 'the-weight-of-remembering'
+      && report.destinationReturn?.portalState === 'open'
+      && report.destinationReturn?.selectedAnchor === 'portal-horizon'
+      && report.destinationReturn?.cameraFocus === 'portal-horizon:open',
+    secondEscapeClosedPortalOnly: report.portalClosed?.portalState === 'closed'
       && report.portalClosed?.selectedAnchor === 'portal-horizon'
       && report.portalClosed?.cameraFocus === 'portal-horizon',
-    secondEscapeReturnedToOverview: report.returnToOverview?.focusMode === 'overview'
+    thirdEscapeReturnedToOverview: report.returnToOverview?.realmId === 'the-weight-of-remembering'
+      && report.returnToOverview?.focusMode === 'overview'
       && report.returnToOverview?.portalState === 'closed'
       && report.returnToOverview?.cameraFocus === 'overview'
       && report.returnToOverview?.cameraPosition === report.metadata?.cameraPosition
       && report.returnToOverview?.cameraTarget === report.metadata?.cameraTarget,
     unsupportedRoomFailsExplicitly: explicitFailure.roomCode === '99'
       && explicitFailure.message.includes('Unknown room code'),
-    evidenceCaptured: report.screenshots.length === 4,
+    evidenceCaptured: report.screenshots.length === 6,
     browserClean: report.consoleErrors.length === 0
       && report.pageErrors.length === 0
       && report.requestFailures.length === 0,
