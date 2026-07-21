@@ -11,10 +11,13 @@ import type {
 
 const TILE_COLUMNS = 12;
 const TILE_ROWS = 8;
-type SafePixels = Uint8ClampedArray & Record<number, number>;
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.max(minimum, Math.min(maximum, value));
+}
+
+function pixel(pixels: Uint8ClampedArray, index: number): number {
+  return pixels[index] ?? 0;
 }
 
 function saturation(r: number, g: number, b: number): number {
@@ -58,15 +61,15 @@ export async function normalizeImageSource(
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) throw new Error('The browser could not create a 2D analysis canvas.');
   context.drawImage(loaded, 0, 0, width, height);
-  const data = context.getImageData(0, 0, width, height).data as SafePixels;
-
+  const data = context.getImageData(0, 0, width, height).data;
   let brightnessTotal = 0;
   let saturationTotal = 0;
   let pixelCount = 0;
+
   for (let index = 0; index < data.length; index += 4) {
-    const r = data[index] / 255;
-    const g = data[index + 1] / 255;
-    const b = data[index + 2] / 255;
+    const r = pixel(data, index) / 255;
+    const g = pixel(data, index + 1) / 255;
+    const b = pixel(data, index + 2) / 255;
     brightnessTotal += (r + g + b) / 3;
     saturationTotal += saturation(r, g, b);
     pixelCount += 1;
@@ -89,8 +92,7 @@ export function estimateHorizon(image: NormalizedImageData): {
   horizonY: number;
   confidence: number;
 } {
-  const { width, height } = image;
-  const pixels = image.pixels as SafePixels;
+  const { width, height, pixels } = image;
   const start = Math.floor(height * 0.22);
   const end = Math.floor(height * 0.74);
   let bestY = Math.floor(height * 0.46);
@@ -105,15 +107,14 @@ export function estimateHorizon(image: NormalizedImageData): {
       const above = ((y - 1) * width + x) * 4;
       const current = (y * width + x) * 4;
       difference += (
-        Math.abs(pixels[current] - pixels[above])
-        + Math.abs(pixels[current + 1] - pixels[above + 1])
-        + Math.abs(pixels[current + 2] - pixels[above + 2])
+        Math.abs(pixel(pixels, current) - pixel(pixels, above))
+        + Math.abs(pixel(pixels, current + 1) - pixel(pixels, above + 1))
+        + Math.abs(pixel(pixels, current + 2) - pixel(pixels, above + 2))
       ) / (255 * 3);
       samples += 1;
     }
     const rawScore = difference / Math.max(1, samples);
-    const centerPreference = 1 - Math.abs(y / height - 0.46) * 0.55;
-    const score = rawScore * centerPreference;
+    const score = rawScore * (1 - Math.abs(y / height - 0.46) * 0.55);
     scoreTotal += score;
     scoreCount += 1;
     if (score > bestScore) {
@@ -130,8 +131,7 @@ export function estimateHorizon(image: NormalizedImageData): {
 }
 
 function tileMetrics(image: NormalizedImageData, bbox: BoundingBox): RegionMetrics {
-  const { width } = image;
-  const pixels = image.pixels as SafePixels;
+  const { width, pixels } = image;
   let red = 0;
   let green = 0;
   let blue = 0;
@@ -146,9 +146,9 @@ function tileMetrics(image: NormalizedImageData, bbox: BoundingBox): RegionMetri
   for (let y = bbox.y; y < yEnd; y += 2) {
     for (let x = bbox.x; x < xEnd; x += 2) {
       const index = (y * width + x) * 4;
-      const r = pixels[index] / 255;
-      const g = pixels[index + 1] / 255;
-      const b = pixels[index + 2] / 255;
+      const r = pixel(pixels, index) / 255;
+      const g = pixel(pixels, index + 1) / 255;
+      const b = pixel(pixels, index + 2) / 255;
       red += r;
       green += g;
       blue += b;
@@ -159,18 +159,18 @@ function tileMetrics(image: NormalizedImageData, bbox: BoundingBox): RegionMetri
       if (x + 2 < xEnd) {
         const right = (y * width + x + 2) * 4;
         edge += (
-          Math.abs(pixels[index] - pixels[right])
-          + Math.abs(pixels[index + 1] - pixels[right + 1])
-          + Math.abs(pixels[index + 2] - pixels[right + 2])
+          Math.abs(pixel(pixels, index) - pixel(pixels, right))
+          + Math.abs(pixel(pixels, index + 1) - pixel(pixels, right + 1))
+          + Math.abs(pixel(pixels, index + 2) - pixel(pixels, right + 2))
         ) / (255 * 3);
         edgeCount += 1;
       }
       if (y + 2 < yEnd) {
         const below = ((y + 2) * width + x) * 4;
         edge += (
-          Math.abs(pixels[index] - pixels[below])
-          + Math.abs(pixels[index + 1] - pixels[below + 1])
-          + Math.abs(pixels[index + 2] - pixels[below + 2])
+          Math.abs(pixel(pixels, index) - pixel(pixels, below))
+          + Math.abs(pixel(pixels, index + 1) - pixel(pixels, below + 1))
+          + Math.abs(pixel(pixels, index + 2) - pixel(pixels, below + 2))
         ) / (255 * 3);
         edgeCount += 1;
       }
@@ -199,30 +199,14 @@ function classifyRegion(
   const greenDominant = metrics.green > metrics.red * 1.08 && metrics.green > metrics.blue * 0.96;
   const centerWeight = 1 - Math.abs(normalizedX - 0.5) * 0.7;
 
-  if (aboveHorizon && metrics.edge < 0.17) {
-    return { kind: 'sky', confidence: clamp(0.62 + (0.17 - metrics.edge) * 1.4) };
-  }
-  if (nearHorizon && metrics.edge > 0.27 && centerWeight > 0.62) {
-    return { kind: 'landmark', confidence: clamp(0.52 + metrics.edge * 0.8 + metrics.saturation * 0.15) };
-  }
-  if (aboveHorizon && metrics.edge >= 0.17) {
-    return { kind: 'structure', confidence: clamp(0.48 + metrics.edge * 0.9) };
-  }
-  if (blueDominant && metrics.saturation > 0.16 && metrics.edge < 0.25) {
-    return { kind: 'water', confidence: clamp(0.5 + metrics.saturation * 0.45) };
-  }
-  if (greenDominant && metrics.saturation > 0.14) {
-    return { kind: 'vegetation', confidence: clamp(0.5 + metrics.saturation * 0.5) };
-  }
-  if (normalizedY > Math.max(0.58, horizonRatio + 0.12) && metrics.edge < 0.19) {
-    return { kind: metrics.saturation < 0.32 ? 'path' : 'ground', confidence: clamp(0.55 + (0.19 - metrics.edge)) };
-  }
-  if (metrics.edge > 0.25) {
-    return { kind: centerWeight > 0.58 ? 'structure' : 'landmark', confidence: clamp(0.48 + metrics.edge * 0.85) };
-  }
-  if (normalizedY > horizonRatio) {
-    return { kind: 'ground', confidence: clamp(0.5 + (0.22 - metrics.edge) * 0.55) };
-  }
+  if (aboveHorizon && metrics.edge < 0.17) return { kind: 'sky', confidence: clamp(0.62 + (0.17 - metrics.edge) * 1.4) };
+  if (nearHorizon && metrics.edge > 0.27 && centerWeight > 0.62) return { kind: 'landmark', confidence: clamp(0.52 + metrics.edge * 0.8 + metrics.saturation * 0.15) };
+  if (aboveHorizon && metrics.edge >= 0.17) return { kind: 'structure', confidence: clamp(0.48 + metrics.edge * 0.9) };
+  if (blueDominant && metrics.saturation > 0.16 && metrics.edge < 0.25) return { kind: 'water', confidence: clamp(0.5 + metrics.saturation * 0.45) };
+  if (greenDominant && metrics.saturation > 0.14) return { kind: 'vegetation', confidence: clamp(0.5 + metrics.saturation * 0.5) };
+  if (normalizedY > Math.max(0.58, horizonRatio + 0.12) && metrics.edge < 0.19) return { kind: metrics.saturation < 0.32 ? 'path' : 'ground', confidence: clamp(0.55 + (0.19 - metrics.edge)) };
+  if (metrics.edge > 0.25) return { kind: centerWeight > 0.58 ? 'structure' : 'landmark', confidence: clamp(0.48 + metrics.edge * 0.85) };
+  if (normalizedY > horizonRatio) return { kind: 'ground', confidence: clamp(0.5 + (0.22 - metrics.edge) * 0.55) };
   return { kind: 'unknown', confidence: 0.4 };
 }
 
@@ -244,16 +228,8 @@ export function segmentSemanticRegions(
         height: Math.min(tileHeight, image.height - row * tileHeight),
       };
       const metrics = tileMetrics(image, bbox);
-      const center = {
-        x: bbox.x + bbox.width / 2,
-        y: bbox.y + bbox.height / 2,
-      };
-      const classification = classifyRegion(
-        metrics,
-        center.y / image.height,
-        center.x / image.width,
-        horizonRatio,
-      );
+      const center = { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 };
+      const classification = classifyRegion(metrics, center.y / image.height, center.x / image.width, horizonRatio);
       regions.push({
         id: `semantic-region-${row}-${column}`,
         kind: classification.kind,
@@ -329,11 +305,7 @@ export function buildDepthBands(height: number, horizonY: number): DepthBand[] {
 }
 
 export function inferTraversableRegions(regions: SemanticRegion[]): string[] {
-  const preferred = regions
-    .filter((region) => region.kind === 'path')
-    .sort((a, b) => b.center.y - a.center.y);
-  const fallback = regions
-    .filter((region) => region.kind === 'ground')
-    .sort((a, b) => b.center.y - a.center.y);
+  const preferred = regions.filter((region) => region.kind === 'path').sort((a, b) => b.center.y - a.center.y);
+  const fallback = regions.filter((region) => region.kind === 'ground').sort((a, b) => b.center.y - a.center.y);
   return [...preferred, ...fallback].slice(0, 18).map((region) => region.id);
 }
