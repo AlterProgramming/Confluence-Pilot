@@ -2,6 +2,7 @@ import {
   BufferGeometry,
   Color,
   Float32BufferAttribute,
+  MathUtils,
 } from 'three';
 import type { AnchorProposal, ImageWorldDraft } from '../compiler/contracts';
 import type {
@@ -17,6 +18,9 @@ const BIOME_COLORS: Record<WorldFabricBiome, string> = {
   'thread-marsh': '#427894',
   'void-highland': '#42385f',
 };
+const MAX_TRAVERSABLE_SLOPE_DEGREES = 32;
+const SLOPE_RELAXATION_PASSES = 20;
+const traversableHeightFields = new WeakMap<WorldFabricSpec, Float64Array>();
 
 export interface TerrainBounds {
   minX: number;
@@ -56,6 +60,57 @@ function cellAtGrid(
   return fabric.cells[cellIndex(fabric, gridX, gridZ)] ?? null;
 }
 
+function buildTraversableHeightField(fabric: WorldFabricSpec): Float64Array {
+  const cached = traversableHeightFields.get(fabric);
+  if (cached) return cached;
+
+  const heights = Float64Array.from(
+    fabric.cells,
+    (cell) => cell.elevation,
+  );
+  const maximumDelta = fabric.cellSize * Math.tan(
+    MathUtils.degToRad(MAX_TRAVERSABLE_SLOPE_DEGREES),
+  );
+
+  for (let pass = 0; pass < SLOPE_RELAXATION_PASSES; pass += 1) {
+    for (let z = 0; z < fabric.gridDiameter; z += 1) {
+      for (let x = 0; x < fabric.gridDiameter; x += 1) {
+        const index = z * fabric.gridDiameter + x;
+        for (const neighborIndex of [
+          x + 1 < fabric.gridDiameter ? index + 1 : -1,
+          z + 1 < fabric.gridDiameter ? index + fabric.gridDiameter : -1,
+        ]) {
+          if (neighborIndex < 0) continue;
+          const difference = (heights[neighborIndex] ?? 0) - (heights[index] ?? 0);
+          if (Math.abs(difference) <= maximumDelta) continue;
+          const direction = Math.sign(difference);
+          const correction = (Math.abs(difference) - maximumDelta) * 0.5;
+          heights[index] = (heights[index] ?? 0) + direction * correction;
+          heights[neighborIndex] = (heights[neighborIndex] ?? 0) - direction * correction;
+        }
+      }
+    }
+  }
+
+  traversableHeightFields.set(fabric, heights);
+  return heights;
+}
+
+function heightAtGrid(
+  fabric: WorldFabricSpec,
+  gridX: number,
+  gridZ: number,
+): number | null {
+  if (
+    gridX < -fabric.gridRadius
+    || gridX > fabric.gridRadius
+    || gridZ < -fabric.gridRadius
+    || gridZ > fabric.gridRadius
+  ) return null;
+  const field = buildTraversableHeightField(fabric);
+  return field[cellIndex(fabric, gridX, gridZ)] ?? null;
+}
+
 export function terrainBounds(fabric: WorldFabricSpec): TerrainBounds {
   const half = fabric.gridRadius * fabric.cellSize;
   return {
@@ -83,10 +138,10 @@ export function sampleTerrainHeight(fabric: WorldFabricSpec, x: number, z: numbe
   const gridZ0 = z0Index - fabric.gridRadius;
   const gridZ1 = z1Index - fabric.gridRadius;
   const fallback = fabric.origin[1];
-  const h00 = cellAtGrid(fabric, gridX0, gridZ0)?.elevation ?? fallback;
-  const h10 = cellAtGrid(fabric, gridX1, gridZ0)?.elevation ?? h00;
-  const h01 = cellAtGrid(fabric, gridX0, gridZ1)?.elevation ?? h00;
-  const h11 = cellAtGrid(fabric, gridX1, gridZ1)?.elevation ?? h10;
+  const h00 = heightAtGrid(fabric, gridX0, gridZ0) ?? fallback;
+  const h10 = heightAtGrid(fabric, gridX1, gridZ0) ?? h00;
+  const h01 = heightAtGrid(fabric, gridX0, gridZ1) ?? h00;
+  const h11 = heightAtGrid(fabric, gridX1, gridZ1) ?? h10;
   const top = h00 + (h10 - h00) * tx;
   const bottom = h01 + (h11 - h01) * tx;
   return top + (bottom - top) * tz;
@@ -119,10 +174,11 @@ function pointDistanceToRoute(
 }
 
 function localRelief(fabric: WorldFabricSpec, cell: WorldFabricCell): number {
+  const centerHeight = heightAtGrid(fabric, cell.grid[0], cell.grid[1]) ?? cell.elevation;
   let relief = 0;
   for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
-    const neighbor = cellAtGrid(fabric, cell.grid[0] + dx, cell.grid[1] + dz);
-    if (neighbor) relief = Math.max(relief, Math.abs(neighbor.elevation - cell.elevation));
+    const neighborHeight = heightAtGrid(fabric, cell.grid[0] + dx, cell.grid[1] + dz);
+    if (neighborHeight !== null) relief = Math.max(relief, Math.abs(neighborHeight - centerHeight));
   }
   return relief;
 }
@@ -153,7 +209,7 @@ export function chooseTraversableSpawn(draft: ImageWorldDraft): TraversableSpawn
     const routeScore = mainRoute ? pointDistanceToRoute(cell.center[0], cell.center[2], mainRoute.points) * 0.24 : 0;
     const lodPenalty = cell.lod === 'horizon' ? 8 : cell.lod === 'middle' ? 0.6 : 0;
     const biomePenalty = cell.biome === 'void-highland' ? 2.8 : cell.biome === 'thread-marsh' ? 0.9 : 0;
-    const reliefPenalty = localRelief(fabric, cell) * 2.3;
+    const reliefPenalty = localRelief(fabric, cell) * 3.4;
     const score = approachScore + routeScore + lodPenalty + biomePenalty + reliefPenalty;
     if (score < bestScore) {
       bestScore = score;
@@ -214,7 +270,7 @@ export function buildContinuousTerrainGeometry(fabric: WorldFabricSpec): BufferG
       const cell = cellAtGrid(fabric, gridX, gridZ);
       const x = gridX * fabric.cellSize;
       const z = fabric.origin[2] + gridZ * fabric.cellSize;
-      const y = cell?.elevation ?? sampleTerrainHeight(fabric, x, z);
+      const y = heightAtGrid(fabric, gridX, gridZ) ?? sampleTerrainHeight(fabric, x, z);
       const color = new Color(BIOME_COLORS[cell?.biome ?? 'memory-meadow']);
       positions.push(x, y, z);
       colors.push(color.r, color.g, color.b);
