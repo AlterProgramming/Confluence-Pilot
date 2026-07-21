@@ -1,0 +1,23 @@
+.dimension-complexity-overlay {
+  position: fixed !important;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.dimension-authoring-open ~ .dimension-complexity-overlay {
+  opacity: 0.92;
+}
+
+@media (max-width: 900px) {
+  .dimension-complexity-overlay {
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dimension-complexity-overlay {
+    transition: none;
+  }
+}
