@@ -7,6 +7,8 @@ import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
 import { ComplexDimensionRuntime } from './dimension/ComplexDimensionRuntime';
 import { ImageWorldCompilerApp } from './dimension/compiler/ImageWorldCompilerApp';
+import { CompilerEnterWorldOverlay } from './dimension/play/CompilerEnterWorldOverlay';
+import { TraversableWorldApp } from './dimension/play/TraversableWorldApp';
 import { DimensionApp as LightweightDimensionApp } from './dimensions/DimensionApp';
 import { MotionAuthoringPanel } from './editor/MotionAuthoringPanel';
 import { PlacementAssemblyTools } from './editor/PlacementAssemblyTools';
@@ -66,6 +68,8 @@ function EditorApp() {
 export default function App() {
   const params = new URLSearchParams(window.location.search);
   const normalizedPath = window.location.pathname.replace(/\/$/, '');
+  const playMode = params.get('playWorld') === '1'
+    || normalizedPath === '/dimension/play';
   const compilerMode = params.get('worldCompiler') === '1'
     || normalizedPath === '/dimension/compiler';
   const lightweightDimensionMode = params.get('dimension') === 'weight-of-remembering-lite'
@@ -75,7 +79,15 @@ export default function App() {
     || normalizedPath.startsWith('/dimension/');
   const editorMode = params.get('editor') === '1' || normalizedPath.endsWith('/editor');
 
-  if (compilerMode) return <ImageWorldCompilerApp />;
+  if (playMode) return <TraversableWorldApp />;
+  if (compilerMode) {
+    return (
+      <>
+        <ImageWorldCompilerApp />
+        <CompilerEnterWorldOverlay />
+      </>
+    );
+  }
   if (lightweightDimensionMode) return <LightweightDimensionApp />;
   if (dimensionMode) return <ComplexDimensionRuntime />;
   return editorMode ? <EditorApp /> : <ExperienceApp />;

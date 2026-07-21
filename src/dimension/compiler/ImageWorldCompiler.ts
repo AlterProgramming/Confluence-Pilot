@@ -16,6 +16,7 @@ import type {
   SemanticRegion,
 } from './contracts';
 import { compileProposalsToFabric, proposeWorldStructure } from './synthesis';
+import { saveWorldDraftForPlay } from '../play/handoff';
 
 function objectCount(styleBias: CompilerStyleBias): number {
   if (styleBias === 'literal') return 4;
@@ -176,5 +177,6 @@ export async function compileImageToWorldDraft(
     },
   };
 
+  saveWorldDraftForPlay(draft);
   return { draft };
 }

@@ -1,0 +1,336 @@
+:root {
+  color-scheme: dark;
+}
+
+.traversable-world-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(89, 68, 142, 0.24), transparent 42%),
+    #060812;
+  color: #f6f3ff;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.traversable-world-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.traversable-world-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  cursor: grab;
+}
+
+.traversable-world-canvas canvas:active {
+  cursor: grabbing;
+}
+
+.traversable-world-header,
+.traversable-world-telemetry,
+.traversable-world-interaction,
+.traversable-world-controls {
+  position: absolute;
+  z-index: 4;
+  border: 1px solid rgba(202, 190, 255, 0.17);
+  background: linear-gradient(145deg, rgba(8, 10, 22, 0.86), rgba(14, 13, 29, 0.66));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px) saturate(125%);
+}
+
+.traversable-world-header {
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 13px 16px 13px 18px;
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+.traversable-world-header > div,
+.traversable-world-header nav {
+  pointer-events: auto;
+}
+
+.traversable-world-header span,
+.traversable-world-loading span,
+.traversable-world-interaction > span {
+  display: block;
+  margin-bottom: 4px;
+  color: #b6a5ec;
+  font-size: 0.69rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.traversable-world-header h1 {
+  margin: 0;
+  font-size: clamp(1rem, 1.55vw, 1.42rem);
+  font-weight: 650;
+  text-transform: capitalize;
+}
+
+.traversable-world-header nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.traversable-world-header a,
+.traversable-world-header button,
+.traversable-world-loading a {
+  border: 1px solid rgba(203, 191, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(113, 89, 170, 0.12);
+  color: #eee9ff;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.76rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.traversable-world-header a:hover,
+.traversable-world-header button:hover,
+.traversable-world-loading a:hover {
+  border-color: rgba(223, 215, 255, 0.48);
+  background: rgba(132, 105, 193, 0.25);
+  transform: translateY(-1px);
+}
+
+.traversable-world-telemetry {
+  top: 106px;
+  left: 18px;
+  width: min(340px, calc(100vw - 36px));
+  padding: 14px;
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+.traversable-world-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.traversable-world-status-row span {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: #d3cbed;
+  padding: 5px 8px;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+}
+
+.traversable-world-status-row .status-good {
+  background: rgba(91, 188, 148, 0.14);
+  color: #9ff0c9;
+}
+
+.traversable-world-status-row .status-air {
+  background: rgba(127, 172, 237, 0.14);
+  color: #acd2ff;
+}
+
+.traversable-world-telemetry dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.traversable-world-telemetry dl div {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+
+.traversable-world-telemetry dt {
+  color: #8e84ad;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.traversable-world-telemetry dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #f0ecff;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.traversable-world-interaction {
+  right: 18px;
+  bottom: 72px;
+  width: min(380px, calc(100vw - 36px));
+  padding: 17px 18px;
+  border-radius: 18px;
+  opacity: 0.76;
+  transform: translateY(4px);
+  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+  pointer-events: none;
+}
+
+.traversable-world-interaction.visible {
+  border-color: rgba(246, 222, 150, 0.42);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.traversable-world-interaction h2 {
+  margin: 0 0 7px;
+  font-size: 1.06rem;
+}
+
+.traversable-world-interaction p {
+  margin: 0;
+  color: #c6bfd8;
+  font-size: 0.79rem;
+  line-height: 1.48;
+}
+
+.traversable-world-interaction small {
+  display: block;
+  margin-top: 10px;
+  color: #8f85a8;
+  font-size: 0.68rem;
+}
+
+.traversable-world-controls {
+  left: 50%;
+  bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 13px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.traversable-world-controls span {
+  color: #aaa1bf;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.traversable-world-shell kbd {
+  display: inline-flex;
+  min-width: 20px;
+  justify-content: center;
+  border: 1px solid rgba(216, 207, 255, 0.24);
+  border-bottom-color: rgba(216, 207, 255, 0.42);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f4efff;
+  padding: 2px 5px;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.traversable-world-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  width: min(520px, calc(100vw - 40px));
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(202, 190, 255, 0.19);
+  border-radius: 22px;
+  background: rgba(9, 10, 23, 0.86);
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(20px);
+}
+
+.traversable-world-loading h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.4rem, 4vw, 2.35rem);
+}
+
+.traversable-world-loading p {
+  margin: 0 auto 18px;
+  color: #b8b0c9;
+  line-height: 1.55;
+}
+
+.traversable-world-loading.error {
+  border-color: rgba(238, 117, 140, 0.32);
+}
+
+@media (max-width: 880px) {
+  .traversable-world-header {
+    align-items: flex-start;
+  }
+
+  .traversable-world-header nav a {
+    display: none;
+  }
+
+  .traversable-world-telemetry {
+    top: 104px;
+    width: 270px;
+  }
+
+  .traversable-world-controls {
+    max-width: calc(100vw - 24px);
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .traversable-world-controls span:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .traversable-world-header {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .traversable-world-header nav button {
+    padding: 7px 9px;
+  }
+
+  .traversable-world-telemetry {
+    top: auto;
+    bottom: 64px;
+    left: 10px;
+    width: 220px;
+  }
+
+  .traversable-world-telemetry dl div:nth-child(n + 3) {
+    display: none;
+  }
+
+  .traversable-world-interaction {
+    right: 10px;
+    bottom: 64px;
+    width: min(300px, calc(100vw - 250px));
+  }
+
+  .traversable-world-controls {
+    bottom: 10px;
+  }
+}
