@@ -26,7 +26,6 @@ const CELL_SIZE = 1.35;
 const ORIGIN_Z = -5;
 const WORLD_BACK = ORIGIN_Z - GRID_RADIUS * CELL_SIZE;
 const WORLD_FRONT = ORIGIN_Z + GRID_RADIUS * CELL_SIZE;
-const WORLD_HALF_WIDTH = GRID_RADIUS * CELL_SIZE;
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.max(minimum, Math.min(maximum, value));
@@ -167,9 +166,13 @@ export function proposeWorldStructure(args: {
 
   const routeRegions = [...traversableRegions]
     .sort((a, b) => b.center.y - a.center.y)
-    .filter((region, index, list) => index === 0 || Math.abs(region.center.y - list[index - 1].center.y) > region.bbox.height * 0.35)
+    .filter((region, index, list) => {
+      const previous = list[index - 1];
+      return index === 0 || !previous
+        || Math.abs(region.center.y - previous.center.y) > region.bbox.height * 0.35;
+    })
     .slice(0, 5);
-  const mainPoints = [
+  const mainPoints: Point2D[] = [
     { x: imageWidth * 0.5, y: imageHeight * 0.96 },
     ...routeRegions.map((region) => region.center),
     portalImagePosition,
@@ -188,8 +191,9 @@ export function proposeWorldStructure(args: {
     .filter((anchor) => anchor.kind !== 'portal')
     .slice(0, styleBias === 'interpretive' ? 3 : 2)
     .forEach((anchor, index) => {
-      const branchStart = mainPoints[Math.min(mainPoints.length - 1, Math.max(1, index + 1))] ?? mainPoints[0];
-      const points2D = [branchStart, anchor.imagePosition];
+      const fallbackPoint = mainPoints[0] ?? portalImagePosition;
+      const branchStart = mainPoints[Math.min(mainPoints.length - 1, Math.max(1, index + 1))] ?? fallbackPoint;
+      const points2D: Point2D[] = [branchStart, anchor.imagePosition];
       routes.push({
         id: `image-route-branch-${index + 1}`,
         label: `Route to ${anchor.label}`,
@@ -344,7 +348,9 @@ export function compileProposalsToFabric(args: {
   const activeAnchors = proposals.anchors.filter((anchor) => statusIncluded(anchor.status));
   const activeBiomes = proposals.biomes.filter((biome) => statusIncluded(biome.status));
   const activeRoutes = proposals.routes.filter((route) => statusIncluded(route.status));
-  const biomeByRegion = new Map(activeBiomes.map((proposal) => [proposal.regionId, proposal.biome]));
+  const biomeByRegion = new Map<string, WorldFabricBiome>(
+    activeBiomes.map((proposal) => [proposal.regionId, proposal.biome]),
+  );
   const cells: WorldFabricCell[] = [];
   const gridDiameter = GRID_RADIUS * 2 + 1;
 
@@ -354,9 +360,10 @@ export function compileProposalsToFabric(args: {
       const z = ORIGIN_Z + gridZ * CELL_SIZE;
       const imagePoint = projectWorldToImage(x, z, analysisWidth, analysisHeight, horizonY);
       const region = regionAtPoint(semanticRegions, imagePoint);
-      const biome = (region && biomeByRegion.get(region.id)) ?? (
-        Math.max(Math.abs(gridX), Math.abs(gridZ)) > 7 ? 'void-highland' : 'memory-meadow'
-      );
+      const fallbackBiome: WorldFabricBiome = Math.max(Math.abs(gridX), Math.abs(gridZ)) > 7
+        ? 'void-highland'
+        : 'memory-meadow';
+      const biome: WorldFabricBiome = (region ? biomeByRegion.get(region.id) : undefined) ?? fallbackBiome;
       const elevation = sampleCellElevation(seed, gridX, gridZ, biome, activeAnchors);
       const density = worldFabricRandom(seed + 73, gridX, gridZ);
       const nearest = nearestAnchor(activeAnchors, x, z);
