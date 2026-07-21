@@ -7,6 +7,7 @@ import { SoundController } from './components/SoundController';
 import { ValidationBridge } from './components/ValidationBridge';
 import { ComplexDimensionRuntime } from './dimension/ComplexDimensionRuntime';
 import { ImageWorldCompilerApp } from './dimension/compiler/ImageWorldCompilerApp';
+import { CompilerEnterWorldOverlay } from './dimension/play/CompilerEnterWorldOverlay';
 import { TraversableWorldApp } from './dimension/play/TraversableWorldApp';
 import { MotionAuthoringPanel } from './editor/MotionAuthoringPanel';
 import { PlacementAssemblyTools } from './editor/PlacementAssemblyTools';
@@ -76,7 +77,14 @@ export default function App() {
   const editorMode = params.get('editor') === '1' || normalizedPath.endsWith('/editor');
 
   if (playMode) return <TraversableWorldApp />;
-  if (compilerMode) return <ImageWorldCompilerApp />;
+  if (compilerMode) {
+    return (
+      <>
+        <ImageWorldCompilerApp />
+        <CompilerEnterWorldOverlay />
+      </>
+    );
+  }
   if (dimensionMode) return <ComplexDimensionRuntime />;
   return editorMode ? <EditorApp /> : <ExperienceApp />;
 }
