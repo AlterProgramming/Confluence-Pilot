@@ -131,7 +131,7 @@ try {
   const airborne = await readRuntime(page);
   await page.waitForFunction(
     () => document.querySelector('[data-testid="traversable-world-runtime"]')?.getAttribute('data-player-grounded') === 'true',
-    { timeout: 8_000 },
+    { timeout: 20_000, polling: 100 },
   );
   const landed = await readRuntime(page);
   report.jump = { airborne, landed };
