@@ -19,7 +19,8 @@
     "validate:rooms:strict": "node scripts/validate_rooms.mjs --strict",
     "assets:inventory": "node scripts/asset_inventory.mjs",
     "validate": "npm run typecheck && npm run lint && npm run validate:rooms",
-    "validate:dimension": "node scripts/validate_dimension_scene.mjs",
+    "validate:dimension": "node scripts/validate_dimension_scene.mjs && node scripts/validate_world_fabric.mjs",
+    "validate:world-fabric": "node scripts/validate_world_fabric.mjs",
     "validate:dimension:visual": "node scripts/validate_dimension_visual_review.mjs"
   },
   "dependencies": {
@@ -29,7 +30,7 @@
     "gsap": "^3.15.0",
     "postprocessing": "^6.39.2",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react-dom": "^19.2.3",
     "three": "^0.185.1",
     "zustand": "^5.0.14"
   },
