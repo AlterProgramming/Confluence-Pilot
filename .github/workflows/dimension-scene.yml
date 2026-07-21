@@ -66,6 +66,7 @@ jobs:
           set -o pipefail
           npm run typecheck 2>&1 | tee validation/dimension-scene/typecheck.log
           npm run lint 2>&1 | tee validation/dimension-scene/lint.log
+          python -m py_compile tools/blender/generate_dimension_asset.py 2>&1 | tee validation/dimension-scene/blender-generator-compile.log
           npm run validate:dimension 2>&1 | tee validation/dimension-scene/source-validation.log
           npm run validate:dimension:assets 2>&1 | tee validation/dimension-scene/source-assets-validation.log
 
