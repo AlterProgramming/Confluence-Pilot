@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Dimension } from './Dimension';
 import { DimensionScene, type CameraTravelState } from './DimensionScene';
 import './dimension.css';
+import './journey.css';
 
 function resolveRoomCode() {
   const params = new URLSearchParams(window.location.search);
@@ -10,6 +11,11 @@ function resolveRoomCode() {
 
 function formatCameraPosition(position: [number, number, number]) {
   return position.map((value) => value.toFixed(3)).join(',');
+}
+
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
 }
 
 export function DimensionApp() {
@@ -25,10 +31,38 @@ export function DimensionApp() {
       };
     }
   }, [roomCode]);
+  const scene = useMemo(() => result.dimension?.buildScene() ?? null, [result.dimension]);
   const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>(null);
   const [cameraTravel, setCameraTravel] = useState<CameraTravelState | null>(null);
 
-  if (!result.dimension) {
+  useEffect(() => {
+    if (!scene) return undefined;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target)) return;
+      if (event.key === 'Escape') {
+        setSelectedAnchorId(null);
+        return;
+      }
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+      event.preventDefault();
+      const currentIndex = selectedAnchorId
+        ? scene.anchors.findIndex((anchor) => anchor.id === selectedAnchorId)
+        : -1;
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      const fallbackIndex = direction > 0 ? 0 : scene.anchors.length - 1;
+      const nextIndex = currentIndex < 0
+        ? fallbackIndex
+        : (currentIndex + direction + scene.anchors.length) % scene.anchors.length;
+      setSelectedAnchorId(scene.anchors[nextIndex]?.id ?? null);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [scene, selectedAnchorId]);
+
+  if (!result.dimension || !scene) {
     return (
       <main className="dimension-error" data-testid="dimension-error" data-room-code={roomCode}>
         <span>Dimension initialization failed</span>
@@ -38,14 +72,24 @@ export function DimensionApp() {
     );
   }
 
-  const scene = result.dimension.buildScene();
   const effectiveCameraTravel: CameraTravelState = cameraTravel ?? {
     focusId: 'overview',
     position: [...scene.camera.position],
     target: [...scene.camera.target],
   };
-  const selectedAnchor = scene.anchors.find((anchor) => anchor.id === selectedAnchorId) ?? null;
+  const selectedIndex = selectedAnchorId
+    ? scene.anchors.findIndex((anchor) => anchor.id === selectedAnchorId)
+    : -1;
+  const selectedAnchor = selectedIndex >= 0 ? scene.anchors[selectedIndex] ?? null : null;
   const focusMode = selectedAnchor ? 'anchor' : 'overview';
+
+  const selectRelativeAnchor = (direction: -1 | 1) => {
+    const fallbackIndex = direction > 0 ? 0 : scene.anchors.length - 1;
+    const nextIndex = selectedIndex < 0
+      ? fallbackIndex
+      : (selectedIndex + direction + scene.anchors.length) % scene.anchors.length;
+    setSelectedAnchorId(scene.anchors[nextIndex]?.id ?? null);
+  };
 
   return (
     <main
@@ -96,20 +140,28 @@ export function DimensionApp() {
         className={`dimension-inspector ${selectedAnchor ? 'visible' : ''}`}
         data-testid="dimension-inspector"
         data-selected-anchor={selectedAnchor?.id ?? ''}
+        data-anchor-index={selectedIndex}
         aria-live="polite"
       >
-        <span>{selectedAnchor?.kind ?? 'dimension'}</span>
+        <div className="dimension-inspector-heading">
+          <span>{selectedAnchor?.kind ?? 'dimension'}</span>
+          {selectedAnchor && <small>{selectedIndex + 1} / {scene.anchors.length}</small>}
+        </div>
         <h2>{selectedAnchor?.label ?? 'Choose an anchor'}</h2>
         <p>{selectedAnchor?.description ?? 'Select a light, archive, city, or portal to inspect how this world is connected.'}</p>
         {selectedAnchor && (
-          <button type="button" data-testid="release-dimension-anchor" onClick={() => setSelectedAnchorId(null)}>Return to overview</button>
+          <div className="dimension-journey-actions" aria-label="Dimension journey controls">
+            <button type="button" data-testid="previous-dimension-anchor" aria-keyshortcuts="ArrowLeft" onClick={() => selectRelativeAnchor(-1)}>← Previous</button>
+            <button type="button" data-testid="next-dimension-anchor" aria-keyshortcuts="ArrowRight" onClick={() => selectRelativeAnchor(1)}>Next →</button>
+            <button type="button" data-testid="release-dimension-anchor" aria-keyshortcuts="Escape" onClick={() => setSelectedAnchorId(null)}>Overview</button>
+          </div>
         )}
       </aside>
 
       <div className="dimension-controls">
         <span>Drag to orbit</span>
-        <span>Scroll to cross depth</span>
-        <span>Select a light to travel</span>
+        <span>← / → follow anchors</span>
+        <span>Esc returns to overview</span>
       </div>
     </main>
   );
