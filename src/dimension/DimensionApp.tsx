@@ -3,6 +3,7 @@ import { Dimension } from './Dimension';
 import { DimensionScene, type CameraTravelState } from './DimensionScene';
 import './dimension.css';
 import './journey.css';
+import './portal.css';
 
 function resolveRoomCode() {
   const params = new URLSearchParams(window.location.search);
@@ -33,6 +34,7 @@ export function DimensionApp() {
   }, [roomCode]);
   const scene = useMemo(() => result.dimension?.buildScene() ?? null, [result.dimension]);
   const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>(null);
+  const [portalOpen, setPortalOpen] = useState(false);
   const [cameraTravel, setCameraTravel] = useState<CameraTravelState | null>(null);
 
   useEffect(() => {
@@ -41,7 +43,16 @@ export function DimensionApp() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (isTypingTarget(event.target)) return;
       if (event.key === 'Escape') {
-        setSelectedAnchorId(null);
+        if (portalOpen) {
+          setPortalOpen(false);
+        } else {
+          setSelectedAnchorId(null);
+        }
+        return;
+      }
+      if (event.key === 'Enter' && selectedAnchorId === 'portal-horizon') {
+        event.preventDefault();
+        setPortalOpen((open) => !open);
         return;
       }
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
@@ -55,12 +66,13 @@ export function DimensionApp() {
       const nextIndex = currentIndex < 0
         ? fallbackIndex
         : (currentIndex + direction + scene.anchors.length) % scene.anchors.length;
+      setPortalOpen(false);
       setSelectedAnchorId(scene.anchors[nextIndex]?.id ?? null);
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [scene, selectedAnchorId]);
+  }, [portalOpen, scene, selectedAnchorId]);
 
   if (!result.dimension || !scene) {
     return (
@@ -83,17 +95,22 @@ export function DimensionApp() {
   const selectedAnchor = selectedIndex >= 0 ? scene.anchors[selectedIndex] ?? null : null;
   const focusMode = selectedAnchor ? 'anchor' : 'overview';
 
+  const selectAnchor = (anchorId: string | null) => {
+    setPortalOpen(false);
+    setSelectedAnchorId(anchorId || null);
+  };
+
   const selectRelativeAnchor = (direction: -1 | 1) => {
     const fallbackIndex = direction > 0 ? 0 : scene.anchors.length - 1;
     const nextIndex = selectedIndex < 0
       ? fallbackIndex
       : (selectedIndex + direction + scene.anchors.length) % scene.anchors.length;
-    setSelectedAnchorId(scene.anchors[nextIndex]?.id ?? null);
+    selectAnchor(scene.anchors[nextIndex]?.id ?? null);
   };
 
   return (
     <main
-      className={`dimension-shell${selectedAnchor ? ' dimension-focused' : ''}`}
+      className={`dimension-shell${selectedAnchor ? ' dimension-focused' : ''}${portalOpen ? ' dimension-threshold-open' : ''}`}
       data-testid="dimension-runtime"
       data-dimension-id={scene.id}
       data-room-code={result.dimension.roomCode}
@@ -101,6 +118,7 @@ export function DimensionApp() {
       data-path-count={scene.paths.length}
       data-layer-count={scene.layers.length}
       data-focus-mode={focusMode}
+      data-portal-state={portalOpen ? 'open' : 'closed'}
       data-camera-focus={effectiveCameraTravel.focusId}
       data-camera-position={formatCameraPosition(effectiveCameraTravel.position)}
       data-camera-target={formatCameraPosition(effectiveCameraTravel.target)}
@@ -108,7 +126,8 @@ export function DimensionApp() {
       <DimensionScene
         scene={scene}
         selectedAnchorId={selectedAnchorId}
-        onSelectAnchor={(anchorId) => setSelectedAnchorId(anchorId || null)}
+        portalOpen={portalOpen}
+        onSelectAnchor={selectAnchor}
         onCameraTravelComplete={setCameraTravel}
       />
 
@@ -128,7 +147,7 @@ export function DimensionApp() {
             aria-pressed={anchor.id === selectedAnchorId}
             className={anchor.id === selectedAnchorId ? 'active' : ''}
             style={{ '--anchor-color': anchor.color } as React.CSSProperties}
-            onClick={() => setSelectedAnchorId(anchor.id)}
+            onClick={() => selectAnchor(anchor.id)}
           >
             <span>{String(index + 1).padStart(2, '0')}</span>
             <strong>{anchor.label}</strong>
@@ -149,11 +168,23 @@ export function DimensionApp() {
         </div>
         <h2>{selectedAnchor?.label ?? 'Choose an anchor'}</h2>
         <p>{selectedAnchor?.description ?? 'Select a light, archive, city, or portal to inspect how this world is connected.'}</p>
+        {selectedAnchor?.kind === 'portal' && (
+          <button
+            type="button"
+            className="dimension-portal-action"
+            data-testid={portalOpen ? 'close-dimension-portal' : 'open-dimension-portal'}
+            aria-keyshortcuts="Enter"
+            aria-pressed={portalOpen}
+            onClick={() => setPortalOpen((open) => !open)}
+          >
+            {portalOpen ? 'Close threshold' : 'Open threshold'}
+          </button>
+        )}
         {selectedAnchor && (
           <div className="dimension-journey-actions" aria-label="Dimension journey controls">
             <button type="button" data-testid="previous-dimension-anchor" aria-keyshortcuts="ArrowLeft" onClick={() => selectRelativeAnchor(-1)}>← Previous</button>
             <button type="button" data-testid="next-dimension-anchor" aria-keyshortcuts="ArrowRight" onClick={() => selectRelativeAnchor(1)}>Next →</button>
-            <button type="button" data-testid="release-dimension-anchor" aria-keyshortcuts="Escape" onClick={() => setSelectedAnchorId(null)}>Overview</button>
+            <button type="button" data-testid="release-dimension-anchor" aria-keyshortcuts="Escape" onClick={() => selectAnchor(null)}>Overview</button>
           </div>
         )}
       </aside>
@@ -161,7 +192,7 @@ export function DimensionApp() {
       <div className="dimension-controls">
         <span>Drag to orbit</span>
         <span>← / → follow anchors</span>
-        <span>Esc returns to overview</span>
+        <span>{portalOpen ? 'Esc closes threshold' : 'Esc returns to overview'}</span>
       </div>
     </main>
   );

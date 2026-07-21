@@ -166,24 +166,81 @@ function AnchorNode({
   );
 }
 
-function PortalRing({ scene }: { scene: DimensionSceneSpec }) {
+function PortalRing({ scene, open }: { scene: DimensionSceneSpec; open: boolean }) {
   const portal = scene.portals[0];
+  const group = useRef<Group>(null);
+
+  useFrame((_, delta) => {
+    if (!group.current) return;
+    group.current.rotation.z += delta * (open ? 0.34 : 0.055);
+    const targetScale = open ? 1.55 : 1;
+    const nextScale = group.current.scale.x + (targetScale - group.current.scale.x) * Math.min(1, delta * 2.8);
+    group.current.scale.setScalar(nextScale);
+  });
+
   if (!portal) return null;
   return (
-    <group position={portal.position} rotation={[0.08, -0.35, 0]}>
+    <group ref={group} position={portal.position} rotation={[0.08, -0.35, 0]}>
       {[1, 1.34, 1.68].map((scale, index) => (
         <mesh key={scale} scale={scale} rotation={[0, 0, index * 0.42]}>
           <torusGeometry args={[portal.radius, 0.014 + index * 0.005, 7, 64]} />
           <meshBasicMaterial
             color={index === 1 ? scene.palette.violet : scene.palette.blue}
             transparent
-            opacity={0.34 - index * 0.07}
+            opacity={(open ? 0.56 : 0.34) - index * (open ? 0.08 : 0.07)}
             blending={AdditiveBlending}
             depthWrite={false}
             toneMapped={false}
           />
         </mesh>
       ))}
+      <mesh position={[0, 0, -0.025]}>
+        <circleGeometry args={[portal.radius * 0.76, 64]} />
+        <meshBasicMaterial
+          color={open ? '#d8c8ff' : scene.palette.blue}
+          transparent
+          opacity={open ? 0.34 : 0.08}
+          blending={AdditiveBlending}
+          depthWrite={false}
+          side={DoubleSide}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+function ThresholdTunnel({ scene, open }: { scene: DimensionSceneSpec; open: boolean }) {
+  const portal = scene.portals[0];
+  const group = useRef<Group>(null);
+
+  useFrame((_, delta) => {
+    if (!group.current || !open) return;
+    group.current.rotation.z -= delta * 0.12;
+  });
+
+  if (!portal || !open) return null;
+  return (
+    <group ref={group} position={portal.position} rotation={[0.08, -0.35, 0]}>
+      {Array.from({ length: 6 }, (_, index) => {
+        const depth = 0.5 + index * 0.62;
+        const scale = 1 + index * 0.22;
+        return (
+          <mesh key={depth} position={[0, 0, -depth]} scale={scale} rotation={[0, 0, index * 0.26]}>
+            <torusGeometry args={[portal.radius * 0.82, 0.01 + index * 0.0015, 6, 56]} />
+            <meshBasicMaterial
+              color={index % 2 ? scene.palette.violet : scene.palette.blue}
+              transparent
+              opacity={0.24 - index * 0.025}
+              blending={AdditiveBlending}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        );
+      })}
+      <Sparkles count={80} scale={[2.4, 2.4, 4.8]} position={[0, 0, -2]} size={1.6} speed={0.42} color="#d9ccff" opacity={0.72} />
+      <pointLight position={[0, 0, -1.2]} intensity={7} distance={7} color="#aa8cff" />
     </group>
   );
 }
@@ -280,10 +337,12 @@ function LanternBasin({ scene }: { scene: DimensionSceneSpec }) {
 function GuidedCamera({
   scene,
   selectedAnchorId,
+  portalOpen,
   onTravelComplete,
 }: {
   scene: DimensionSceneSpec;
   selectedAnchorId: string | null;
+  portalOpen: boolean;
   onTravelComplete: (state: CameraTravelState) => void;
 }) {
   const lastFocusId = useRef<string | undefined>(undefined);
@@ -293,26 +352,31 @@ function GuidedCamera({
     const controls = (rootState as typeof rootState & { controls?: OrbitControlsLike }).controls;
     if (!controls) return;
 
-    const focusId = selectedAnchorId ?? 'overview';
+    const focusId = portalOpen ? 'portal-horizon:open' : selectedAnchorId ?? 'overview';
     if (lastFocusId.current !== focusId) {
       lastFocusId.current = focusId;
       const anchor = scene.anchors.find((candidate) => candidate.id === selectedAnchorId);
-      const toTarget = anchor ? new Vector3(...anchor.position) : new Vector3(...scene.camera.target);
+      const portal = portalOpen ? scene.portals.find((candidate) => candidate.id === 'portal-horizon') : undefined;
+      const toTarget = portal
+        ? new Vector3(...portal.position).add(new Vector3(0, 0, -1.15))
+        : anchor
+          ? new Vector3(...anchor.position)
+          : new Vector3(...scene.camera.target);
       let toPosition = new Vector3(...scene.camera.position);
 
       if (anchor) {
         const viewingDirection = rootState.camera.position.clone().sub(controls.target);
         if (viewingDirection.lengthSq() < 0.001) viewingDirection.set(0, 0.12, 1);
         viewingDirection.normalize();
-        const distance = anchor.kind === 'city' ? 7.8 : anchor.kind === 'portal' ? 7.2 : 6.8;
+        const distance = portalOpen ? 3.6 : anchor.kind === 'city' ? 7.8 : anchor.kind === 'portal' ? 7.2 : 6.8;
         toPosition = toTarget.clone().add(viewingDirection.multiplyScalar(distance));
-        toPosition.y += anchor.kind === 'city' ? 0.7 : 0.32;
+        toPosition.y += portalOpen ? 0.12 : anchor.kind === 'city' ? 0.7 : 0.32;
       }
 
       transition.current = {
         focusId,
         elapsed: 0,
-        duration: anchor ? 1.45 : 1.2,
+        duration: portalOpen ? 1.65 : anchor ? 1.45 : 1.2,
         fromPosition: rootState.camera.position.clone(),
         toPosition,
         fromTarget: controls.target.clone(),
@@ -348,11 +412,13 @@ function GuidedCamera({
 function DimensionWorld({
   scene,
   selectedAnchorId,
+  portalOpen,
   onSelectAnchor,
   onCameraTravelComplete,
 }: {
   scene: DimensionSceneSpec;
   selectedAnchorId: string | null;
+  portalOpen: boolean;
   onSelectAnchor: (anchorId: string) => void;
   onCameraTravelComplete: (state: CameraTravelState) => void;
 }) {
@@ -367,8 +433,8 @@ function DimensionWorld({
   return (
     <>
       <color attach="background" args={[scene.palette.void]} />
-      <fog attach="fog" args={[scene.palette.void, 22, 46]} />
-      <ambientLight intensity={0.16} color="#8c83b7" />
+      <fog attach="fog" args={[scene.palette.void, portalOpen ? 15 : 22, portalOpen ? 34 : 46]} />
+      <ambientLight intensity={portalOpen ? 0.22 : 0.16} color="#8c83b7" />
       <pointLight position={[-3, 0.2, 2.4]} intensity={8} distance={11} color={scene.palette.memory} />
       <pointLight position={[5.2, 1.5, 0]} intensity={5} distance={10} color={scene.palette.thread} />
       <pointLight position={[0, -3, -1]} intensity={3} distance={8} color={scene.palette.violet} />
@@ -377,7 +443,8 @@ function DimensionWorld({
         <SeedBackdrop scene={scene} />
         <FloatingMemoryFragments scene={scene} />
         <LanternBasin scene={scene} />
-        <PortalRing scene={scene} />
+        <PortalRing scene={scene} open={portalOpen} />
+        <ThresholdTunnel scene={scene} open={portalOpen} />
         {scene.paths.map((path) => (
           <Filament
             key={path.id}
@@ -400,7 +467,7 @@ function DimensionWorld({
         enableDamping
         dampingFactor={0.055}
         enablePan={false}
-        minDistance={5.5}
+        minDistance={3}
         maxDistance={20}
         minPolarAngle={Math.PI * 0.24}
         maxPolarAngle={Math.PI * 0.76}
@@ -409,6 +476,7 @@ function DimensionWorld({
       <GuidedCamera
         scene={scene}
         selectedAnchorId={selectedAnchorId}
+        portalOpen={portalOpen}
         onTravelComplete={onCameraTravelComplete}
       />
     </>
@@ -418,11 +486,13 @@ function DimensionWorld({
 export function DimensionScene({
   scene,
   selectedAnchorId,
+  portalOpen,
   onSelectAnchor,
   onCameraTravelComplete,
 }: {
   scene: DimensionSceneSpec;
   selectedAnchorId: string | null;
+  portalOpen: boolean;
   onSelectAnchor: (anchorId: string) => void;
   onCameraTravelComplete: (state: CameraTravelState) => void;
 }) {
@@ -437,6 +507,7 @@ export function DimensionScene({
       <DimensionWorld
         scene={scene}
         selectedAnchorId={selectedAnchorId}
+        portalOpen={portalOpen}
         onSelectAnchor={onSelectAnchor}
         onCameraTravelComplete={onCameraTravelComplete}
       />
