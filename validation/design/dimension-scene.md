@@ -40,6 +40,21 @@ The authored scene grammar is supplemented by six synchronized procedural system
 
 The complexity layer is rendered in a transparent synchronized WebGL surface. It follows the runtime's reported camera position, target, focus transitions, and active realm while remaining completely transparent to pointer input.
 
+## World Fabric substrate
+
+The primary world's landmarks now sit inside a deterministic semantic world substrate rather than floating over an undifferentiated backdrop.
+
+- a 19 × 19 field provides 361 stable, addressable world cells;
+- authored anchors deform the surrounding terrain according to their meaning;
+- five biome and shape families fill the land between focal structures;
+- filament paths become ground-following route geometry;
+- city, archive, heart, and portal anchors seed local settlement grammars;
+- near, middle, and horizon bands control procedural density;
+- a complete horizon massif ring gives the realm geographic enclosure;
+- repeated forms use instancing so shape variety does not return the project to one heavy mesh per object.
+
+The cells are intentionally stable. Future systems can attach inhabitants, ecology, buildings, streaming status, generated-image evidence, and save deltas to the same IDs without replacing the visual grammar.
+
 ## Parallel Remembrance procedural architecture
 
 The destination realm has six distinct procedural systems rather than reusing the primary world's grammar:
@@ -75,6 +90,8 @@ Exported drafts remain review candidates. The browser does not promote arbitrary
 - Room 02 is an optional entrance only.
 - Both procedural architecture files are required.
 - Six named complexity systems exist in each realm.
+- World Fabric provides deterministic cells, semantic terrain, five biome families, routes, settlements, and horizon massing.
+- Runtime evidence exposes World Fabric cell, biome, route, settlement, and shape-family counts.
 - Instanced geometry is used for high-density repeated structures.
 - The complexity surface follows runtime camera metadata.
 - The overlay cannot intercept pointer interaction.
@@ -82,4 +99,4 @@ Exported drafts remain review candidates. The browser does not promote arbitrary
 
 ## Deliberate boundary
 
-The browser exports authoring drafts but does not automatically write them into the registry. A later approval-controlled promotion gate can ingest a reviewed export, record reviewer identity, update the registry, and approve a new visual baseline.
+The browser exports authoring drafts but does not automatically write them into the registry. A later approval-controlled promotion gate can ingest a reviewed export, record reviewer identity, update the registry, and approve a new visual baseline. World Fabric establishes the stable substrate for later cell streaming, image-conditioned depth, inhabitants, ecology, and persistent world change; those systems are not claimed by this pass.
