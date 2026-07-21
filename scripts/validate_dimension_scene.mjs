@@ -32,6 +32,28 @@ checks.push(
   { id: 'interactive-anchors', pass: /anchors: \[/.test(dimensionSource) && /AnchorNode/.test(sceneSource) },
   { id: 'filament-paths', pass: /paths: \[/.test(dimensionSource) && /Filament/.test(sceneSource) },
   { id: 'portal-runtime', pass: /portals: \[/.test(dimensionSource) && /PortalRing/.test(sceneSource) },
+  {
+    id: 'portal-destination-binding',
+    pass: /destination: 'parallel-remembrance'/.test(dimensionSource)
+      && /returnPortalId: 'portal-horizon'/.test(dimensionSource),
+  },
+  {
+    id: 'destination-contract',
+    pass: /export interface DimensionDestination/.test(dimensionSource)
+      && /destinations: DimensionDestination\[\]/.test(dimensionSource)
+      && /id: 'parallel-remembrance'/.test(dimensionSource),
+  },
+  {
+    id: 'destination-nodes',
+    pass: /id: 'unwritten-archive'/.test(dimensionSource)
+      && /id: 'echo-bridge'/.test(dimensionSource)
+      && /id: 'unlived-garden'/.test(dimensionSource),
+  },
+  {
+    id: 'destination-clone-isolation',
+    pass: /destinations: spec\.destinations\.map/.test(dimensionSource)
+      && /nodes: destination\.nodes\.map/.test(dimensionSource),
+  },
   { id: 'dimension-route', pass: /DimensionApp/.test(appSource) && /dimension/.test(appSource) },
 );
 
@@ -40,6 +62,7 @@ console.log(JSON.stringify({
   state: failed.length ? 'failed' : 'validated',
   roomCode: '02',
   dimensionId: 'the-weight-of-remembering',
+  destinationId: 'parallel-remembrance',
   seedBytes: seed.size,
   checks,
 }, null, 2));
