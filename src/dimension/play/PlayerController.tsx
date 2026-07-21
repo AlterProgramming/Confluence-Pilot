@@ -53,7 +53,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
   const velocityRef = useRef(new Vector3());
   const verticalVelocityRef = useRef(0);
   const groundedRef = useRef(true);
-  const jumpLatchRef = useRef(false);
+  const jumpRequestedRef = useRef(false);
   const interactionRequestedRef = useRef(false);
   const interactionAnchorIdRef = useRef<string | null>(null);
   const telemetryClockRef = useRef(0);
@@ -71,14 +71,14 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
     const onKeyDown = (event: KeyboardEvent) => {
       const key = normalizedKey(event.key);
       keysRef.current.add(key);
-      if (key === 'e') interactionRequestedRef.current = true;
+      if (key === 'e' && !event.repeat) interactionRequestedRef.current = true;
+      if (key === ' ' && !event.repeat) jumpRequestedRef.current = true;
       if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
         event.preventDefault();
       }
     };
     const onKeyUp = (event: KeyboardEvent) => {
       keysRef.current.delete(normalizedKey(event.key));
-      if (event.key === ' ') jumpLatchRef.current = false;
     };
     const resetPlayer = () => {
       positionRef.current.set(
@@ -89,6 +89,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
       velocityRef.current.set(0, 0, 0);
       verticalVelocityRef.current = 0;
       groundedRef.current = true;
+      jumpRequestedRef.current = false;
       interactionRequestedRef.current = false;
       interactionAnchorIdRef.current = null;
     };
@@ -181,11 +182,12 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
     }
 
     const groundCenterY = sampleTerrainHeight(fabric, position.x, position.z) + PLAYER_HALF_HEIGHT;
-    const jumpPressed = keys.has(' ');
-    if (groundedRef.current && jumpPressed && !jumpLatchRef.current) {
+    if (groundedRef.current && jumpRequestedRef.current) {
+      jumpRequestedRef.current = false;
       verticalVelocityRef.current = JUMP_SPEED;
       groundedRef.current = false;
-      jumpLatchRef.current = true;
+    } else if (!groundedRef.current && jumpRequestedRef.current) {
+      jumpRequestedRef.current = false;
     }
     if (!groundedRef.current) {
       verticalVelocityRef.current += GRAVITY * delta;
@@ -218,6 +220,7 @@ export function PlayerController({ draft, spawn, onTelemetry }: PlayerController
       velocityRef.current.set(0, 0, 0);
       verticalVelocityRef.current = 0;
       groundedRef.current = true;
+      jumpRequestedRef.current = false;
       interactionRequestedRef.current = false;
       interactionAnchorIdRef.current = null;
     }
