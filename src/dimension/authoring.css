@@ -202,6 +202,19 @@
   transform: translateX(-215px);
 }
 
+@media (min-width: 901px) {
+  .dimension-authoring-open .dimension-title-panel,
+  .dimension-authoring-open .dimension-anchor-rail,
+  .dimension-authoring-open .dimension-destination-rail {
+    transform: none;
+  }
+
+  .dimension-authoring-open .dimension-inspector,
+  .dimension-authoring-open .dimension-controls {
+    transform: translateX(-430px);
+  }
+}
+
 @media (max-width: 900px) {
   .dimension-authoring-open .dimension-title-panel,
   .dimension-authoring-open .dimension-anchor-rail,
