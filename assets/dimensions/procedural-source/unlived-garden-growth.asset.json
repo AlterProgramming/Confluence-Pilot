@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "id": "unlived-garden-growth",
+  "title": "Unlived Garden Growth",
+  "realm": "parallel-remembrance",
+  "category": "organic-growth",
+  "revision": 1,
+  "description": "A single procedural growth unit from the garden of unlived futures. It combines a dark branching stem, translucent ribbon leaves, a multi-petal probability bloom, suspended seed memories, and root filaments that never fully touch the ground. The asset feels botanical without copying any real-world species.",
+  "narrativeFunction": "These growths make unrealized lives feel fertile rather than empty. Dense variation creates the garden canopy, while individual hero plants can carry a specific unchosen memory. Their slow reaching motion contrasts archive rigidity, bridge repetition, and the severity of probability monoliths.",
+  "designKeywords": ["unlived future", "impossible botany", "probability bloom", "ribbon leaves", "floating roots", "seed memory", "violet cyan flora", "reaching motion"],
+  "scale": {"unit": "meter", "bounds": {"width": 2.4, "height": 3.6, "depth": 2.1}, "heroScale": 1, "modularScale": 0.16},
+  "orientation": {
+    "upAxis": "+Y",
+    "forwardAxis": "-Z",
+    "pivot": [0,-1.8,0],
+    "originMeaning": "The origin is the nominal root center projected onto the ground plane even though the visible roots hover above and below this point."
+  },
+  "silhouette": {
+    "primary": "A tall curved stem forking into three upper branches supporting one dominant open bloom and two smaller incomplete buds.",
+    "secondary": "Four to seven ribbon leaves spiral around the stem at uneven intervals and create broad directional sweeps.",
+    "tertiary": "Seed memories, vein emission, floating root threads, translucent petal edges, dew-like possibility nodes, unopened buds, and mineral stem scars add close detail.",
+    "negativeSpace": "Large spaces between ribbon leaves and between bloom petals remain open. The root area appears airy and suspended rather than forming a dense bush.",
+    "recognitionTest": "At distance the asset reads as an elegant impossible flowering plant reaching toward one chosen direction, not as coral, a tree, seaweed, or a generic particle emitter."
+  },
+  "materials": [
+    {
+      "id": "garden-stem",
+      "role": "Stem, branches, and root filaments",
+      "baseColor": "#28333B",
+      "metallic": 0.22,
+      "roughness": 0.56,
+      "emission": {"color": "#4B8D9B", "strength": 0.28},
+      "surfaceDescription": "Dark blue-green fibrous material with subtle metallic mineral veins, brighter stress points at branch forks, and matte worn areas near the root crown."
+    },
+    {
+      "id": "ribbon-leaf",
+      "role": "Translucent directional foliage",
+      "baseColor": "#586C8A",
+      "metallic": 0.02,
+      "roughness": 0.24,
+      "emission": {"color": "#7DD6E8", "strength": 0.78},
+      "surfaceDescription": "Thin semi-translucent leaves with pale cyan edge emission, darker central veins, subtle layered fibers, and a soft transparency gradient toward their tips."
+    },
+    {
+      "id": "probability-bloom",
+      "role": "Hero flower, buds, and seed memories",
+      "baseColor": "#8065A4",
+      "metallic": 0.01,
+      "roughness": 0.2,
+      "emission": {"color": "#D1A9FF", "strength": 1.9},
+      "surfaceDescription": "Layered violet petals with luminous rims, milky internal depth, warmer seed cores, and slight color change according to view angle."
+    }
+  ],
+  "components": [
+    {
+      "id": "main-stem",
+      "primitive": "curve-tube",
+      "role": "Primary curved load-bearing botanical gesture.",
+      "dimensions": {"points": [[0,0,0],[0.08,0.75,0.05],[-0.18,1.55,0.22],[0.2,2.35,0.42],[0.35,3.1,0.15]], "radius": 0.07, "resolution": 18, "bevelResolution": 4},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "garden-stem",
+      "detail": "The stem tapers upward, thickens at forks, contains a narrow luminous mineral vein, and leans toward the hero bloom without becoming a simple arc.",
+      "repeat": {"mode": "none", "count": 1}
+    },
+    {
+      "id": "branching-stems",
+      "primitive": "curve-tube",
+      "role": "Three upper branches carrying the hero bloom and incomplete buds.",
+      "dimensions": {"points": [[0,1.65,0],[0.45,2.1,0.18],[0.85,2.55,0.05]], "radius": 0.035, "resolution": 14, "bevelResolution": 3},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "garden-stem",
+      "detail": "Branches emerge at different heights and directions, preserve visible fork swelling, and terminate in one open bloom and two less-developed outcomes.",
+      "repeat": {"mode": "radial", "count": 3, "radius": 0, "axis": "Y", "angleOffsetDegrees": 18}
+    },
+    {
+      "id": "ribbon-leaves",
+      "primitive": "custom-profile",
+      "role": "Broad twisting leaves establishing the plant's secondary silhouette.",
+      "dimensions": {"points": [[0,0,0],[0.28,0.12,0],[0.65,0.04,0],[0.92,0.18,0],[0.58,0.3,0],[0.2,0.22,0]], "radius": 0.015, "resolution": 6, "bevelResolution": 2},
+      "transform": {"position": [0.08,0.75,0.05], "rotation": [8,25,-18], "scale": [1,1,1]},
+      "material": "ribbon-leaf",
+      "detail": "Each leaf twists along its length, narrows to a translucent point, carries one dark central vein, and avoids regular radial distribution.",
+      "repeat": {"mode": "arc", "count": 6, "radius": 1.05, "arcDegrees": 250}
+    },
+    {
+      "id": "hero-petals",
+      "primitive": "custom-profile",
+      "role": "Seven separated petals forming the dominant probability bloom.",
+      "dimensions": {"points": [[0,0,0],[0.18,0.28,0],[0.08,0.68,0],[-0.08,0.72,0],[-0.2,0.3,0]], "radius": 0.018, "resolution": 6, "bevelResolution": 2},
+      "transform": {"position": [0.35,3.1,0.15], "rotation": [75,0,0], "scale": [1,1,1]},
+      "material": "probability-bloom",
+      "detail": "Petals cup around an open center, vary in length and curl, expose luminous edges, and preserve visible gaps even when the flower breathes.",
+      "repeat": {"mode": "radial", "count": 7, "radius": 0, "axis": "Y", "angleOffsetDegrees": 9}
+    },
+    {
+      "id": "seed-memories",
+      "primitive": "icosphere",
+      "role": "Small suspended possibility seeds beneath blooms and leaf junctions.",
+      "dimensions": {"radius": 0.055, "subdivisions": 2},
+      "transform": {"position": [0.4,2.5,0.15], "rotation": [0,0,0], "scale": [0.65,1.35,0.65]},
+      "material": "probability-bloom",
+      "detail": "Seeds are teardrop-shaped, hang from nearly invisible threads, contain a warmer core, and cluster near the least-developed branch.",
+      "repeat": {"mode": "scatter", "count": 9, "bounds": [0.85,1.25,0.7], "scaleMin": 0.65, "scaleMax": 1.35}
+    },
+    {
+      "id": "floating-roots",
+      "primitive": "curve-tube",
+      "role": "Fine root filaments hovering above and below the nominal ground plane.",
+      "dimensions": {"points": [[0,0,0],[0.15,-0.35,0.05],[0.42,-0.62,0.18],[0.75,-0.78,0.1]], "radius": 0.018, "resolution": 12, "bevelResolution": 3},
+      "transform": {"position": [0,0,0], "rotation": [0,0,0], "scale": [1,1,1]},
+      "material": "garden-stem",
+      "detail": "Roots fan outward, taper sharply, contain tiny drifting soil-light particles, and stop before touching any visible ground surface.",
+      "repeat": {"mode": "radial", "count": 5, "radius": 0, "axis": "Y", "angleOffsetDegrees": 31}
+    }
+  ],
+  "generation": {
+    "seed": 10837,
+    "deterministic": true,
+    "assemblyOrder": ["Author main reaching stem", "Add three asymmetrical upper branches", "Wrap stem with ribbon-leaf family", "Construct hero bloom and smaller buds", "Suspend seed memories and floating root filaments"],
+    "deformationRules": [
+      "The main stem leans eight to twenty degrees toward a designated light or destination vector.",
+      "Ribbon leaves twist forty to one hundred ten degrees along their length.",
+      "Petals cup outward while preserving at least three centimeters from neighboring petals."
+    ],
+    "variationRules": [
+      "Bloom petal count ranges from five to nine while the default hero growth uses seven.",
+      "Leaf count ranges from four to eight and hue shifts within the cyan-violet and muted blue-green family.",
+      "Seed-memory count ranges from five to twelve and clusters around one unchosen branch."
+    ]
+  },
+  "topology": {
+    "target": "Game-ready curve and custom-profile organic topology with riggable stem branches, detachable ribbon leaves, separated bloom petals, instanced seeds, and reusable root filaments.",
+    "bevel": "Use smooth stem and root profiles, thin leaf edge bevels, and soft petal thickness sufficient to catch rim light without appearing plastic.",
+    "subdivision": "Use moderate subdivision on hero petals and leaves, lower curve resolution on background growths, and preserve slight faceting in mineral stems.",
+    "normals": "Use smooth normals on leaves and petals while preserving deliberate mineral facets and fork swelling on the stem.",
+    "uv": "Generate longitudinal stem UVs, unique leaf vein coordinates, radial petal UVs, dedicated edge-emission masks, and reusable seed material islands.",
+    "watertightParts": ["main stem", "branch stems", "hero petals", "seed source mesh"]
+  },
+  "animation": {
+    "channels": ["main-stem.reaching_sway", "ribbon-leaves.twist_response", "hero-petals.breath", "seed-memories.orbit_sway", "vein-emission.flow"],
+    "loopLengthSeconds": 19,
+    "motionCharacter": "Growths move as though following distant possibility rather than wind. The stem reaches slowly, leaves answer with delayed twists, petals open by a few degrees, and seed cores brighten in sequence.",
+    "constraints": ["The root pivot remains stable.", "The hero bloom never closes completely.", "Leaf and petal geometry never intersects the main stem during the loop."]
+  },
+  "lod": [
+    {"name": "LOD0", "screenCoverage": 0.55, "triangleBudget": 68000, "preserve": ["all leaf twists", "separated hero petals", "seed threads", "root filaments", "mineral veins"]},
+    {"name": "LOD1", "screenCoverage": 0.18, "triangleBudget": 18000, "preserve": ["reaching stem", "four leaf sweeps", "hero bloom", "seed cluster", "root direction"]},
+    {"name": "LOD2", "screenCoverage": 0.04, "triangleBudget": 2800, "preserve": ["main stem curve", "hero bloom", "two leaf sweeps", "floating root silhouette"]}
+  ],
+  "collision": {
+    "mode": "capsule",
+    "description": "Use one narrow capsule around the lower main stem for hero growths. Background canopy instances use no collision."
+  },
+  "sockets": [
+    {"id": "root-placement", "purpose": "Ground or floating garden placement point.", "position": [0,0,0], "rotation": [0,0,0]},
+    {"id": "hero-bloom-focus", "purpose": "Camera, interaction, or memory-content focus at the dominant bloom.", "position": [0.35,3.1,0.15], "rotation": [-15,0,0]},
+    {"id": "branch-memory", "purpose": "Optional narrative object attached to the least-developed branch.", "position": [0.82,2.52,0.05], "rotation": [0,0,0]}
+  ],
+  "orthographicGuidance": {
+    "front": "Show the reaching main stem, three-branch crown, one dominant bloom, uneven ribbon leaves, and airy floating roots.",
+    "side": "Reveal leaf twist, branch depth separation, petal cup depth, and the fact that roots stop before ground contact.",
+    "top": "Make asymmetrical branch directions, open petal gaps, and nonuniform leaf spiral readable.",
+    "threeQuarter": "Use bloom-level light to reveal translucent edges, warm seed cores, and the dark mineral structure of the stem.",
+    "scaleCue": "Include a standing human beside the growth; the hero bloom sits slightly above head height."
+  },
+  "validation": [
+    "The default growth contains one dominant bloom, two incomplete buds, and three upper branches.",
+    "At least four large negative spaces remain between ribbon leaves from hero view.",
+    "Visible root filaments terminate above the ground plane.",
+    "Hero bloom petals stay separated and expose a readable open center.",
+    "Idle reaching motion preserves the root pivot and avoids self-intersection.",
+    "LOD2 retains the reaching stem, hero bloom, two leaf sweeps, and root direction.",
+    "Hero-focus and root-placement sockets align with intended vertical orientation."
+  ]
+}
