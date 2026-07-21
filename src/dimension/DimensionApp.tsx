@@ -25,7 +25,7 @@ export function DimensionApp() {
 
   if (!result.dimension) {
     return (
-      <main className="dimension-error">
+      <main className="dimension-error" data-testid="dimension-error" data-room-code={roomCode}>
         <span>Dimension initialization failed</span>
         <h1>{result.error}</h1>
         <a href="/">Return to Confluence</a>
@@ -39,10 +39,12 @@ export function DimensionApp() {
   return (
     <main
       className="dimension-shell"
+      data-testid="dimension-runtime"
       data-dimension-id={scene.id}
       data-room-code={result.dimension.roomCode}
       data-anchor-count={scene.anchors.length}
       data-path-count={scene.paths.length}
+      data-layer-count={scene.layers.length}
     >
       <DimensionScene
         scene={scene}
@@ -62,6 +64,8 @@ export function DimensionApp() {
           <button
             key={anchor.id}
             type="button"
+            data-anchor-id={anchor.id}
+            aria-pressed={anchor.id === selectedAnchorId}
             className={anchor.id === selectedAnchorId ? 'active' : ''}
             style={{ '--anchor-color': anchor.color } as React.CSSProperties}
             onClick={() => setSelectedAnchorId(anchor.id)}
@@ -72,12 +76,17 @@ export function DimensionApp() {
         ))}
       </nav>
 
-      <aside className={`dimension-inspector ${selectedAnchor ? 'visible' : ''}`} aria-live="polite">
+      <aside
+        className={`dimension-inspector ${selectedAnchor ? 'visible' : ''}`}
+        data-testid="dimension-inspector"
+        data-selected-anchor={selectedAnchor?.id ?? ''}
+        aria-live="polite"
+      >
         <span>{selectedAnchor?.kind ?? 'dimension'}</span>
         <h2>{selectedAnchor?.label ?? 'Choose an anchor'}</h2>
         <p>{selectedAnchor?.description ?? 'Select a light, archive, city, or portal to inspect how this world is connected.'}</p>
         {selectedAnchor && (
-          <button type="button" onClick={() => setSelectedAnchorId(null)}>Release anchor</button>
+          <button type="button" data-testid="release-dimension-anchor" onClick={() => setSelectedAnchorId(null)}>Release anchor</button>
         )}
       </aside>
 

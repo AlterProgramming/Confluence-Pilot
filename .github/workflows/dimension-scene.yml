@@ -8,6 +8,7 @@ on:
       - 'src/dimension/**'
       - 'public/reference/dimensions/**'
       - 'scripts/validate_dimension_scene.mjs'
+      - 'scripts/capture_dimension_scene.mjs'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
@@ -16,22 +17,76 @@ on:
       - 'src/dimension/**'
       - 'public/reference/dimensions/**'
       - 'scripts/validate_dimension_scene.mjs'
+      - 'scripts/capture_dimension_scene.mjs'
       - 'src/App.tsx'
       - 'package.json'
       - '.github/workflows/dimension-scene.yml'
 
+concurrency:
+  group: dimension-scene-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   validate-dimension:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run validate:dimension
-      - run: npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate source contract
+        run: |
+          mkdir -p validation/dimension-scene
+          set -o pipefail
+          npm run typecheck 2>&1 | tee validation/dimension-scene/typecheck.log
+          npm run lint 2>&1 | tee validation/dimension-scene/lint.log
+          npm run validate:dimension 2>&1 | tee validation/dimension-scene/source-validation.log
+
+      - name: Build production bundle
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee validation/dimension-scene/build.log
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4178 > /tmp/confluence-dimension-preview.log 2>&1 &
+          echo $! > /tmp/confluence-dimension-preview.pid
+          for attempt in {1..45}; do
+            if curl --silent --fail http://127.0.0.1:4178/dimension?room=02 > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cp /tmp/confluence-dimension-preview.log validation/dimension-scene/preview.log
+          exit 1
+
+      - name: Capture browser evidence
+        run: node scripts/capture_dimension_scene.mjs http://127.0.0.1:4178
+
+      - name: Preserve preview log
+        if: always()
+        run: |
+          if [ -f /tmp/confluence-dimension-preview.log ]; then
+            cp /tmp/confluence-dimension-preview.log validation/dimension-scene/preview.log
+          fi
+
+      - name: Upload dimension evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dimension-scene-evidence
+          path: validation/dimension-scene
+          if-no-files-found: warn
+          retention-days: 14
