@@ -3,8 +3,14 @@ import { access, readFile, stat } from 'node:fs/promises';
 const requiredFiles = [
   'src/dimension/Dimension.ts',
   'src/dimension/DimensionApp.tsx',
+  'src/dimension/DimensionAuthoring.ts',
+  'src/dimension/DimensionAuthoringPanel.tsx',
   'src/dimension/DimensionScene.tsx',
+  'src/dimension/authoring.css',
   'src/dimension/dimension.css',
+  'scripts/capture_dimension_authoring.mjs',
+  'scripts/validate_dimension_visual_review.mjs',
+  'validation/design/dimension-visual-review.json',
   'public/reference/dimensions/the-weight-of-remembering.webp',
 ];
 
@@ -19,9 +25,12 @@ for (const path of requiredFiles) {
 }
 
 const dimensionSource = await readFile('src/dimension/Dimension.ts', 'utf8');
+const authoringSource = await readFile('src/dimension/DimensionAuthoring.ts', 'utf8');
+const authoringPanelSource = await readFile('src/dimension/DimensionAuthoringPanel.tsx', 'utf8');
 const sceneSource = await readFile('src/dimension/DimensionScene.tsx', 'utf8');
 const dimensionAppSource = await readFile('src/dimension/DimensionApp.tsx', 'utf8');
 const appSource = await readFile('src/App.tsx', 'utf8');
+const visualContract = JSON.parse(await readFile('validation/design/dimension-visual-review.json', 'utf8'));
 const seed = await stat('public/reference/dimensions/the-weight-of-remembering.webp');
 
 checks.push(
@@ -47,7 +56,8 @@ checks.push(
   {
     id: 'standalone-world-route',
     pass: /DEFAULT_DIMENSION_ID = 'the-weight-of-remembering'/.test(dimensionAppSource)
-      && /params\.get\('world'\)/.test(dimensionAppSource),
+      && /params\.get\('world'\)/.test(dimensionAppSource)
+      && /World registry/.test(dimensionAppSource),
   },
   {
     id: 'entrance-contract',
@@ -58,6 +68,33 @@ checks.push(
   {
     id: 'entrance-clone-isolation',
     pass: /entrances: spec\.entrances\.map/.test(dimensionSource),
+  },
+  {
+    id: 'authoring-operations',
+    pass: /updateDimensionMetadata/.test(authoringSource)
+      && /updateDimensionAnchor/.test(authoringSource)
+      && /validateDimensionDraft/.test(authoringSource)
+      && /serializeDimensionDraft/.test(authoringSource),
+  },
+  {
+    id: 'live-authoring-surface',
+    pass: /DimensionAuthoringPanel/.test(dimensionAppSource)
+      && /World authoring/.test(authoringPanelSource)
+      && /Anchor placement/.test(authoringPanelSource)
+      && /Portal graph/.test(authoringPanelSource)
+      && /Export JSON/.test(authoringPanelSource),
+  },
+  {
+    id: 'authoring-route',
+    pass: /authoring/.test(dimensionAppSource)
+      && /startsWith\('\/dimension\/'\)/.test(appSource),
+  },
+  {
+    id: 'visual-review-contract',
+    pass: visualContract.schemaVersion === 1
+      && visualContract.worldId === 'the-weight-of-remembering'
+      && visualContract.shots.length === 9
+      && visualContract.baseline.state === 'candidate',
   },
   { id: 'seeded-artwork', pass: /the-weight-of-remembering\.webp/.test(dimensionSource) && seed.size > 10_000 },
   { id: 'layered-scene', pass: /layers: \[/.test(dimensionSource) && /SeedBackdrop/.test(sceneSource) },
@@ -95,6 +132,8 @@ console.log(JSON.stringify({
   dimensionId: 'the-weight-of-remembering',
   entranceIds: ['standalone-dimension-route', 'room-02-memory-threshold'],
   destinationId: 'parallel-remembrance',
+  authoringSurface: '/dimension/authoring',
+  visualShotCount: visualContract.shots.length,
   seedBytes: seed.size,
   checks,
 }, null, 2));
