@@ -11,6 +11,7 @@ import type {
 
 const TILE_COLUMNS = 12;
 const TILE_ROWS = 8;
+type SafePixels = Uint8ClampedArray & Record<number, number>;
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.max(minimum, Math.min(maximum, value));
@@ -57,7 +58,7 @@ export async function normalizeImageSource(
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) throw new Error('The browser could not create a 2D analysis canvas.');
   context.drawImage(loaded, 0, 0, width, height);
-  const data = context.getImageData(0, 0, width, height).data;
+  const data = context.getImageData(0, 0, width, height).data as SafePixels;
 
   let brightnessTotal = 0;
   let saturationTotal = 0;
@@ -88,7 +89,8 @@ export function estimateHorizon(image: NormalizedImageData): {
   horizonY: number;
   confidence: number;
 } {
-  const { width, height, pixels } = image;
+  const { width, height } = image;
+  const pixels = image.pixels as SafePixels;
   const start = Math.floor(height * 0.22);
   const end = Math.floor(height * 0.74);
   let bestY = Math.floor(height * 0.46);
@@ -128,7 +130,8 @@ export function estimateHorizon(image: NormalizedImageData): {
 }
 
 function tileMetrics(image: NormalizedImageData, bbox: BoundingBox): RegionMetrics {
-  const { width, pixels } = image;
+  const { width } = image;
+  const pixels = image.pixels as SafePixels;
   let red = 0;
   let green = 0;
   let blue = 0;
