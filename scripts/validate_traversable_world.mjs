@@ -82,7 +82,8 @@ checks.push(
   {
     id: 'interaction-contract',
     pass: player.includes('INTERACTION_RADIUS')
-      && player.includes("keys.has('e')")
+      && player.includes("if (key === 'e') interactionRequestedRef.current = true")
+      && player.includes('if (interactionRequestedRef.current)')
       && app.includes('data-interaction-anchor-id'),
   },
   {
