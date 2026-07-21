@@ -31,13 +31,14 @@ const browser = await puppeteer.launch({
 });
 
 const report = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   generatedAt: new Date().toISOString(),
   route: '/dimension?room=02',
   passed: false,
   fatalError: null,
   metadata: null,
   interaction: null,
+  journeyStep: null,
   returnToOverview: null,
   seedRequest: null,
   screenshots: [],
@@ -85,6 +86,7 @@ try {
     pathCount: Number(element.getAttribute('data-path-count')),
     layerCount: Number(element.getAttribute('data-layer-count')),
     canvasCount: element.querySelectorAll('canvas').length,
+    focusMode: element.getAttribute('data-focus-mode'),
     cameraFocus: element.getAttribute('data-camera-focus'),
     cameraPosition: element.getAttribute('data-camera-position'),
     cameraTarget: element.getAttribute('data-camera-target'),
@@ -108,11 +110,15 @@ try {
     const inspector = document.querySelector('[data-testid="dimension-inspector"]');
     return {
       selectedAnchor: inspector?.getAttribute('data-selected-anchor') ?? '',
+      anchorIndex: Number(inspector?.getAttribute('data-anchor-index')),
       heading: inspector?.querySelector('h2')?.textContent?.trim() ?? '',
       description: inspector?.querySelector('p')?.textContent?.trim() ?? '',
+      focusMode: runtime.getAttribute('data-focus-mode'),
       cameraFocus: runtime.getAttribute('data-camera-focus'),
       cameraPosition: runtime.getAttribute('data-camera-position'),
       cameraTarget: runtime.getAttribute('data-camera-target'),
+      previousControl: Boolean(inspector?.querySelector('[data-testid="previous-dimension-anchor"]')),
+      nextControl: Boolean(inspector?.querySelector('[data-testid="next-dimension-anchor"]')),
     };
   });
 
@@ -120,7 +126,33 @@ try {
   await page.screenshot({ path: selectedPath, captureBeyondViewport: false });
   report.screenshots.push(path.basename(selectedPath));
 
-  await page.click('[data-testid="release-dimension-anchor"]');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-inspector"]')?.getAttribute('data-selected-anchor') === 'portal-horizon',
+    { timeout: 20_000 },
+  );
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="dimension-runtime"]')?.getAttribute('data-camera-focus') === 'portal-horizon',
+    { timeout: 30_000 },
+  );
+  await delay(650);
+  report.journeyStep = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => {
+    const inspector = document.querySelector('[data-testid="dimension-inspector"]');
+    return {
+      selectedAnchor: inspector?.getAttribute('data-selected-anchor') ?? '',
+      anchorIndex: Number(inspector?.getAttribute('data-anchor-index')),
+      heading: inspector?.querySelector('h2')?.textContent?.trim() ?? '',
+      cameraFocus: runtime.getAttribute('data-camera-focus'),
+      cameraPosition: runtime.getAttribute('data-camera-position'),
+      cameraTarget: runtime.getAttribute('data-camera-target'),
+    };
+  });
+
+  const portalPath = path.join(outputDirectory, 'dimension-room-02-portal-horizon.png');
+  await page.screenshot({ path: portalPath, captureBeyondViewport: false });
+  report.screenshots.push(path.basename(portalPath));
+
+  await page.keyboard.press('Escape');
   await page.waitForFunction(
     () => document.querySelector('[data-testid="dimension-inspector"]')?.getAttribute('data-selected-anchor') === '',
     { timeout: 20_000 },
@@ -130,6 +162,7 @@ try {
     { timeout: 30_000 },
   );
   report.returnToOverview = await page.$eval('[data-testid="dimension-runtime"]', (runtime) => ({
+    focusMode: runtime.getAttribute('data-focus-mode'),
     cameraFocus: runtime.getAttribute('data-camera-focus'),
     cameraPosition: runtime.getAttribute('data-camera-position'),
     cameraTarget: runtime.getAttribute('data-camera-target'),
@@ -153,21 +186,32 @@ try {
       && report.metadata?.layerCount === 5,
     webglCanvasMounted: report.metadata?.canvasCount === 1,
     seededArtworkFetched: report.seedRequest?.ok === true && report.seedRequest?.status === 200,
-    overviewCameraReported: report.metadata?.cameraFocus === 'overview'
+    overviewCameraReported: report.metadata?.focusMode === 'overview'
+      && report.metadata?.cameraFocus === 'overview'
       && typeof report.metadata?.cameraPosition === 'string'
       && typeof report.metadata?.cameraTarget === 'string',
     anchorSelectionWorks: report.interaction?.selectedAnchor === 'lantern-city'
+      && report.interaction?.anchorIndex === 5
       && report.interaction?.heading === 'Lantern city basin'
       && report.interaction?.description.length > 40,
+    focusedInterfaceActivated: report.interaction?.focusMode === 'anchor'
+      && report.interaction?.previousControl === true
+      && report.interaction?.nextControl === true,
     guidedCameraReachedAnchor: report.interaction?.cameraFocus === 'lantern-city'
       && report.interaction?.cameraPosition !== report.metadata?.cameraPosition
       && report.interaction?.cameraTarget !== report.metadata?.cameraTarget,
-    cameraReturnedToOverview: report.returnToOverview?.cameraFocus === 'overview'
+    keyboardJourneyAdvanced: report.journeyStep?.selectedAnchor === 'portal-horizon'
+      && report.journeyStep?.anchorIndex === 6
+      && report.journeyStep?.heading === 'Portal horizon'
+      && report.journeyStep?.cameraFocus === 'portal-horizon'
+      && report.journeyStep?.cameraTarget !== report.interaction?.cameraTarget,
+    escapeReturnedToOverview: report.returnToOverview?.focusMode === 'overview'
+      && report.returnToOverview?.cameraFocus === 'overview'
       && report.returnToOverview?.cameraPosition === report.metadata?.cameraPosition
       && report.returnToOverview?.cameraTarget === report.metadata?.cameraTarget,
     unsupportedRoomFailsExplicitly: explicitFailure.roomCode === '99'
       && explicitFailure.message.includes('Unknown room code'),
-    evidenceCaptured: report.screenshots.length === 2,
+    evidenceCaptured: report.screenshots.length === 3,
     browserClean: report.consoleErrors.length === 0
       && report.pageErrors.length === 0
       && report.requestFailures.length === 0,
