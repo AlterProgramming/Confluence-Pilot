@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Dimension, type DimensionEntrance } from './Dimension';
+import { Dimension, type DimensionEntrance, type DimensionSceneSpec } from './Dimension';
+import { DimensionAuthoringPanel } from './DimensionAuthoringPanel';
 import { DimensionScene, type CameraTravelState } from './DimensionScene';
 import { ParallelRemembranceScene } from './ParallelRemembranceScene';
 import './dimension.css';
 import './journey.css';
 import './portal.css';
 import './destination.css';
+import './authoring.css';
 
 const DEFAULT_DIMENSION_ID = 'the-weight-of-remembering';
 
 interface DimensionRuntimeRequest {
   dimensionId: string | null;
   roomEntranceId: string | null;
+  authoring: boolean;
 }
 
 function resolveRuntimeRequest(): DimensionRuntimeRequest {
@@ -19,6 +22,7 @@ function resolveRuntimeRequest(): DimensionRuntimeRequest {
   return {
     dimensionId: params.get('world') ?? params.get('dimensionId'),
     roomEntranceId: params.get('room'),
+    authoring: params.get('authoring') === '1' || window.location.pathname.replace(/\/$/, '').endsWith('/dimension/authoring'),
   };
 }
 
@@ -54,12 +58,23 @@ export function DimensionApp() {
       };
     }
   }, [request.dimensionId, request.roomEntranceId]);
-  const scene = useMemo(() => result.dimension?.buildScene() ?? null, [result.dimension]);
+  const registryScene = useMemo(() => result.dimension?.buildScene() ?? null, [result.dimension]);
+  const [scene, setScene] = useState<DimensionSceneSpec | null>(registryScene);
   const [selectedAnchorId, setSelectedAnchorId] = useState<string | null>(null);
   const [portalOpen, setPortalOpen] = useState(false);
   const [activeDestinationId, setActiveDestinationId] = useState<string | null>(null);
   const [selectedDestinationNodeId, setSelectedDestinationNodeId] = useState<string | null>(null);
   const [cameraTravel, setCameraTravel] = useState<CameraTravelState | null>(null);
+  const [authoringOpen, setAuthoringOpen] = useState(request.authoring);
+
+  useEffect(() => {
+    setScene(registryScene);
+    setSelectedAnchorId(null);
+    setPortalOpen(false);
+    setActiveDestinationId(null);
+    setSelectedDestinationNodeId(null);
+    setCameraTravel(null);
+  }, [registryScene]);
 
   const activeDestination = scene?.destinations.find((destination) => destination.id === activeDestinationId) ?? null;
 
@@ -70,7 +85,9 @@ export function DimensionApp() {
       if (isTypingTarget(event.target)) return;
 
       if (event.key === 'Escape') {
-        if (activeDestination) {
+        if (authoringOpen) {
+          setAuthoringOpen(false);
+        } else if (activeDestination) {
           setActiveDestinationId(null);
           setSelectedDestinationNodeId(null);
           setSelectedAnchorId(activeDestination.returnPortalId);
@@ -123,7 +140,7 @@ export function DimensionApp() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeDestination, portalOpen, scene, selectedAnchorId, selectedDestinationNodeId]);
+  }, [activeDestination, authoringOpen, portalOpen, scene, selectedAnchorId, selectedDestinationNodeId]);
 
   if (!result.dimension || !scene) {
     return (
@@ -214,7 +231,7 @@ export function DimensionApp() {
 
   return (
     <main
-      className={`dimension-shell${selectedAnchor ? ' dimension-focused' : ''}${portalOpen && !activeDestination ? ' dimension-threshold-open' : ''}${activeDestination ? ' dimension-destination-active' : ''}`}
+      className={`dimension-shell${selectedAnchor ? ' dimension-focused' : ''}${portalOpen && !activeDestination ? ' dimension-threshold-open' : ''}${activeDestination ? ' dimension-destination-active' : ''}${authoringOpen ? ' dimension-authoring-open' : ''}`}
       data-testid="dimension-runtime"
       data-dimension-id={scene.id}
       data-entry-kind={result.entrance?.kind ?? 'standalone'}
@@ -228,6 +245,7 @@ export function DimensionApp() {
       data-realm-id={activeDestination?.id ?? scene.id}
       data-focus-mode={focusMode}
       data-portal-state={portalState}
+      data-authoring-state={authoringOpen ? 'open' : 'closed'}
       data-camera-focus={effectiveCameraTravel.focusId}
       data-camera-position={formatCameraPosition(effectiveCameraTravel.position)}
       data-camera-target={formatCameraPosition(effectiveCameraTravel.target)}
@@ -245,6 +263,27 @@ export function DimensionApp() {
           portalOpen={portalOpen}
           onSelectAnchor={selectAnchor}
           onCameraTravelComplete={setCameraTravel}
+        />
+      )}
+
+      <button
+        type="button"
+        className="dimension-authoring-toggle"
+        data-testid="toggle-dimension-authoring"
+        aria-pressed={authoringOpen}
+        onClick={() => setAuthoringOpen((open) => !open)}
+      >
+        {authoringOpen ? 'Close authoring' : 'Author world'}
+      </button>
+
+      {authoringOpen && (
+        <DimensionAuthoringPanel
+          scene={scene}
+          selectedAnchorId={selectedAnchorId}
+          onSelectAnchor={selectAnchor}
+          onChange={setScene}
+          onReset={() => setScene(result.dimension.buildScene())}
+          onClose={() => setAuthoringOpen(false)}
         />
       )}
 
