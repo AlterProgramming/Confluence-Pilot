@@ -36,17 +36,23 @@ try {
     await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
     const id = String(room).padStart(2, '0');
     try {
-      await page.goto(base + '/?capture=1&validate=1&view=canonical&room=' + room + '&quality=balanced', { waitUntil: 'domcontentloaded', timeout: 90000 });
-      await page.waitForSelector('canvas', { timeout: 90000 });
-      await page.waitForFunction(
-        expected => window.__CONFLUENCE_VALIDATION__?.ready && window.__CONFLUENCE_VALIDATION__.activeRoomId === expected,
-        { timeout: 90000 },
-        id,
-      );
+      await page.goto(base + '/?capture=1&validate=1&view=canonical&room=' + room + '&quality=balanced', { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('canvas', { timeout: 30000 });
+      let ready = false;
+      try {
+        await page.waitForFunction(
+          expected => window.__CONFLUENCE_VALIDATION__?.ready && window.__CONFLUENCE_VALIDATION__.activeRoomId === expected,
+          { timeout: 16000 },
+          id,
+        );
+        ready = true;
+      } catch (error) {
+        errors.push('Scene not confirmed ready: ' + String(error));
+      }
       await new Promise(resolve => setTimeout(resolve, 800));
       await page.addStyleTag({ content: '.hud { visibility: hidden !important; }' });
       await page.screenshot({ path: path.join(output, 'room-' + id + '.png') });
-      results.push({ room: id, captured: true, errors });
+      results.push({ room: id, captured: true, ready, errors });
     } catch (error) {
       results.push({ room: id, captured: false, errors: [...errors, String(error)] });
     } finally {
