@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Object3D, type InstancedMesh } from 'three';
 import type { RoomDefinition } from '../types/room';
+import { ProgramFixtures } from './ProgramFixtures';
 
 type Vec3 = [number, number, number];
 type Transform = { position: Vec3; rotation?: Vec3; scale?: Vec3 };
@@ -127,5 +128,5 @@ export function RoomFixtures({ room, active }: { room: RoomDefinition; active: b
   if (room.architecture === 'studio') return <Studio room={room} active={active}/>;
   if (room.architecture === 'living-building') return <LivingBuilding room={room} active={active}/>;
   if (room.architecture === 'neighborhood') return <Neighborhood room={room} active={active}/>;
-  return null;
+  return <ProgramFixtures room={room} active={active}/>;
 }
