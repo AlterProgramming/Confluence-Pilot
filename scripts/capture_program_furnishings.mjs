@@ -36,7 +36,7 @@ try {
     await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
     const id = String(room).padStart(2, '0');
     try {
-      await page.goto(base + '/?capture=1&room=' + room + '&quality=balanced', { waitUntil: 'domcontentloaded', timeout: 90000 });
+      await page.goto(base + '/?capture=1&validate=1&view=canonical&room=' + room + '&quality=balanced', { waitUntil: 'domcontentloaded', timeout: 90000 });
       await page.waitForSelector('canvas', { timeout: 90000 });
       await page.waitForFunction(
         expected => window.__CONFLUENCE_VALIDATION__?.ready && window.__CONFLUENCE_VALIDATION__.activeRoomId === expected,
