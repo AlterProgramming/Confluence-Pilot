@@ -217,7 +217,7 @@ export function RoomAsset({
   };
 
   return (
-    <AssetErrorBoundary fallback={fallback}>
+    <AssetErrorBoundary key={assetUrl} fallback={fallback}>
       <Suspense fallback={fallback}>
         <LoadedRoomAsset {...loadedProps} />
       </Suspense>
